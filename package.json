@@ -81,7 +81,7 @@
         "type": "git",
         "url": "git+https://github.com/eliware/cfhub.git"
     },
-    "homepage": "https://eliware.org/cf",
+    "homepage": "https://eliware.org/cfhub",
     "bugs": {
         "url": "https://github.com/eliware/cfhub/issues"
     },

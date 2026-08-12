@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`@eliware/cf` is a standalone ESM Node.js CLI for Cloudflare administration.
+`cfhub` is a standalone ESM Node.js CLI for Cloudflare administration.
 
 Current resources:
 

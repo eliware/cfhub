@@ -245,9 +245,9 @@ For help, questions, or community chat:
 
 ## Links
 
-- [Project Home](https://eliware.org/cf)
-- [Privacy Policy](https://eliware.org/cf/policy)
-- [Terms of Service](https://eliware.org/cf/tos)
+- [Project Home](https://eliware.org/cfhub)
+- [Privacy Policy](https://eliware.org/cfhub/policy)
+- [Terms of Service](https://eliware.org/cfhub/tos)
 - [GitHub Repository](https://github.com/eliware/cfhub)
 - [GitHub Organization](https://github.com/eliware)
 - [npm Package](https://www.npmjs.com/package/cfhub)
