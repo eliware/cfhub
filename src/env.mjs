@@ -1,0 +1,34 @@
+import * as fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import os from 'node:os';
+
+export function loadEnvFile(filePath, env = process.env, fsImpl = fs) {
+  if (!fsImpl.existsSync(filePath)) return false;
+  const lines = fsImpl.readFileSync(filePath, 'utf8').split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const idx = trimmed.indexOf('=');
+    if (idx === -1) continue;
+    const key = trimmed.slice(0, idx).trim();
+    const value = trimmed.slice(idx + 1).trim();
+    if (!(key in env)) env[key] = value;
+  }
+  return true;
+}
+
+export function loadUserEnv(homeDir = os.homedir(), env = process.env, fsImpl = fs) {
+  return loadEnvFile(`${homeDir}/.cfhub`, env, fsImpl);
+}
+
+export function loadProjectEnv(projectRoot, env = process.env, fsImpl = fs, homeDir = os.homedir()) {
+  loadUserEnv(homeDir, env, fsImpl);
+  const rootUrl = new URL(`file://${projectRoot.replaceAll('\\', '/')}/`);
+  return loadEnvFile(fileURLToPath(new URL('.env', rootUrl)), env, fsImpl);
+}
+
+export function requireEnv(name, env = process.env) {
+  const value = env[name];
+  if (!value) throw new Error(`Missing ${name}`);
+  return value;
+}

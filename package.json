@@ -1,0 +1,105 @@
+{
+    "name": "cfhub",
+    "version": "1.0.0",
+    "description": "OAuth-first Cloudflare administration CLI with GitHub CLI-style commands, profiles, safe writes, and direct API access.",
+    "type": "module",
+    "scripts": {
+        "test": "npx --node-options=\"--experimental-vm-modules --no-warnings\" jest --detectOpenHandles --silent --coverage",
+        "lint": "npx oxlint .",
+        "test:gaps": "node scripts/test-gaps.mjs",
+        "test:live": "npm run test:live:dry",
+        "test:live:dry": "node scripts/test-live.mjs --dry",
+        "test:live:wet": "node scripts/test-live.mjs --wet",
+        "test:e2e:screenshots": "node tests/e2e/oauth-picker.e2e.mjs",
+        "test:e2e:lighthouse": "node tests/e2e/oauth-picker.lighthouse.mjs",
+        "test:e2e:web": "npm run test:e2e:screenshots && npm run test:e2e:lighthouse",
+        "pack": "npm pack --dry-run"
+    },
+    "keywords": [
+        "cloudflare",
+        "cli",
+        "cloudflare-api",
+        "cloudflare-cli",
+        "cloudflare-management",
+        "oauth",
+        "api-client",
+        "api-token",
+        "profiles",
+        "dns",
+        "zones",
+        "workers",
+        "r2",
+        "pages",
+        "d1",
+        "queues",
+        "stream",
+        "waf",
+        "rulesets",
+        "zero-trust",
+        "security",
+        "account-management",
+        "infrastructure",
+        "automation",
+        "javascript",
+        "nodejs",
+        "esm",
+        "devops"
+    ],
+    "author": "Eli Sterling <eli@eliware.org>",
+    "license": "ISC",
+    "dependencies": {
+        "cloudflare": "^7.0.0"
+    },
+    "bin": {
+        "cfhub": "bin/cfhub.mjs"
+    },
+    "devDependencies": {
+        "chrome-launcher": "^1.2.1",
+        "jest": "^30.0.4",
+        "lighthouse": "^13.4.1",
+        "oxlint": "^1.78.0",
+        "puppeteer": "^25.6.0"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "testMatch": [
+            "**/?(*.)+(spec|test).mjs"
+        ],
+        "coveragePathIgnorePatterns": [
+            "/bin/",
+            "/tests/live/"
+        ],
+        "testPathIgnorePatterns": [
+            "/node_modules/",
+            "/tests/live/"
+        ]
+    },
+    "allowScripts": {
+        "unrs-resolver@1.12.2": true
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/eliware/cfhub.git"
+    },
+    "homepage": "https://eliware.org/cf",
+    "bugs": {
+        "url": "https://github.com/eliware/cfhub/issues"
+    },
+    "engines": {
+        "node": ">=26"
+    },
+    "files": [
+        "bin",
+        "src",
+        "README.md",
+        "RELEASE_NOTES.md",
+        "LICENSE",
+        "data",
+        "docs",
+        "completions",
+        "examples"
+    ],
+    "optionalDependencies": {
+        "keytar": "^7.9.0"
+    }
+}

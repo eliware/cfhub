@@ -1,0 +1,16 @@
+.TH CF 1
+.SH NAME
+cfhub \- Cloudflare administration CLI
+.SH SYNOPSIS
+.B cfhub
+<resource> <action> [options]
+.SH DESCRIPTION
+Use cfhub for Cloudflare resources, authentication profiles, audits, and raw API calls.
+.SH EXAMPLES
+.B cfhub auth status
+.br
+.B cfhub zone list --json
+.br
+.B cfhub api /zones --json --jq '.result[].name'
+.SH SEE ALSO
+cfhub --help
