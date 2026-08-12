@@ -1,5 +1,10 @@
 # Release Notes
 
+## 1.0.1
+
+- Updated product branding and project links from `cf` to `cfhub` across the
+  package metadata, documentation, and OAuth web pages.
+
 ## 1.0.0
 
 `cfhub` is an OAuth-first command-line tool for Cloudflare administration. It
