@@ -304,7 +304,7 @@ export async function loginOAuth({
   };
   let selectedScopes = [...new Set([...REQUIRED_OAUTH_SCOPES, ...scopes])];
   print(
-    `Open this URL to ${scopePicker ? "set up cf" : "authorize cf"}: ${scopePicker ? `http://${redirectHost}:${port}/` : makeAuthorization(selectedScopes)}`,
+    `Open this URL to ${scopePicker ? "set up cfhub" : "authorize cf"}: ${scopePicker ? `http://${redirectHost}:${port}/` : makeAuthorization(selectedScopes)}`,
   );
   const callback = new Promise((resolve, reject) =>
     server.on("request", (request, response) => {
@@ -312,6 +312,17 @@ export async function loginOAuth({
       if (scopePicker && url.pathname === "/" && request.method === "GET") {
         response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
         response.end(pickerHtml());
+        return;
+      }
+      if (url.pathname === "/api/version" && request.method === "GET") {
+        const project = url.searchParams.get("project");
+        if (project !== "cfhub") {
+          response.writeHead(404, { "content-type": "application/json; charset=utf-8" });
+          response.end(JSON.stringify({ error: `Project not found: ${project || ""}` }) + "\n");
+          return;
+        }
+        response.writeHead(200, { "content-type": "application/json; charset=utf-8" });
+        response.end(JSON.stringify({ name: "cfhub", version: VERSION }) + "\n");
         return;
       }
       if (

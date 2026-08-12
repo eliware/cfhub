@@ -36,6 +36,7 @@ try {
   for (const [name, viewport] of [
     ["desktop", { width: 1440, height: 1000 }],
     ["mobile", { width: 390, height: 844, isMobile: true, hasTouch: true }],
+    ["mobile-landscape", { width: 844, height: 390, isMobile: true, hasTouch: true }],
   ]) {
     await page.setViewport({ deviceScaleFactor: 1, ...viewport });
     const response = await page.goto(previewUrl, { waitUntil: "networkidle0" });
@@ -43,6 +44,10 @@ try {
     await page.screenshot({
       path: join(outputDir, `oauth-picker-${name}.png`),
       fullPage: true,
+    });
+    await page.screenshot({
+      path: join(outputDir, `oauth-picker-${name}-above-fold.png`),
+      fullPage: false,
     });
     assert.equal(
       await page.$eval("#scope-search", (input) =>
@@ -81,6 +86,10 @@ try {
     path: join(outputDir, "oauth-success-desktop.png"),
     fullPage: true,
   });
+  await desktopSuccessPage.screenshot({
+    path: join(outputDir, "oauth-success-desktop-above-fold.png"),
+    fullPage: false,
+  });
   await desktopSuccessPage.close();
   console.log("Captured desktop OAuth success screenshot");
   const mobileSuccessPage = await browser.newPage();
@@ -95,6 +104,21 @@ try {
   await mobileSuccessPage.screenshot({
     path: join(outputDir, "oauth-success-mobile.png"),
     fullPage: true,
+  });
+  await mobileSuccessPage.screenshot({
+    path: join(outputDir, "oauth-success-mobile-above-fold.png"),
+    fullPage: false,
+  });
+  await mobileSuccessPage.setViewport({
+    width: 844,
+    height: 390,
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 1,
+  });
+  await mobileSuccessPage.screenshot({
+    path: join(outputDir, "oauth-success-mobile-landscape-above-fold.png"),
+    fullPage: false,
   });
   await mobileSuccessPage.close();
   console.log("Captured mobile OAuth success screenshot");
@@ -135,11 +159,16 @@ try {
   for (const [name, viewport] of [
     ["desktop", { width: 1440, height: 1000 }],
     ["mobile", { width: 390, height: 844, isMobile: true, hasTouch: true }],
+    ["mobile-landscape", { width: 844, height: 390, isMobile: true, hasTouch: true }],
   ]) {
     await page.setViewport({ deviceScaleFactor: 1, ...viewport });
     await page.screenshot({
       path: join(outputDir, `oauth-cancelled-${name}.png`),
       fullPage: true,
+    });
+    await page.screenshot({
+      path: join(outputDir, `oauth-cancelled-${name}-above-fold.png`),
+      fullPage: false,
     });
     console.log(`Captured ${name} OAuth cancellation screenshot`);
   }
@@ -174,11 +203,16 @@ try {
   for (const [name, viewport] of [
     ["desktop", { width: 1440, height: 1000 }],
     ["mobile", { width: 390, height: 844, isMobile: true, hasTouch: true }],
+    ["mobile-landscape", { width: 844, height: 390, isMobile: true, hasTouch: true }],
   ]) {
     await page.setViewport({ deviceScaleFactor: 1, ...viewport });
     await page.screenshot({
       path: join(outputDir, `oauth-invalid-state-${name}.png`),
       fullPage: true,
+    });
+    await page.screenshot({
+      path: join(outputDir, `oauth-invalid-state-${name}-above-fold.png`),
+      fullPage: false,
     });
     console.log(`Captured ${name} OAuth invalid-state screenshot`);
   }

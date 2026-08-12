@@ -245,7 +245,7 @@ test("OAuth scope picker opens a local setup page and redirects with selected sc
           body += chunk;
         });
         response.on("end", () => {
-          expect(body).toContain("Set up cf");
+          expect(body).toContain("Set up cfhub");
           expect(body).toContain("scope-search");
           expect(body).toContain("2026-2027");
           resolve();
