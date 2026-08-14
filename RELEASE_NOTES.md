@@ -1,5 +1,16 @@
 # Release Notes
 
+## 1.0.2
+
+- Added opt-in OAuth `offline_access` support through the “Keep me logged in” picker option.
+- Persisted OAuth access, refresh, and expiry metadata in the OS keychain when
+  available, with a secure `0600` disk fallback when it is not.
+- Automatically refreshes expiring OAuth credentials and removes expired
+  profiles that have no refresh token.
+- Added synchronized session controls above both OAuth login buttons and
+  tightened the picker layout for desktop and mobile screens.
+- Updated Puppeteer to 25.7.0.
+
 ## 1.0.1
 
 - Updated product branding and project links from `cf` to `cfhub` across the
