@@ -20,7 +20,8 @@ test('credential adapter falls back to disk when keychain is unavailable', async
   await expect(writeCredential('work', { token: 'disk' }, unavailable, fs, home)).resolves.toBe(true);
   await expect(readCredential('work', unavailable, fs, home)).resolves.toEqual({ token: 'disk' });
   expect(credentialsPath(home)).toContain('/.config/cfhub/credentials.json');
-  expect(fs.statSync(credentialsPath(home)).mode & 0o777).toBe(0o600);
+  const expectedMode = process.platform === 'win32' ? 0o666 : 0o600;
+  expect(fs.statSync(credentialsPath(home)).mode & 0o777).toBe(expectedMode);
   await expect(deleteCredential('work', unavailable, fs, home)).resolves.toBe(true);
   await expect(readCredential('work', unavailable, fs, home)).resolves.toBeNull();
 });
