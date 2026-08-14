@@ -54,6 +54,10 @@
         enabled so cf can confirm your account and provide basic commands.
       </p>
       <form method="post" action="/oauth/start" id="scope-form">
+        <label class="session-option">
+          <input type="checkbox" name="keep-signed-in" />
+          <span><strong>Keep me logged in</strong><small>Request a refresh token so this profile can renew access after about one hour.</small></span>
+        </label>
         <button class="login" type="submit" disabled>
           Log in with Cloudflare
         </button>
@@ -83,6 +87,10 @@
           </div>
         </div>
         <div id="scope-groups"></div>
+        <label class="session-option session-option-bottom">
+          <input type="checkbox" name="keep-signed-in" />
+          <span><strong>Keep me logged in</strong><small>Request a refresh token so this profile can renew access after about one hour.</small></span>
+        </label>
         <button class="login" type="submit" disabled>
           Log in with Cloudflare
         </button>
@@ -93,6 +101,17 @@
     </main>
     <section class="faq" aria-labelledby="faq-title">
       <h2 id="faq-title">Frequently asked questions</h2>
+      <details>
+        <summary>What does “Keep me logged in” do?</summary>
+        <p>
+          When selected, cfhub requests Cloudflare's <code>offline_access</code>
+          permission. If your OAuth client allows refresh tokens, the profile
+          can renew itself after the roughly one-hour access-token lifetime.
+          It is off by default because it creates a longer-lived credential.
+          If you leave it off, you will need to authorize again when the access
+          token expires.
+        </p>
+      </details>
       <details>
         <summary>What are scopes?</summary>
         <p>

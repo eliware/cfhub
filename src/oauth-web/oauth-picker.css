@@ -31,7 +31,7 @@ input {
 }
 .shell {
   width: min(100% - 32px, 760px);
-  margin: 34px auto 80px;
+  margin: 22px auto 60px;
 }
 .brand {
   display: grid;
@@ -45,7 +45,7 @@ input {
   font-size: 16px;
 }
 header {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 h1 {
   font-size: 28px;
@@ -72,6 +72,23 @@ p {
 .required-scopes strong {
   color: var(--text);
 }
+.session-option {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 18px 0 24px;
+  padding: 13px 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft);
+  cursor: pointer;
+}
+.session-option small {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
 .module-heading,
 .scope-heading {
   display: flex;
@@ -85,7 +102,7 @@ p {
   font-size: 12px;
 }
 .module-tier {
-  margin-top: 18px;
+  margin-top: 12px;
 }
 .module-tier h3 {
   font-size: 13px;
@@ -98,7 +115,7 @@ p {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 7px;
 }
 .module-actions,
 .scope-selection-tools,
@@ -119,14 +136,14 @@ p {
 .module-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 .module {
   background: var(--soft);
   color: var(--text);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 7px 9px;
   text-align: left;
   cursor: pointer;
 }
@@ -138,7 +155,7 @@ p {
   display: block;
   color: var(--muted);
   font-size: 11px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 .login {
   width: 100%;
@@ -149,7 +166,7 @@ p {
   font-weight: 700;
   padding: 12px 16px;
   cursor: pointer;
-  margin: 22px 0;
+  margin: 10px 0;
 }
 .login:disabled {
   opacity: 0.38;
@@ -157,7 +174,7 @@ p {
 }
 .scope-heading {
   border-top: 1px solid var(--line);
-  padding-top: 25px;
+  padding-top: 18px;
 }
 #scope-search {
   width: 100%;

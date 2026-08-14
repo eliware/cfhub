@@ -1,7 +1,7 @@
 import os from "node:os";
 import * as fs from 'node:fs';
 import { configRoot } from "./config.mjs";
-import { readCredential, writeCredential } from "./credentials.mjs";
+import { deleteCredential, readCredential, writeCredential } from "./credentials.mjs";
 import { refreshOAuth } from "./oauth.mjs";
 
 export function profilesPath(homeDir = os.homedir()) {
@@ -41,13 +41,29 @@ export async function applyActiveProfile(
   fsImpl = fs,
   effects = {},
 ) {
-  const credentialReader = effects.readCredential || readCredential;
-  const credentialWriter = effects.writeCredential || writeCredential;
+  const credentialReader = effects.readCredential || ((profile) => readCredential(profile, undefined, fsImpl, homeDir));
+  const credentialWriter = effects.writeCredential || ((profile, value) => writeCredential(profile, value, undefined, fsImpl, homeDir));
+  const credentialDeleter = effects.deleteCredential || ((profile) => deleteCredential(profile, undefined, fsImpl, homeDir));
   const refresh = effects.refreshOAuth || refreshOAuth;
   const now = effects.now || Date.now;
   const profile = activeProfile(env, homeDir, fsImpl);
   if (!profile) return null;
   const credential = await credentialReader(profile.name);
+  if (
+    credential?.oauthAccessToken &&
+    credential.expiresAt &&
+    credential.expiresAt <= now() + 60_000 &&
+    !credential.oauthRefreshToken
+  ) {
+    await credentialDeleter(profile.name);
+    const data = readProfiles(homeDir, fsImpl);
+    delete data.profiles[profile.name];
+    data.active = data.active === profile.name
+      ? Object.keys(data.profiles)[0] || null
+      : data.active;
+    writeProfiles(data, homeDir, fsImpl);
+    return null;
+  }
   let activeCredential = credential;
   if (
     credential?.oauthRefreshToken &&
@@ -71,9 +87,9 @@ export async function applyActiveProfile(
       activeCredential = credential;
     }
   }
-  const values = { ...activeCredential, ...profile };
+  const values = { ...profile, ...activeCredential };
   for (const [key, value] of Object.entries({
-    CLOUDFLARE_API_TOKEN: values.apiToken || values.oauthAccessToken,
+    CLOUDFLARE_API_TOKEN: values.oauthAccessToken || values.apiToken,
     CLOUDFLARE_ACCOUNT_ID: values.accountId,
     CLOUDFLARE_ZONE_ID: values.zoneId,
     CF_OAUTH_SCOPES: values.scopes?.join(","),

@@ -5,6 +5,7 @@
   const enabledModules = new Set();
   let synchronizeModules = true;
   const boxes = [];
+  const sessionOptions = document.querySelectorAll('input[name="keep-signed-in"]');
   const owners = new Map();
   modules.forEach((module) =>
     module.scopes.forEach((scope) => {
@@ -112,6 +113,11 @@
           enabledModules.delete(id),
         );
       render();
+    }),
+  );
+  sessionOptions.forEach((option) =>
+    option.addEventListener("change", () => {
+      sessionOptions.forEach((other) => { other.checked = option.checked; });
     }),
   );
   document.querySelectorAll("[data-module]").forEach((button) =>

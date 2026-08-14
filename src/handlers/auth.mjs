@@ -84,7 +84,7 @@ export async function handleAuth({
         bindHost: process.env.CF_OAUTH_BIND_HOST || "0.0.0.0",
         redirectHost: process.env.CF_OAUTH_REDIRECT_HOST || "127.0.0.1",
       });
-      const storedInKeychain = await writeCredentialImpl(name, {
+      await writeCredentialImpl(name, {
         oauthAccessToken: oauth.accessToken,
         oauthRefreshToken: oauth.refreshToken,
         expiresIn: oauth.expiresIn,
@@ -96,7 +96,6 @@ export async function handleAuth({
         accountId: opts?.["account-id"] || process.env.CLOUDFLARE_ACCOUNT_ID,
         zoneId: opts?.["zone-id"] || process.env.CLOUDFLARE_ZONE_ID,
       };
-      if (!storedInKeychain) data.profiles[name].apiToken = oauth.accessToken;
       data.active = name;
       write(data, profileHome, profileFs);
       return printer.log(`Saved and activated profile ${name}`);

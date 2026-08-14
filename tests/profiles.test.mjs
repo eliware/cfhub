@@ -3,6 +3,7 @@ import * as fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { activeProfile, applyActiveProfile, profilesPath, readProfiles, writeProfiles } from '../src/profiles.mjs';
+import { deleteCredential, readCredential, writeCredential } from '../src/credentials.mjs';
 
 test('profile storage writes private JSON and applies active values', async () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-'));
@@ -63,4 +64,66 @@ test('profile application refreshes expiring OAuth credentials and falls back on
   const failing = { ...credential }; const fallbackEnv = {};
   await applyActiveProfile(fallbackEnv, home, fs, { readCredential: jest.fn().mockResolvedValue(failing), refreshOAuth: jest.fn().mockRejectedValue(new Error('expired')), now: () => 0 });
   expect(fallbackEnv.CLOUDFLARE_API_TOKEN).toBe('old');
+});
+
+test('refreshed OAuth credentials take precedence over legacy profile access tokens', async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-legacy-oauth-'));
+  writeProfiles({ active: 'work', profiles: { work: { apiToken: 'expired', accountId: 'a1' } } }, home);
+  const env = {};
+  await applyActiveProfile(env, home, fs, {
+    readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: 'fresh' }),
+    now: () => 0,
+  });
+  expect(env.CLOUDFLARE_API_TOKEN).toBe('fresh');
+});
+
+test('default credential writer persists refreshed OAuth credentials to disk', async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-disk-refresh-'));
+  writeProfiles({ active: 'work', profiles: { work: {} } }, home);
+  await applyActiveProfile({}, home, fs, {
+    readCredential: jest.fn().mockResolvedValue({ oauthRefreshToken: 'refresh', oauthAccessToken: 'old', expiresAt: 1 }),
+    refreshOAuth: jest.fn().mockResolvedValue({ accessToken: 'new', refreshToken: 'next', expiresAt: 9999 }),
+    writeCredential: (profile, value) => writeCredential(profile, value, jest.fn().mockResolvedValue(null), fs, home),
+    now: () => 0,
+  });
+  const credentials = JSON.parse(fs.readFileSync(`${home}/.config/cfhub/credentials.json`, 'utf8'));
+  expect(credentials.work).toMatchObject({ oauthAccessToken: 'new', oauthRefreshToken: 'next' });
+});
+
+test('default credential writer uses the available keychain', async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-keychain-'));
+  writeProfiles({ active: 'keychain-test', profiles: { 'keychain-test': {} } }, home);
+  await applyActiveProfile({}, home, fs, {
+    readCredential: jest.fn().mockResolvedValue({ oauthRefreshToken: 'refresh', oauthAccessToken: 'old', expiresAt: 1 }),
+    refreshOAuth: jest.fn().mockResolvedValue({ accessToken: 'new', refreshToken: 'next', expiresAt: 9999 }),
+    now: () => 0,
+  });
+  await expect(readCredential('keychain-test')).resolves.toMatchObject({ oauthAccessToken: 'new' });
+  await deleteCredential('keychain-test');
+});
+
+test('expired OAuth credentials without refresh tokens are logged out', async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-expired-'));
+  writeProfiles({ active: 'work', profiles: { work: {}, other: {} } }, home);
+  const deleteCredential = jest.fn().mockResolvedValue(true);
+  const result = await applyActiveProfile({}, home, fs, {
+    readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: 'expired', expiresAt: 1 }),
+    deleteCredential,
+    now: () => 0,
+  });
+  expect(result).toBeNull();
+  expect(deleteCredential).toHaveBeenCalledWith('work');
+  expect(readProfiles(home)).toEqual({ active: 'other', profiles: { other: {} } });
+  writeProfiles({ active: 'other', profiles: { work: {}, other: {} } }, home);
+  await expect(applyActiveProfile({ CLOUDFLARE_PROFILE: 'work' }, home, fs, {
+    readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: 'expired', expiresAt: 1 }),
+    now: () => 0,
+  })).resolves.toBeNull();
+  expect(readProfiles(home)).toEqual({ active: 'other', profiles: { other: {} } });
+  writeProfiles({ active: 'work', profiles: { work: {} } }, home);
+  await expect(applyActiveProfile({}, home, fs, {
+    readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: 'expired', expiresAt: 1 }),
+    now: () => 0,
+  })).resolves.toBeNull();
+  expect(readProfiles(home)).toEqual({ active: null, profiles: {} });
 });

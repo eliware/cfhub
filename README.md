@@ -138,7 +138,13 @@ CLOUDFLARE_ACCOUNT_ID=your_account_id
 CLOUDFLARE_ZONE_ID=your_zone_id
 ```
 
-OAuth profiles are stored in the `~/.cfhub` configuration directory, while secrets are stored in the OS keychain. Existing environment variables take precedence over profile values. Keep tokens, `.env` files, keychain exports, and generated state private; none should be committed.
+OAuth profiles are stored in the `~/.config/cfhub` configuration directory, while secrets are stored in the OS keychain when available. Existing environment variables take precedence over profile values. Keep tokens, `.env` files, keychain exports, and generated state private; none should be committed.
+
+If an OS keychain is unavailable, OAuth credentials are stored in
+`~/.config/cfhub/credentials.json` with `0600` permissions. This file contains
+the refresh token and expiry metadata needed to renew access tokens; protect it
+like any other credential file and exclude it from backups or shared home
+directories. Profile metadata never stores OAuth access or refresh tokens.
 
 ## Usage
 

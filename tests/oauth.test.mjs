@@ -247,6 +247,7 @@ test("OAuth scope picker opens a local setup page and redirects with selected sc
         response.on("end", () => {
           expect(body).toContain("Set up cfhub");
           expect(body).toContain("scope-search");
+          expect(body).toContain("Keep me logged in");
           expect(body).toContain("2026-2027");
           resolve();
         });
@@ -276,12 +277,13 @@ test("OAuth scope picker opens a local setup page and redirects with selected sc
         expect(response.statusCode).toBe(302);
         authorization = new URL(response.headers.location);
         expect(authorization.searchParams.get("scope")).toContain("dns.write");
+        expect(authorization.searchParams.get("scope")).toContain("offline_access");
         response.resume();
         response.on("end", resolve);
       },
     );
     request.on("error", reject);
-    request.end("scope=zone.read&scope=dns.write");
+    request.end("scope=zone.read&scope=dns.write&keep-signed-in=on");
   });
   const callback = new URL(landing);
   callback.pathname = "/oauth/callback";
@@ -315,6 +317,16 @@ test("OAuth picker serves its browser assets and summarizes zones and DNS", asyn
     const response = await fetch(`http://127.0.0.1:${landing.port}${path}`);
     expect(response.status).toBe(200);
   }
+  const missingProject = await fetch(`http://127.0.0.1:${landing.port}/api/version?project=missing`);
+  expect(missingProject.status).toBe(404);
+  expect(await missingProject.json()).toEqual({ error: "Project not found: missing" });
+  const missingProjectName = await fetch(`http://127.0.0.1:${landing.port}/api/version`);
+  expect(await missingProjectName.json()).toEqual({ error: "Project not found: " });
+  const version = await fetch(`http://127.0.0.1:${landing.port}/api/version?project=cfhub`);
+  expect(version.status).toBe(200);
+  expect((await version.json()).name).toBe("cfhub");
+  const wrongMethod = await fetch(`http://127.0.0.1:${landing.port}/api/version?project=cfhub`, { method: "POST" });
+  expect(wrongMethod.status).not.toBe(200);
   browser.emit("error", { code: "ENOENT" });
   const startResponse = await fetch(new URL("/oauth/start", landing), { method: "POST", redirect: "manual" });
   const authorization = new URL(startResponse.headers.get("location"));

@@ -288,13 +288,16 @@ export async function loginOAuth({
   if (!server || !port)
     throw new Error("No OAuth callback port available (tried 8765-8769)");
   const redirectUri = `http://${redirectHost}:${port}/oauth/callback`;
-  const makeAuthorization = (selected) => {
+  const makeAuthorization = (selected, offlineAccess = false) => {
     const authorization = new URL(AUTH_URL);
+    const authorizationScopes = offlineAccess
+      ? [...selected, "offline_access"]
+      : selected;
     const params = new URLSearchParams({
       response_type: "code",
       client_id: clientId,
       redirect_uri: redirectUri,
-      scope: selected.join(" "),
+      scope: authorizationScopes.join(" "),
       code_challenge: challenge,
       code_challenge_method: "S256",
       state,
@@ -409,7 +412,7 @@ export async function loginOAuth({
             ]),
           ];
           response.writeHead(302, {
-            location: makeAuthorization(selectedScopes).toString(),
+            location: makeAuthorization(selectedScopes, form.get("keep-signed-in") === "on").toString(),
           });
           response.end();
         });
