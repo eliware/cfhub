@@ -90,7 +90,7 @@ test('default credential writer persists refreshed OAuth credentials to disk', a
   expect(credentials.work).toMatchObject({ oauthAccessToken: 'new', oauthRefreshToken: 'next' });
 });
 
-test('default credential writer uses the available keychain', async () => {
+test('default credential writer persists through the configured credential adapter', async () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-keychain-'));
   writeProfiles({ active: 'keychain-test', profiles: { 'keychain-test': {} } }, home);
   await applyActiveProfile({}, home, fs, {
@@ -98,8 +98,8 @@ test('default credential writer uses the available keychain', async () => {
     refreshOAuth: jest.fn().mockResolvedValue({ accessToken: 'new', refreshToken: 'next', expiresAt: 9999 }),
     now: () => 0,
   });
-  await expect(readCredential('keychain-test')).resolves.toMatchObject({ oauthAccessToken: 'new' });
-  await deleteCredential('keychain-test');
+  await expect(readCredential('keychain-test', undefined, fs, home)).resolves.toMatchObject({ oauthAccessToken: 'new' });
+  await deleteCredential('keychain-test', undefined, fs, home);
 });
 
 test('expired OAuth credentials without refresh tokens are logged out', async () => {
