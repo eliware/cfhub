@@ -2,7 +2,7 @@ import os from 'node:os';
 import * as fs from 'node:fs';
 import { configRoot } from './config.mjs';
 
-const SERVICE = 'cf';
+const SERVICE = 'cfhub';
 export function credentialsPath(homeDir = os.homedir()) {
   return `${configRoot(homeDir)}/credentials.json`;
 }

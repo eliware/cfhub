@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Choose Cloudflare permissions for the cf command-line tool."
+      content="Choose Cloudflare permissions for the cfhub command-line tool."
     />
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" type="image/svg+xml" href="/oauth-web/cf-logo.svg" />
@@ -20,7 +20,7 @@
             <img
               class="cf-logo"
               src="/oauth-web/cf-logo.svg"
-              alt="cf"
+              alt="Cloudflare"
               width="40"
               height="40"
             />
@@ -51,7 +51,7 @@
       </section>
       <p class="required-scopes">
         <strong>Required:</strong> identity access and zone discovery are always
-        enabled so cf can confirm your account and provide basic commands.
+        enabled so cfhub can confirm your account and provide basic commands.
       </p>
       <form method="post" action="/oauth/start" id="scope-form">
         <label class="session-option">
@@ -115,7 +115,7 @@
       <details>
         <summary>What are scopes?</summary>
         <p>
-          Scopes are permissions granted to cf by Cloudflare. Each scope
+          Scopes are permissions granted to cfhub by Cloudflare. Each scope
           controls a capability, such as reading zones or changing DNS records.
           Choose only the permissions you expect to use.
         </p>
@@ -123,7 +123,7 @@
       <details>
         <summary>What do the modules do?</summary>
         <p>
-          Modules group the scopes used by built-in cf commands. Enabling a
+          Modules group the scopes used by built-in cfhub commands. Enabling a
           module selects its required permissions; shared permissions stay
           selected while another enabled module still needs them.
         </p>
@@ -153,7 +153,7 @@
           local callback URL
           <code>http://127.0.0.1:8765/oauth/callback</code>. If your client
           registration supports multiple redirect URLs, also register ports
-          <code>8766</code> through <code>8769</code> because cf uses them as
+          <code>8766</code> through <code>8769</code> because cfhub uses them as
           fallbacks when a port is busy. Select every Cloudflare scope your
           client should be allowed to request. Then start the normal login
           command with your client ID:
@@ -173,9 +173,9 @@
         <summary>Can Eliware access my Cloudflare account?</summary>
         <p>
           No. The default Eliware OAuth client identifies the application, but
-          cf sends the authorization flow directly between your browser and
+          cfhub sends the authorization flow directly between your browser and
           Cloudflare. The resulting credentials are stored locally in your
-          operating-system keychain and API calls go directly from cf to
+          operating-system keychain and API calls go directly from cfhub to
           Cloudflare. Eliware does not receive your token, proxy your requests,
           or choose permissions on your behalf. You can use your own OAuth
           client at any time if you prefer to manage the client registration

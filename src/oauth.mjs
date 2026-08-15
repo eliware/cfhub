@@ -307,7 +307,7 @@ export async function loginOAuth({
   };
   let selectedScopes = [...new Set([...REQUIRED_OAUTH_SCOPES, ...scopes])];
   print(
-    `Open this URL to ${scopePicker ? "set up cfhub" : "authorize cf"}: ${scopePicker ? `http://${redirectHost}:${port}/` : makeAuthorization(selectedScopes)}`,
+    `Open this URL to ${scopePicker ? "set up cfhub" : "authorize cfhub"}: ${scopePicker ? `http://${redirectHost}:${port}/` : makeAuthorization(selectedScopes)}`,
   );
   const callback = new Promise((resolve, reject) =>
     server.on("request", (request, response) => {
@@ -429,7 +429,7 @@ export async function loginOAuth({
           failurePage({
             title: "Authorization request expired",
             detail:
-              "This callback no longer matches the login request. Start a new login from the cf command line and try again.",
+              "This callback no longer matches the login request. Start a new login from the cfhub command line and try again.",
           }),
         );
         reject(

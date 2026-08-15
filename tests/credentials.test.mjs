@@ -10,7 +10,7 @@ test('credential adapter reads, writes, and deletes keychain entries', async () 
   await expect(readCredential('work', load)).resolves.toEqual({ token: 'secret' });
   await expect(writeCredential('work', { token: 'new' }, load)).resolves.toBe(true);
   await expect(deleteCredential('work', load)).resolves.toBe(true);
-  expect(store.setPassword).toHaveBeenCalledWith('cf', 'work', JSON.stringify({ token: 'new' }));
+  expect(store.setPassword).toHaveBeenCalledWith('cfhub', 'work', JSON.stringify({ token: 'new' }));
 });
 
 test('credential adapter falls back to disk when keychain is unavailable', async () => {

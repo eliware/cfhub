@@ -373,7 +373,7 @@ liveDescribe("authenticated live CLI smoke tests", () => {
     const listName = `cflive${Date.now()}`;
     const createList = await run([
       "lists", "create", "--account-id", accountId, "--data",
-      JSON.stringify({ name: listName, description: "Temporary cf live test list", kind: "ip" }), "--json",
+      JSON.stringify({ name: listName, description: "Temporary cfhub live test list", kind: "ip" }), "--json",
     ]);
     if (createList.code !== 0 && skipUnavailable("list CRUD", createList)) return;
     expect(createList.code).toBe(0);

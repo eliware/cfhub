@@ -70,7 +70,7 @@ try {
   callback.search = `?state=${authorization.searchParams.get("state")}&code=preview`;
   await page.goto(callback, { waitUntil: "domcontentloaded" }).catch(() => {});
   await login;
-  assert.equal(await page.title(), "Cloudflare connected · cf");
+  assert.equal(await page.title(), "Cloudflare connected · cfhub");
   assert.match(await page.$eval("h1", (heading) => heading.textContent), /connected/i);
   const successHtml = await page.content();
   const desktopSuccessPage = await browser.newPage();
@@ -154,7 +154,7 @@ try {
     waitUntil: "domcontentloaded",
   });
   assert.equal(cancellationResponse?.status(), 400);
-  assert.equal(await page.title(), "Authorization cancelled · cf");
+  assert.equal(await page.title(), "Authorization cancelled · cfhub");
   assert.match(await page.$eval("h1", (heading) => heading.textContent), /cancelled/i);
   for (const [name, viewport] of [
     ["desktop", { width: 1440, height: 1000 }],
@@ -195,7 +195,7 @@ try {
     waitUntil: "domcontentloaded",
   });
   assert.equal(invalidStateResponse?.status(), 400);
-  assert.equal(await page.title(), "Authorization request expired · cf");
+  assert.equal(await page.title(), "Authorization request expired · cfhub");
   assert.match(
     await page.$eval("h1", (heading) => heading.textContent),
     /request expired/i,

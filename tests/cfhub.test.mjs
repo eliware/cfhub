@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 
-describe("cf run()", () => {
+describe("cfhub run()", () => {
   test("dispatches to injected handlers and loads env", async () => {
     const log = jest.fn();
     const error = jest.fn();
@@ -105,7 +105,7 @@ describe("cf run()", () => {
   test("run can use every default dependency when invoked as the entrypoint", async () => {
     const originalArgv = process.argv;
     const spy = jest.spyOn(console, "log").mockImplementation(() => {});
-    process.argv = [process.execPath, "cf"];
+    process.argv = [process.execPath, "cfhub"];
     try {
       const mod = await import(`../src/cli.mjs?ts=${Date.now() + 600}`);
       await mod.run();

@@ -16,7 +16,7 @@ function memoryFs(files = new Map()) {
 test("update check caches once per interval and reports newer versions", async () => {
   const fs = memoryFs();
   const fetchImpl = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ version: "2.0.0" }) });
-  const options = { currentVersion: "1.1.3", homeDir: "/tmp/cf", fsImpl: fs, fetchImpl, now: 86_400_001 };
+  const options = { currentVersion: "1.1.3", homeDir: "/tmp/cfhub", fsImpl: fs, fetchImpl, now: 86_400_001 };
   await expect(checkForUpdate(options)).resolves.toBe("2.0.0");
   await expect(checkForUpdate({ ...options, now: 86_401_000 })).resolves.toBe("2.0.0");
   expect(fetchImpl).toHaveBeenCalledTimes(1);
@@ -29,7 +29,7 @@ test("update check respects opt-out, current versions, bad responses, and failur
     .mockResolvedValueOnce({ ok: true, json: async () => ({ version: "1.1.3" }) })
     .mockResolvedValueOnce({ ok: false })
     .mockRejectedValueOnce(new Error("offline"));
-  const base = { currentVersion: "1.1.3", homeDir: "/tmp/cf", fsImpl: fs, fetchImpl, now: 1 };
+  const base = { currentVersion: "1.1.3", homeDir: "/tmp/cfhub", fsImpl: fs, fetchImpl, now: 1 };
   await expect(checkForUpdate({ ...base, env: { CFHUB_NO_UPDATE_CHECK: "1" } })).resolves.toBeNull();
   await expect(checkForUpdate(base)).resolves.toBeNull();
   await expect(checkForUpdate({ ...base, now: 86_400_002 })).resolves.toBeNull();
@@ -41,7 +41,7 @@ test("CLI prints an update notice without delaying command output", async () => 
   const printer = { log: jest.fn(), error: jest.fn() };
   await run({
     argv: ["zones", "list"],
-    homeDir: "/tmp/cf-update-cli",
+    homeDir: "/tmp/cfhub-update-cli",
     env: {},
     printer,
     fsImpl: { existsSync: () => false },
