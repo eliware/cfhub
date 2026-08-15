@@ -3,7 +3,11 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const webpack = spawn(process.platform === "win32" ? "webpack.cmd" : "webpack", [
+const webpackCli = fileURLToPath(
+  new URL("../node_modules/webpack-cli/bin/cli.js", import.meta.url),
+);
+const webpack = spawn(process.execPath, [
+  webpackCli,
   "--config",
   "webpack.config.mjs",
   "--mode",
