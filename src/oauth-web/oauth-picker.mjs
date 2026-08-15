@@ -1,4 +1,4 @@
-(() => {
+export function initializePicker() {
   const { categories, modules, requiredScopes = [] } = window.CFHUB_SCOPE_MODEL;
   const required = new Set(requiredScopes);
   const selected = new Set(requiredScopes);
@@ -189,4 +189,6 @@
     });
   });
   render();
-})();
+}
+
+initializePicker();

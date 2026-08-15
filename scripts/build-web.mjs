@@ -16,8 +16,8 @@ const exitCode = await new Promise((resolve) => {
 if (exitCode !== 0) process.exitCode = exitCode;
 else {
   await Promise.all([
-    rm(new URL("../src/oauth-web/bundled/oauth-picker.js", import.meta.url), { force: true }),
-    rm(new URL("../src/oauth-web/bundled/oauth-result.js", import.meta.url), { force: true }),
-    rm(new URL("../src/oauth-web/bundled/oauth-success.js", import.meta.url), { force: true }),
+    rm(new URL("../src/oauth-web/bundled/oauth-picker.mjs", import.meta.url), { force: true }),
+    rm(new URL("../src/oauth-web/bundled/oauth-result.mjs", import.meta.url), { force: true }),
+    rm(new URL("../src/oauth-web/bundled/oauth-success.mjs", import.meta.url), { force: true }),
   ]);
 }

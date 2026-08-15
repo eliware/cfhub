@@ -8,7 +8,7 @@ export default {
     "oauth-success": "./src/oauth-web/oauth-success.entry.mjs",
   },
   output: {
-    filename: "[name].js",
+    filename: "[name].mjs",
     path: new URL("./src/oauth-web/bundled/", import.meta.url).pathname,
     clean: true,
   },
