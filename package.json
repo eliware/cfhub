@@ -1,6 +1,6 @@
 {
     "name": "cfhub",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "OAuth-first Cloudflare administration CLI with GitHub CLI-style commands, profiles, safe writes, and direct API access.",
     "type": "module",
     "scripts": {

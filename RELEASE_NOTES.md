@@ -1,5 +1,11 @@
 # Release Notes
 
+## 1.0.3
+
+- Completed the remaining CLI branding transition from `cf` to `cfhub`, including OAuth pages, update notices, tests, and the credential keychain service namespace.
+- Improved the OAuth browser experience with better contrast, reduced layout shift, responsive image sizing, CSS minification, gzip compression, cache headers, and versioned static assets.
+- Restricted the publish workflow to `v*` tags and validated the browser flows with Lighthouse and screenshot tests.
+
 ## 1.0.2
 
 - Added opt-in OAuth `offline_access` support through the “Keep me logged in” picker option.
