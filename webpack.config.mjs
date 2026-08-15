@@ -1,5 +1,6 @@
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import { fileURLToPath } from "node:url";
 
 export default {
   entry: {
@@ -9,7 +10,7 @@ export default {
   },
   output: {
     filename: "[name].mjs",
-    path: new URL("./src/oauth-web/bundled/", import.meta.url).pathname,
+    path: fileURLToPath(new URL("./src/oauth-web/bundled/", import.meta.url)),
     clean: true,
   },
   module: {
