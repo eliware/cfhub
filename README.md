@@ -212,8 +212,13 @@ npm install
 npm test
 npm run lint
 npm run test:gaps
+npm run build:web
 npm run pack
 ```
+
+The OAuth pages keep their readable source stylesheets in `src/oauth-web/`.
+Run `npm run build:web` after editing them to regenerate the minified bundles
+served by the local OAuth server; `npm pack` runs that build automatically.
 
 The test suite uses dependency injection for Cloudflare clients, filesystem access, environment loading, output, handlers, and process exits. Browser checks for the OAuth web interface are available without authenticating:
 

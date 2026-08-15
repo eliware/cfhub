@@ -1,0 +1,1 @@
+import "./oauth-result.css";

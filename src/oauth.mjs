@@ -183,7 +183,7 @@ function successPage({ account, scopes, summary }) {
   ].filter(Boolean).map((example) => `<div class="example"><code>${escapeHtml(example)}</code></div>`).join("");
   const logoData = encodeURIComponent(pickerAsset("oauth-web/cf-logo.svg")).replace(/'/g, "%27");
   return pickerAsset("oauth-web/oauth-success.html")
-    .replaceAll("__SUCCESS_CSS__", pickerAsset("oauth-web/oauth-success.css"))
+    .replaceAll("__SUCCESS_CSS__", pickerAsset("oauth-web/bundled/oauth-success.css"))
     .replaceAll("__CFHUB_LOGO_DATA__", logoData)
     .replaceAll("__ACCOUNT__", escapeHtml(account?.name || account?.email || "your Cloudflare account"))
     .replaceAll("__SCOPE_COUNT__", String(scopes.length))
@@ -218,26 +218,17 @@ const ALLOWED_OAUTH_SCOPES = new Set(
 );
 const pickerAsset = (name) =>
   readFileSync(fileURLToPath(new URL(`./${name}`, import.meta.url)), "utf8");
-function minifyCss(value) {
-  return value
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/\s+/g, " ")
-    .replace(/\s*([{}:;,>])\s*/g, "$1")
-    .replace(/;}/g, "}")
-    .trim();
-}
 function sendAsset(
   request,
   response,
   body,
   contentType,
-    { cacheControl = "public, max-age=31536000, immutable", css = false } = {},
+    { cacheControl = "public, max-age=31536000, immutable" } = {},
 ) {
-  const source = css ? minifyCss(body) : body;
   const acceptsGzip = /(?:^|,\s*)gzip(?:\s*;|\s*,|\s*$)/i.test(
     request.headers["accept-encoding"] || "",
   );
-  const payload = acceptsGzip ? gzipSync(source) : Buffer.from(source);
+  const payload = acceptsGzip ? gzipSync(body) : Buffer.from(body);
   const headers = {
     "content-type": contentType,
     "cache-control": cacheControl,
@@ -368,7 +359,7 @@ export async function loginOAuth({
         url.pathname === "/oauth-picker.css" &&
         request.method === "GET"
       ) {
-        sendAsset(request, response, pickerAsset("oauth-web/oauth-picker.css"), "text/css; charset=utf-8", { css: true });
+        sendAsset(request, response, pickerAsset("oauth-web/bundled/oauth-picker.css"), "text/css; charset=utf-8");
         return;
       }
       if (
@@ -408,7 +399,7 @@ export async function loginOAuth({
         url.pathname === "/oauth-result.css" &&
         request.method === "GET"
       ) {
-        sendAsset(request, response, pickerAsset("oauth-web/oauth-result.css"), "text/css; charset=utf-8", { css: true });
+        sendAsset(request, response, pickerAsset("oauth-web/bundled/oauth-result.css"), "text/css; charset=utf-8");
         return;
       }
       if (
