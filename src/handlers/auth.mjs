@@ -61,7 +61,7 @@ export async function handleAuth({
     const name = opts?.profile || "default";
     const hasEnvironmentCredentials = process.env.CLOUDFLARE_API_TOKEN;
     if (opts?.oauth || (!opts?.["token-stdin"] && !hasEnvironmentCredentials)) {
-      const configuredScopes = (process.env.CF_OAUTH_SCOPES || "")
+      const configuredScopes = (process.env.CFHUB_OAUTH_SCOPES || "")
         .split(",")
         .map((scope) => scope.trim())
         .filter(Boolean);
@@ -78,11 +78,11 @@ export async function handleAuth({
         ]),
       ];
       const oauth = await oauthLogin({
-        clientId: process.env.CF_OAUTH_CLIENT_ID || DEFAULT_OAUTH_CLIENT_ID,
+        clientId: process.env.CFHUB_OAUTH_CLIENT_ID || DEFAULT_OAUTH_CLIENT_ID,
         scopes,
         scopePicker: !opts?.["no-scope-picker"],
-        bindHost: process.env.CF_OAUTH_BIND_HOST || "0.0.0.0",
-        redirectHost: process.env.CF_OAUTH_REDIRECT_HOST || "127.0.0.1",
+        bindHost: process.env.CFHUB_OAUTH_BIND_HOST || "0.0.0.0",
+        redirectHost: process.env.CFHUB_OAUTH_REDIRECT_HOST || "127.0.0.1",
       });
       await writeCredentialImpl(name, {
         oauthAccessToken: oauth.accessToken,

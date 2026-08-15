@@ -248,8 +248,8 @@ test("auth OAuth login omits the token when keychain storage succeeds", async ()
 });
 
 test("auth OAuth login accepts configured and requested scopes", async () => {
-  const oldScopes = process.env.CF_OAUTH_SCOPES;
-  process.env.CF_OAUTH_SCOPES = "custom.read, zone.read";
+  const oldScopes = process.env.CFHUB_OAUTH_SCOPES;
+  process.env.CFHUB_OAUTH_SCOPES = "custom.read, zone.read";
   const write = jest.fn();
   const oauthLogin = jest.fn().mockResolvedValue({ accessToken: "access", scopes: ["custom.read"] });
   const ctx = base();
@@ -269,8 +269,8 @@ test("auth OAuth login accepts configured and requested scopes", async () => {
   expect(write).toHaveBeenCalledWith(expect.objectContaining({
     profiles: { work: expect.objectContaining({ scopes: ["custom.read"], accountId: "acct", zoneId: "zone" }) },
   }), undefined, undefined);
-  if (oldScopes === undefined) delete process.env.CF_OAUTH_SCOPES;
-  else process.env.CF_OAUTH_SCOPES = oldScopes;
+  if (oldScopes === undefined) delete process.env.CFHUB_OAUTH_SCOPES;
+  else process.env.CFHUB_OAUTH_SCOPES = oldScopes;
 });
 
 test("auth switch, logout, status, and verify report missing credentials or profiles", async () => {

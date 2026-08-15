@@ -158,14 +158,14 @@
           client should be allowed to request. Then start the normal login
           command with your client ID:
         </p>
-        <pre><code>CF_OAUTH_CLIENT_ID=your-client-id cfhub auth login</code></pre>
+        <pre><code>CFHUB_OAUTH_CLIENT_ID=your-client-id cfhub auth login</code></pre>
         <p>
           The command starts the local OAuth web server and opens the scope
           picker for you; no separate server command is required. The picker
           can only request scopes allowed by your Cloudflare client. For a
           remote or headless setup, keep the registered redirect host at
           <code>127.0.0.1</code> and use
-          <code>CF_OAUTH_BIND_HOST=0.0.0.0</code> if the browser reaches the
+          <code>CFHUB_OAUTH_BIND_HOST=0.0.0.0</code> if the browser reaches the
           machine through another address.
         </p>
       </details>
@@ -198,7 +198,7 @@
       />
     </footer>
     <script>
-      window.CF_SCOPE_MODEL = __CF_SCOPE_MODEL__;
+      window.CFHUB_SCOPE_MODEL = __CFHUB_SCOPE_MODEL__;
     </script>
     <script type="module" src="/oauth-picker.mjs"></script>
   </body>

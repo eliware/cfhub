@@ -92,7 +92,7 @@ export async function applyActiveProfile(
     CLOUDFLARE_API_TOKEN: values.oauthAccessToken || values.apiToken,
     CLOUDFLARE_ACCOUNT_ID: values.accountId,
     CLOUDFLARE_ZONE_ID: values.zoneId,
-    CF_OAUTH_SCOPES: values.scopes?.join(","),
+    CFHUB_OAUTH_SCOPES: values.scopes?.join(","),
   }))
     if (value && !env[key]) env[key] = value;
   return { ...profile, ...credential };

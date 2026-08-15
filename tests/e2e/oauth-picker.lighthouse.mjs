@@ -7,7 +7,7 @@ import { loginOAuth } from "../../src/oauth.mjs";
 import { findBrowser } from "../../src/browser.mjs";
 
 const outputDir = resolve(
-  process.env.CF_LIGHTHOUSE_DIR ?? "artifacts/oauth-lighthouse",
+  process.env.CFHUB_LIGHTHOUSE_DIR ?? "artifacts/oauth-lighthouse",
 );
 const executablePath = await findBrowser();
 const printed = [];

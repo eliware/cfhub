@@ -273,10 +273,10 @@ FLAGS
   --zone-id <id>         Associate a zone with the profile
 
 ENVIRONMENT
-  CF_OAUTH_CLIENT_ID     Override the public OAuth client
-  CF_OAUTH_SCOPES        Comma-separated OAuth scopes
-  CF_OAUTH_BIND_HOST     Local callback listener address (default: 0.0.0.0)
-  CF_OAUTH_REDIRECT_HOST OAuth redirect host (default: 127.0.0.1)
+  CFHUB_OAUTH_CLIENT_ID     Override the public OAuth client
+  CFHUB_OAUTH_SCOPES        Comma-separated OAuth scopes
+  CFHUB_OAUTH_BIND_HOST     Local callback listener address (default: 0.0.0.0)
+  CFHUB_OAUTH_REDIRECT_HOST OAuth redirect host (default: 127.0.0.1)
 
 EXAMPLES
   $ cfhub auth login

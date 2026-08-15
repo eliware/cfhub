@@ -6,7 +6,7 @@ import { loginOAuth } from "../../src/oauth.mjs";
 import { findBrowser } from "../../src/browser.mjs";
 
 const outputDir = resolve(
-  process.env.CF_SCREENSHOT_DIR ?? "artifacts/oauth-screenshots",
+  process.env.CFHUB_SCREENSHOT_DIR ?? "artifacts/oauth-screenshots",
 );
 const executablePath = await findBrowser({ puppeteerPath: puppeteer.executablePath() });
 const printed = [];

@@ -183,7 +183,7 @@ function successPage({ account, scopes, summary }) {
   const logoData = encodeURIComponent(pickerAsset("oauth-web/cf-logo.svg")).replace(/'/g, "%27");
   return pickerAsset("oauth-web/oauth-success.html")
     .replaceAll("__SUCCESS_CSS__", pickerAsset("oauth-web/oauth-success.css"))
-    .replaceAll("__CF_LOGO_DATA__", logoData)
+    .replaceAll("__CFHUB_LOGO_DATA__", logoData)
     .replaceAll("__ACCOUNT__", escapeHtml(account?.name || account?.email || "your Cloudflare account"))
     .replaceAll("__SCOPE_COUNT__", String(scopes.length))
     .replaceAll("__ENABLED_COUNT__", String(enabled.length))
@@ -203,7 +203,7 @@ function failurePage({ title, detail }) {
     .replaceAll("__RESULT_TITLE__", escapeHtml(title))
     .replaceAll("__RESULT_DETAIL__", escapeHtml(detail))
     .replaceAll("__RESULT_CSS__", pickerAsset("oauth-web/oauth-result.css"))
-    .replaceAll("__CF_LOGO_DATA__", logoData)
+    .replaceAll("__CFHUB_LOGO_DATA__", logoData)
     .replaceAll("__COPYRIGHT__", currentCopyright())
     .replaceAll("__VERSION__", VERSION);
 }
@@ -220,7 +220,7 @@ const pickerAsset = (name) =>
 const pickerHtml = () =>
   pickerAsset("oauth-web/oauth-picker.html")
     .replace(
-      "__CF_SCOPE_MODEL__",
+      "__CFHUB_SCOPE_MODEL__",
       JSON.stringify({
         categories: SCOPE_CATALOG_DATA,
         modules: MODULE_CATALOG,
@@ -254,7 +254,7 @@ export async function loginOAuth({
   print = console.log,
   serverFactory = http.createServer,
 }) {
-  if (!clientId) throw new Error("Missing CF_OAUTH_CLIENT_ID");
+  if (!clientId) throw new Error("Missing CFHUB_OAUTH_CLIENT_ID");
   const verifier = base64url(crypto.randomBytes(32));
   const challenge = base64url(
     crypto.createHash("sha256").update(verifier).digest(),

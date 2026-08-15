@@ -84,7 +84,7 @@ or a different set of approved scopes:
 5. Start the normal login command with the client ID:
 
 ```sh
-CF_OAUTH_CLIENT_ID=your-client-id cfhub auth login
+CFHUB_OAUTH_CLIENT_ID=your-client-id cfhub auth login
 ```
 
 There is no separate OAuth-server command: `cfhub auth login` starts the
@@ -93,9 +93,9 @@ temporary server automatically. The default browser redirect remains
 the registered redirect remains local to the browser:
 
 ```sh
-CF_OAUTH_CLIENT_ID=your-client-id \
-CF_OAUTH_BIND_HOST=0.0.0.0 \
-CF_OAUTH_REDIRECT_HOST=127.0.0.1 \
+CFHUB_OAUTH_CLIENT_ID=your-client-id \
+CFHUB_OAUTH_BIND_HOST=0.0.0.0 \
+CFHUB_OAUTH_REDIRECT_HOST=127.0.0.1 \
 cfhub auth login
 ```
 
@@ -122,7 +122,7 @@ An unauthenticated command reports that the user is not logged in and directs th
 
 The CLI checks npm for a newer version at most once per day. The check is
 best-effort, does not delay commands, and never updates automatically. Disable
-it with `CF_NO_UPDATE_CHECK=1` or permanently with:
+it with `CFHUB_NO_UPDATE_CHECK=1` or permanently with:
 
 ```sh
 cfhub config set update-check false

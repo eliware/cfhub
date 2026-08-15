@@ -13,8 +13,8 @@ const jestBin = fileURLToPath(
 );
 const environment = {
   ...process.env,
-  CF_LIVE_TESTS: "1",
-  CF_LIVE_MUTATIONS: mode === "--wet" ? "1" : "0",
+  CFHUB_LIVE_TESTS: "1",
+  CFHUB_LIVE_MUTATIONS: mode === "--wet" ? "1" : "0",
 };
 const child = spawn(
   process.execPath,

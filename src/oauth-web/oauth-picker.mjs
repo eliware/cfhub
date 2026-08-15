@@ -1,5 +1,5 @@
 (() => {
-  const { categories, modules, requiredScopes = [] } = window.CF_SCOPE_MODEL;
+  const { categories, modules, requiredScopes = [] } = window.CFHUB_SCOPE_MODEL;
   const required = new Set(requiredScopes);
   const selected = new Set(requiredScopes);
   const enabledModules = new Set();

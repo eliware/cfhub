@@ -30,7 +30,7 @@ test("update check respects opt-out, current versions, bad responses, and failur
     .mockResolvedValueOnce({ ok: false })
     .mockRejectedValueOnce(new Error("offline"));
   const base = { currentVersion: "1.1.3", homeDir: "/tmp/cf", fsImpl: fs, fetchImpl, now: 1 };
-  await expect(checkForUpdate({ ...base, env: { CF_NO_UPDATE_CHECK: "1" } })).resolves.toBeNull();
+  await expect(checkForUpdate({ ...base, env: { CFHUB_NO_UPDATE_CHECK: "1" } })).resolves.toBeNull();
   await expect(checkForUpdate(base)).resolves.toBeNull();
   await expect(checkForUpdate({ ...base, now: 86_400_002 })).resolves.toBeNull();
   await expect(checkForUpdate({ ...base, now: 172_800_003 })).resolves.toBeNull();

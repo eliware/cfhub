@@ -127,7 +127,7 @@ test("browser launcher selects the native command for each platform", () => {
 
 test("OAuth login validates client configuration before opening a browser", async () => {
   await expect(loginOAuth({ clientId: "" })).rejects.toThrow(
-    "Missing CF_OAUTH_CLIENT_ID",
+    "Missing CFHUB_OAUTH_CLIENT_ID",
   );
 });
 

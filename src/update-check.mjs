@@ -28,7 +28,7 @@ export async function checkForUpdate({
   now = Date.now(),
   interval = DAY_MS,
 } = {}) {
-  if (!currentVersion || env.CF_NO_UPDATE_CHECK === "1") return null;
+  if (!currentVersion || env.CFHUB_NO_UPDATE_CHECK === "1") return null;
   const path = cachePath(homeDir);
   let cache = {};
   try {

@@ -42,7 +42,7 @@ test('runtime loadEnvFile handles missing files', () => {
 test('runtime loadEnvFile uses default environment and filesystem dependencies', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-runtime-default-'));
   const file = path.join(tmp, '.env');
-  const key = 'CF_RUNTIME_DEFAULT_TEST';
+  const key = 'CFHUB_RUNTIME_DEFAULT_TEST';
   fs.writeFileSync(file, `${key}=ok\n`);
   delete process.env[key];
   loadEnvFile(file);

@@ -250,7 +250,7 @@ export async function run({
 
   loadEnv(projectRoot, env, fsImpl);
   await applyActiveProfile(env, homeDir, fsImpl);
-  const grantedScopes = env.CF_OAUTH_SCOPES?.split(",")
+  const grantedScopes = env.CFHUB_OAUTH_SCOPES?.split(",")
     .map((scope) => scope.trim())
     .filter(Boolean);
   const missing = missingScopes(resource, action, grantedScopes);

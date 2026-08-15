@@ -89,9 +89,9 @@ describe("cf run()", () => {
     const exit = jest.fn();
     await mod.run({ argv: ["zones", "--help"], printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") } });
     await mod.run({ argv: ["zones", "far-away"], printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") }, cfFactory: jest.fn() });
-    await mod.run({ argv: ["zones", "list"], env: { CF_OAUTH_SCOPES: "dns.read" }, printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") }, cfFactory: jest.fn() });
-    await mod.run({ argv: ["inventory", "export"], env: { CF_OAUTH_SCOPES: "" }, printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") }, cfFactory: jest.fn() });
-    await expect(mod.run({ argv: ["audit", "list"], env: { CF_OAUTH_SCOPES: "account-settings.read,zone.read,dns.read,ssl-and-certificates.read" }, printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") }, handlers: { audit: jest.fn().mockRejectedValue(new Error("raw failure")) }, cfFactory: jest.fn(() => ({})) })).rejects.toThrow("raw failure");
+    await mod.run({ argv: ["zones", "list"], env: { CFHUB_OAUTH_SCOPES: "dns.read" }, printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") }, cfFactory: jest.fn() });
+    await mod.run({ argv: ["inventory", "export"], env: { CFHUB_OAUTH_SCOPES: "" }, printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") }, cfFactory: jest.fn() });
+    await expect(mod.run({ argv: ["audit", "list"], env: { CFHUB_OAUTH_SCOPES: "account-settings.read,zone.read,dns.read,ssl-and-certificates.read" }, printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") }, handlers: { audit: jest.fn().mockRejectedValue(new Error("raw failure")) }, cfFactory: jest.fn(() => ({})) })).rejects.toThrow("raw failure");
   });
 
   test("run uses safe defaults when called with only an empty argv", async () => {
@@ -284,7 +284,7 @@ test("CLI reports missing OAuth scopes before creating a Cloudflare client", asy
   const cfFactory = jest.fn();
   await mod.run({
     argv: ["zones", "list"],
-    env: { CF_OAUTH_SCOPES: "zone.write" },
+    env: { CFHUB_OAUTH_SCOPES: "zone.write" },
     printer,
     loadEnv: jest.fn(),
     cfFactory,

@@ -10,7 +10,7 @@ npm run test:live:dry
 ```
 
 The suite discovers a zone and account from `cfhub zones list`. Set
-`CF_LIVE_ZONE_ID` and `CF_LIVE_ACCOUNT_ID` to select explicit fixtures.
+`CFHUB_LIVE_ZONE_ID` and `CFHUB_LIVE_ACCOUNT_ID` to select explicit fixtures.
 
 The wet command runs complete disposable DNS and health-check lifecycles. DNS
 is listed, created, read, updated, read again, deleted, and confirmed gone.
@@ -28,5 +28,5 @@ npm run test:live:wet
 ```
 
 The test uses a unique DNS name and an RFC 5737 documentation IP, then always
-attempts cleanup in a `finally` block. Set `CF_LIVE_ZONE_ID` to choose the
+attempts cleanup in a `finally` block. Set `CFHUB_LIVE_ZONE_ID` to choose the
 disposable test zone.

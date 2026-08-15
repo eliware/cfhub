@@ -7,11 +7,11 @@ import { requiredScopes } from "../../src/scopes.mjs";
 
 const execFileAsync = promisify(execFile);
 const cli =
-  process.env.CF_BIN || fileURLToPath(new URL("../../bin/cfhub.mjs", import.meta.url));
-const liveEnabled = process.env.CF_LIVE_TESTS === "1";
-const wetEnabled = process.env.CF_LIVE_MUTATIONS === "1";
-let zoneId = process.env.CF_LIVE_ZONE_ID;
-let accountId = process.env.CF_LIVE_ACCOUNT_ID;
+  process.env.CFHUB_BIN || fileURLToPath(new URL("../../bin/cfhub.mjs", import.meta.url));
+const liveEnabled = process.env.CFHUB_LIVE_TESTS === "1";
+const wetEnabled = process.env.CFHUB_LIVE_MUTATIONS === "1";
+let zoneId = process.env.CFHUB_LIVE_ZONE_ID;
+let accountId = process.env.CFHUB_LIVE_ACCOUNT_ID;
 const profile = (() => {
   try {
     return activeProfile();
