@@ -3,6 +3,7 @@ import http from "node:http";
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { gzipSync } from "node:zlib";
 import { VERSION } from "./version.mjs";
 import scopeCatalog from "../data/cloudflare-oauth-scopes.json" with { type: "json" };
 import moduleCatalog from "../data/cloudflare-oauth-modules.json" with { type: "json" };
@@ -217,8 +218,43 @@ const ALLOWED_OAUTH_SCOPES = new Set(
 );
 const pickerAsset = (name) =>
   readFileSync(fileURLToPath(new URL(`./${name}`, import.meta.url)), "utf8");
+function minifyCss(value) {
+  return value
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\s+/g, " ")
+    .replace(/\s*([{}:;,>])\s*/g, "$1")
+    .replace(/;}/g, "}")
+    .trim();
+}
+function sendAsset(
+  request,
+  response,
+  body,
+  contentType,
+    { cacheControl = "public, max-age=31536000, immutable", css = false } = {},
+) {
+  const source = css ? minifyCss(body) : body;
+  const acceptsGzip = /(?:^|,\s*)gzip(?:\s*;|\s*,|\s*$)/i.test(
+    request.headers["accept-encoding"] || "",
+  );
+  const payload = acceptsGzip ? gzipSync(source) : Buffer.from(source);
+  const headers = {
+    "content-type": contentType,
+    "cache-control": cacheControl,
+    "content-length": payload.length,
+    vary: "Accept-Encoding",
+  };
+  if (acceptsGzip) headers["content-encoding"] = "gzip";
+  response.writeHead(200, headers);
+  response.end(payload);
+}
 const pickerHtml = () =>
   pickerAsset("oauth-web/oauth-picker.html")
+    .replaceAll('href="/oauth-web/cf-logo.svg"', `href="/oauth-web/cf-logo.svg?v=${VERSION}"`)
+    .replaceAll('href="/oauth-picker.css"', `href="/oauth-picker.css?v=${VERSION}"`)
+    .replaceAll('src="/oauth-web/cloudflare-115x53.png"', `src="/oauth-web/cloudflare-115x53.png?v=${VERSION}"`)
+    .replaceAll('src="/oauth-web/eliware-58x58.png"', `src="/oauth-web/eliware-58x58.png?v=${VERSION}"`)
+    .replaceAll('src="/oauth-picker.mjs"', `src="/oauth-picker.mjs?v=${VERSION}"`)
     .replace(
       "__CFHUB_SCOPE_MODEL__",
       JSON.stringify({
@@ -313,8 +349,7 @@ export async function loginOAuth({
     server.on("request", (request, response) => {
       const url = new URL(request.url, redirectUri);
       if (scopePicker && url.pathname === "/" && request.method === "GET") {
-        response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-        response.end(pickerHtml());
+        sendAsset(request, response, pickerHtml(), "text/html; charset=utf-8", { cacheControl: "no-store" });
         return;
       }
       if (url.pathname === "/api/version" && request.method === "GET") {
@@ -333,8 +368,7 @@ export async function loginOAuth({
         url.pathname === "/oauth-picker.css" &&
         request.method === "GET"
       ) {
-        response.writeHead(200, { "content-type": "text/css; charset=utf-8" });
-        response.end(pickerAsset("oauth-web/oauth-picker.css"));
+        sendAsset(request, response, pickerAsset("oauth-web/oauth-picker.css"), "text/css; charset=utf-8", { css: true });
         return;
       }
       if (
@@ -342,10 +376,7 @@ export async function loginOAuth({
         url.pathname === "/oauth-picker.mjs" &&
         request.method === "GET"
       ) {
-        response.writeHead(200, {
-          "content-type": "text/javascript; charset=utf-8",
-        });
-        response.end(pickerAsset("oauth-web/oauth-picker.mjs"));
+        sendAsset(request, response, pickerAsset("oauth-web/oauth-picker.mjs"), "text/javascript; charset=utf-8");
         return;
       }
       if (
@@ -353,8 +384,7 @@ export async function loginOAuth({
         url.pathname === "/oauth-web/cf-logo.svg" &&
         request.method === "GET"
       ) {
-        response.writeHead(200, { "content-type": "image/svg+xml" });
-        response.end(pickerAsset("oauth-web/cf-logo.svg"));
+        sendAsset(request, response, pickerAsset("oauth-web/cf-logo.svg"), "image/svg+xml");
         return;
       }
       if (
@@ -362,29 +392,15 @@ export async function loginOAuth({
         url.pathname === "/oauth-web/cloudflare-115x53.png" &&
         request.method === "GET"
       ) {
-        response.writeHead(200, { "content-type": "image/png" });
-        response.end(
-          readFileSync(
-            fileURLToPath(
-              new URL("./oauth-web/cloudflare-115x53.png", import.meta.url),
-            ),
-          ),
-        );
+        sendAsset(request, response, readFileSync(fileURLToPath(new URL("./oauth-web/cloudflare-115x53.png", import.meta.url))), "image/png");
         return;
       }
       if (
         scopePicker &&
-        url.pathname === "/oauth-web/eliware-115x115.png" &&
+        url.pathname === "/oauth-web/eliware-58x58.png" &&
         request.method === "GET"
       ) {
-        response.writeHead(200, { "content-type": "image/png" });
-        response.end(
-          readFileSync(
-            fileURLToPath(
-              new URL("./oauth-web/eliware-115x115.png", import.meta.url),
-            ),
-          ),
-        );
+        sendAsset(request, response, readFileSync(fileURLToPath(new URL("./oauth-web/eliware-58x58.png", import.meta.url))), "image/png");
         return;
       }
       if (
@@ -392,8 +408,7 @@ export async function loginOAuth({
         url.pathname === "/oauth-result.css" &&
         request.method === "GET"
       ) {
-        response.writeHead(200, { "content-type": "text/css; charset=utf-8" });
-        response.end(pickerAsset("oauth-web/oauth-result.css"));
+        sendAsset(request, response, pickerAsset("oauth-web/oauth-result.css"), "text/css; charset=utf-8", { css: true });
         return;
       }
       if (

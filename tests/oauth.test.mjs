@@ -313,7 +313,7 @@ test("OAuth picker serves its browser assets and summarizes zones and DNS", asyn
   const promise = loginOAuth({ clientId: "client", scopePicker: true, scopes: ["zone.read", "zone.write", "dns.read", "dns.write"], ports: [0], open, print: (value) => printed.push(value), fetchImpl });
   await new Promise((resolve) => setTimeout(resolve, 10));
   const landing = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
-  for (const path of ["/oauth-picker.css", "/oauth-picker.mjs", "/oauth-web/cf-logo.svg", "/oauth-web/cloudflare-115x53.png", "/oauth-web/eliware-115x115.png", "/oauth-result.css"]) {
+  for (const path of ["/oauth-picker.css", "/oauth-picker.mjs", "/oauth-web/cf-logo.svg", "/oauth-web/cloudflare-115x53.png", "/oauth-web/eliware-58x58.png", "/oauth-result.css"]) {
     const response = await fetch(`http://127.0.0.1:${landing.port}${path}`);
     expect(response.status).toBe(200);
   }
