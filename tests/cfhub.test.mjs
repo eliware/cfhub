@@ -337,6 +337,7 @@ test("CLI accepts terminal output controls without changing JSON contracts", asy
     cfFactory: jest.fn(() => ({})),
     handlers: { zones: ({ printer: injected }) => injected.log("ID\nexample") },
     exit: jest.fn(),
+    updateCheck: jest.fn().mockResolvedValue(null),
   });
   expect(printer.error).not.toHaveBeenCalled();
 });
