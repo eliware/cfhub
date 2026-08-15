@@ -175,10 +175,10 @@ function successPage({ account, scopes, summary }) {
   const disabled = MODULE_CATALOG.filter((module) => !enabled.includes(module));
   const zone = summary.zones[0]?.name || "example.com";
   const examples = [
-    enabled.some((module) => module.id === "zones") && `cf zone list`,
+    enabled.some((module) => module.id === "zones") && `cfhub zone list`,
     enabled.some((module) => module.id === "dns") && `cfhub dns record list --zone ${zone}`,
-    enabled.some((module) => module.id === "zone-settings") && `cf zone settings list --zone ${zone}`,
-    enabled.some((module) => module.id === "workers") && "cf workers list",
+    enabled.some((module) => module.id === "zone-settings") && `cfhub zone settings list --zone ${zone}`,
+    enabled.some((module) => module.id === "workers") && "cfhub workers list",
   ].filter(Boolean).map((example) => `<div class="example"><code>${escapeHtml(example)}</code></div>`).join("");
   const logoData = encodeURIComponent(pickerAsset("oauth-web/cf-logo.svg")).replace(/'/g, "%27");
   return pickerAsset("oauth-web/oauth-success.html")
