@@ -195,6 +195,7 @@ test("auth login guides account-token setup and stores the account id", async ()
     opts: { profile: "account" },
     promptToken: () => "cfat_account-token",
     promptAccountId: () => "account-1",
+    inspectApiTokenImpl: jest.fn().mockResolvedValue({ permissions: ["DNS Read"], permissionsKnown: true, permissionSummary: { total: 1, read: 1, write: 0, other: 0 } }),
     write,
     writeCredentialImpl: jest.fn().mockResolvedValue(true),
   });
@@ -202,6 +203,7 @@ test("auth login guides account-token setup and stores the account id", async ()
     active: "account",
     profiles: { account: expect.objectContaining({ authMethod: "account-api-token", accountId: "account-1", zoneId: undefined }) },
   }), undefined, undefined);
+  expect(ctx.printer.log).toHaveBeenCalledWith(expect.stringContaining("Permissions discovered: 1"));
   if (oldAccount === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID; else process.env.CLOUDFLARE_ACCOUNT_ID = oldAccount;
 });
 

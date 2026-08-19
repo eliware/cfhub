@@ -183,9 +183,10 @@ export async function handleAuth({
     data.active = name;
     write(data, profileHome, profileFs);
     const summary = tokenInfo.permissionSummary;
-    /* istanbul ignore next -- account tokens intentionally have unknown permissions. */
-    const discovered = tokenInfo.permissionsKnown ? `Permissions discovered: ${summary.total} (Read: ${summary.read}, Write/Edit: ${summary.write}, Other: ${summary.other})` : "Permissions could not be enumerated for this account token; authorization errors will be explained when encountered.";
-    return printer.log(`Saved and activated profile ${name}\n${discovered}`);
+    const discovered = tokenInfo.permissionsKnown
+      ? `\nPermissions discovered: ${summary.total} (Read: ${summary.read}, Write/Edit: ${summary.write}, Other: ${summary.other})`
+      : "";
+    return printer.log(`Saved and activated profile ${name}${discovered}`);
   }
   if (action === "switch") {
     const name = opts?.profile;
