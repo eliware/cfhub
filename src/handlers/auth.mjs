@@ -10,6 +10,17 @@ import process from 'node:process';
 import readline from 'node:readline/promises';
 import { inspectApiToken } from "../token-permissions.mjs";
 
+const API_TOKEN_TUTORIAL = `Create an Account API Token in Cloudflare:
+  1. Log in to Cloudflare.
+  2. Open Manage account > Account API tokens.
+  3. Click Create Token.
+  4. Set a name, such as eliware/cfhub.
+  5. Choose a permission policy, such as Read all resources, Write all resources, Edit Cloudflare Workers, Edit zone DNS, or Start from scratch. Grant only what you need.
+  6. Set token expiration and optional client IP filtering.
+  7. Click Review Token, scroll down, and click Create Token.
+  8. Copy Your API Token and paste it below.
+  9. Copy the Account ID from Cloudflare when cfhub asks for it.`;
+
 /* istanbul ignore next -- interactive terminal input is covered manually. */
 async function promptHidden(input = process.stdin, output = process.stderr) {
   output.write("Cloudflare API token (input hidden): ");
@@ -145,7 +156,7 @@ export async function handleAuth({
     const interactive = !opts?.["token-stdin"];
     const suppliedToken = opts?.["token-stdin"]
       ? readToken()
-      : (printer.error?.("Create a Cloudflare API token at https://dash.cloudflare.com/profile/api-tokens\nGrant only the permissions needed by your cfhub commands, such as Zone Read, DNS Read, DNS Write, Zone Settings Read/Write, Account Rulesets Read/Write, and Account Lists Read/Write. The token is stored securely and is not displayed.") , await promptToken());
+      : (printer.error?.(`${API_TOKEN_TUTORIAL}\n\nThe token is stored securely and is not displayed.`) , await promptToken());
     if (!suppliedToken?.trim()) {
       fail("No API token supplied. Run cfhub auth login again.");
       return;

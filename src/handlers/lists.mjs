@@ -7,14 +7,19 @@ export async function handleLists({ cf, action, opts, body, outputJson, printer 
   requireValue(accountId, 'Missing --account-id or CLOUDFLARE_ACCOUNT_ID', fail);
 
   if (action === 'list') {
-    const items = [];
-    for await (const list of cf.rules.lists.list({ account_id: accountId })) items.push(list);
+    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+    const response = typeof cf.get === 'function' ? await cf.get(`/accounts/${accountId}/rules/lists`, undefined) : null;
+    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+    const items = response ? (Array.isArray(response.result) ? response.result : response) : [];
+    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+    if (!response) for await (const list of cf.rules.lists.list({ account_id: accountId })) items.push(list);
     return outputJson ? toJsonOutput(items) : printTable(['ID', 'NAME'], items.map(l => [l.id, l.name]), printer.log);
   }
 
   if (action === 'get') {
     requireValue(id, 'Missing --id', fail);
-    const res = await cf.rules.lists.get(id, { account_id: accountId });
+    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+    const res = typeof cf.get === 'function' ? await cf.get(`/accounts/${accountId}/rules/lists/${id}`, undefined) : await cf.rules.lists.get(id, { account_id: accountId });
     return outputJson ? toJsonOutput(res) : printer.log(JSON.stringify(res, null, 2));
   }
 

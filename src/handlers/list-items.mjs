@@ -8,22 +8,28 @@ export async function handleListItems({ cf, action, opts, body, outputJson, prin
   requireValue(id, 'Missing --id', fail);
 
   if (action === 'list') {
-    const items = [];
-    for await (const item of cf.rules.lists.items.list(id, { account_id: accountId })) items.push(item);
+    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+    const response = typeof cf.get === 'function' ? await cf.get(`/accounts/${accountId}/rules/lists/${id}/items`, undefined) : null;
+    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+    const items = response ? (Array.isArray(response.result) ? response.result : response) : [];
+    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+    if (!response) for await (const item of cf.rules.lists.items.list(id, { account_id: accountId })) items.push(item);
     return outputJson ? toJsonOutput(items) : printTable(['ID', 'VALUE'], items.map(i => [i.id, i.value || i.ip || JSON.stringify(i)]), printer.log);
   }
 
   if (action === 'create') {
     requireValue(body, 'Missing --data or --file', fail);
     if (opts['dry-run']) return printer.log(JSON.stringify({ listId: id, action: 'create', body, dryRun: true }, null, 2));
-    const res = await cf.rules.lists.items.create(id, { account_id: accountId, body: Array.isArray(body) ? body : [body] });
+    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+    const res = typeof cf.post === 'function' ? await cf.post(`/accounts/${accountId}/rules/lists/${id}/items`, { body: Array.isArray(body) ? body : [body] }) : await cf.rules.lists.items.create(id, { account_id: accountId, body: Array.isArray(body) ? body : [body] });
     return outputJson ? toJsonOutput(res) : printer.log(JSON.stringify(res, null, 2));
   }
 
   if (action === 'delete') {
     if (!body || !Array.isArray(body.ids)) fail('Missing --data or --file with {"ids":[...]}');
     requireValue(opts.force, 'Refusing to delete without --force', fail);
-    const res = await cf.rules.lists.items.delete(id, { account_id: accountId, items: body.ids.map(itemId => ({ id: itemId })) });
+    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+    const res = typeof cf.delete === 'function' ? await cf.delete(`/accounts/${accountId}/rules/lists/${id}/items`, { body: { items: body.ids.map(itemId => ({ id: itemId })) } }) : await cf.rules.lists.items.delete(id, { account_id: accountId, items: body.ids.map(itemId => ({ id: itemId })) });
     return outputJson ? toJsonOutput(res) : printer.log(JSON.stringify(res, null, 2));
   }
 

@@ -60,6 +60,17 @@ hidden input. Credentials are stored in the operating system keychain when
 available, with a private disk fallback otherwise. Use `--token-stdin` for
 headless automation.
 
+The interactive setup follows Cloudflare’s current Account API Token flow:
+
+1. Open **Manage account > Account API tokens**.
+2. Choose **Create Token**, enter a name, and select an appropriate policy
+   such as Read all resources, Write all resources, Edit Cloudflare Workers,
+   Edit zone DNS, or a custom policy.
+3. Set expiration and optional client IP filtering, then choose **Review
+   Token**, scroll down, and choose **Create Token**.
+4. Paste the one-time token into cfhub, then provide the Cloudflare Account ID
+   when prompted.
+
 After login, cfhub verifies the token. For user-owned tokens it also loads the
 token's Cloudflare permission groups when the token permits token-details
 access, stores a read/write/other summary, and blocks commands whose required

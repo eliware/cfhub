@@ -5,12 +5,12 @@ export async function handleHealth({ cf, action, opts, body, outputJson, printer
   requireValue(zoneId, 'Missing --zone-id', fail);
   const base = `/zones/${zoneId}/healthchecks`;
   if (action === 'list') {
-    const result = await cf.get(base);
+    const result = await cf.get(base, undefined);
     return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
   }
   if (action === 'get') {
     requireValue(id, 'Missing --id', fail);
-    const result = await cf.get(`${base}/${id}`);
+    const result = await cf.get(`${base}/${id}`, undefined);
     return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
   }
   if (action === 'create') {

@@ -10,6 +10,7 @@ const cli =
   process.env.CFHUB_BIN || fileURLToPath(new URL("../../bin/cfhub.mjs", import.meta.url));
 const liveEnabled = process.env.CFHUB_LIVE_TESTS === "1";
 const wetEnabled = process.env.CFHUB_LIVE_MUTATIONS === "1";
+const includeInventory = process.env.CFHUB_LIVE_INCLUDE_INVENTORY === "1";
 let zoneId = process.env.CFHUB_LIVE_ZONE_ID;
 let accountId = process.env.CFHUB_LIVE_ACCOUNT_ID;
 const profile = (() => {
@@ -70,7 +71,6 @@ const basicCommands = [
   ["rulesets", "list", "--json"],
   ["lists", "list", "--json"],
   ["audit", "list", "--json"],
-  ["inventory", "export", "--json"],
   ["origin-ca", "list", "--json"],
   ["workers", "list", "--json"],
   ["pages", "list", "--json"],
@@ -82,6 +82,8 @@ const basicCommands = [
   ["ai", "list", "--json"],
   ["access", "list", "--json"],
 ];
+
+if (includeInventory) basicCommands.push(["inventory", "export", "--json"]);
 
 const crudCommands = [
   ["zones", ["list", "get", "create", "update", "delete"]],
@@ -132,6 +134,23 @@ const helpCommands = [
   ["images", "--help"],
   ["ai", "--help"],
   ["access", "--help"],
+];
+
+const dryRunCommands = [
+  ["zones", "create", "--data", JSON.stringify({ name: "dry-run.example.invalid" })],
+  ["zones", "update", "--data", JSON.stringify({ name: "dry-run.example.invalid" })],
+  ["dns-records", "create", "--data", JSON.stringify({ type: "A", name: "dry-run", content: "192.0.2.1" })],
+  ["dns-records", "update", "--id", "dry-run-record", "--data", JSON.stringify({ content: "192.0.2.2" })],
+  ["zone-settings", "set", "--setting", "development_mode", "--data", JSON.stringify({ value: "off" })],
+  ["rulesets", "create", "--data", JSON.stringify({ name: "cfhub-dry-run" })],
+  ["rulesets", "update", "--id", "dry-run-ruleset", "--data", JSON.stringify({ name: "cfhub-dry-run" })],
+  ["lists", "create", "--data", JSON.stringify({ name: "cfhub-dry-run", kind: "ip" })],
+  ["lists", "update", "--id", "dry-run-list", "--data", JSON.stringify({ description: "cfhub-dry-run" })],
+  ["list-items", "create", "--id", "dry-run-list", "--data", JSON.stringify({ ip: "192.0.2.1" })],
+  ["health", "create", "--data", JSON.stringify({ name: "cfhub-dry-run" })],
+  ["origin-ca", "create", "--data", JSON.stringify({ hostnames: ["dry-run.example.invalid"] })],
+  ["ssl", "set", "--setting", "ssl", "--value", "full"],
+  ["cache", "purge", "--data", JSON.stringify({ hosts: ["dry-run.example.invalid"] })],
 ];
 
 function withContext(args) {
@@ -201,6 +220,15 @@ liveDescribe("authenticated live CLI smoke tests", () => {
     const result = await run(withContext(args));
     if (result.code !== 0 && skipUnavailable(args.join(" "), result)) return;
     expect(result.code).toBe(0);
+  });
+
+  test("all supported dry-run write paths avoid Cloudflare mutations", async () => {
+    if (!liveReady) return;
+    for (const args of dryRunCommands) {
+      const result = await run(withContext([...args, "--dry-run", "--json"]));
+      if (result.code !== 0 && skipUnavailable(`${args[0]} ${args[1]} --dry-run`, result)) continue;
+      expect(result.code).toBe(0);
+    }
   });
 
   test("all CRUD actions expose working help", async () => {

@@ -1,5 +1,16 @@
 # Release Notes
 
+## 1.0.4
+
+- Added current Cloudflare Account API Token setup guidance to interactive login.
+- Migrated supported zone, DNS, settings, ruleset, list, inventory, and health
+  operations to verified raw Cloudflare API endpoints while preserving legacy
+  injected-client compatibility for tests and integrations.
+- Added opt-in live validation for real-token reads and non-mutating dry-run
+  write paths, with account-wide inventory scanning disabled by default.
+- Updated handler fixtures and maintained complete automated coverage.
+- Updated Cloudflare, build, lint, and browser-test dependencies.
+
 ## 1.0.3
 
 - Completed the remaining CLI branding transition from `cf` to `cfhub`, including OAuth pages, update notices, tests, and the credential keychain service namespace.

@@ -7,8 +7,8 @@ const base = () => ({ cf: { get: jest.fn().mockResolvedValue({ ok: true }), post
 test('health supports list, get, create, and delete', async () => {
   const ctx = base();
   for (const action of ['list', 'get', 'create', 'delete']) await handleHealth({ ...ctx, action });
-  expect(ctx.cf.get).toHaveBeenCalledWith('/zones/z1/healthchecks');
-  expect(ctx.cf.get).toHaveBeenCalledWith('/zones/z1/healthchecks/h1');
+  expect(ctx.cf.get).toHaveBeenCalledWith('/zones/z1/healthchecks', undefined);
+  expect(ctx.cf.get).toHaveBeenCalledWith('/zones/z1/healthchecks/h1', undefined);
   expect(ctx.cf.post).toHaveBeenCalledWith('/zones/z1/healthchecks', { body: { type: 'https' } });
   expect(ctx.cf.delete).toHaveBeenCalledWith('/zones/z1/healthchecks/h1');
 });
