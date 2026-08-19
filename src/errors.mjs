@@ -34,5 +34,5 @@ export function formatCloudflareError(
       null,
       2,
     );
-  return `${message}\n\nYour active login may not have the required permission. Run cfhub auth login again and select the required scopes, then retry.`;
+  return `${message}\n\nYour active login may not have the required permission. Run cfhub auth login again with a token or OAuth login that grants the required permissions, then retry.`;
 }

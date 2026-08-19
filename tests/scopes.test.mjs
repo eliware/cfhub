@@ -1,4 +1,4 @@
-import { missingScopes, requiredScopes } from "../src/scopes.mjs";
+import { missingApiPermissions, missingScopes, requiredApiPermissions, requiredScopes } from "../src/scopes.mjs";
 
 test("maps read and write commands to the matching OAuth scopes", () => {
   expect(requiredScopes("zones", "list")).toEqual(["zone.read"]);
@@ -16,4 +16,11 @@ test("reports only scopes absent from the active OAuth profile", () => {
   expect(missingScopes("zones", "list", ["zone.read"])).toEqual([]);
   expect(missingScopes("api", "request", [])).toEqual([]);
   expect(missingScopes("zones", "list", undefined)).toEqual([]);
+});
+
+test("maps API token permissions and reports missing permissions", () => {
+  expect(requiredApiPermissions("dns-records", "create")).toEqual(["DNS Write"]);
+  expect(missingApiPermissions("dns-records", "create", ["DNS Read"])).toEqual(["DNS Write"]);
+  expect(missingApiPermissions("dns-records", "create", ["DNS Write"])).toEqual([]);
+  expect(missingApiPermissions("dns-records", "create", null)).toEqual([]);
 });

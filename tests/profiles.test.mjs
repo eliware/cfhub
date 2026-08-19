@@ -16,6 +16,15 @@ test('profile storage writes private JSON and applies active values', async () =
   expect(env).toEqual({ CLOUDFLARE_API_TOKEN: 'token', CLOUDFLARE_ACCOUNT_ID: 'a1', CLOUDFLARE_ZONE_ID: 'z1' });
 });
 
+test('profile application exports known API permissions', async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-permissions-'));
+  writeProfiles({ active: 'work', profiles: { work: { apiToken: 'token', apiPermissions: ['DNS Read'], apiPermissionsKnown: true } } }, home);
+  const env = {};
+  await applyActiveProfile(env, home);
+  expect(env.CFHUB_API_PERMISSIONS).toBe('DNS Read');
+  expect(env.CFHUB_API_PERMISSIONS_KNOWN).toBe('1');
+});
+
 test('profile selection honors explicit profile and missing storage', async () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-empty-'));
   expect(readProfiles(home)).toEqual({ active: null, profiles: {} });

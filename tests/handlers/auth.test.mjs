@@ -9,6 +9,7 @@ const base = () => ({
   toJsonOutput: jest.fn(),
   fail: jest.fn(),
   read: () => ({ active: null, profiles: {} }),
+  inspectApiTokenImpl: jest.fn().mockResolvedValue({ permissions: [], permissionsKnown: false, permissionSummary: { total: 0, read: 0, write: 0, other: 0 } }),
 });
 
 test("auth status reports the OAuth identity", async () => {
@@ -65,6 +66,60 @@ test("auth status defaults API-token method when profile metadata is absent", as
   });
   expect(ctx.toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ method: "api-token" }));
   process.env.CLOUDFLARE_API_TOKEN = oldToken;
+});
+
+test("auth status and verify use account-token endpoints for cfat credentials", async () => {
+  const oldToken = process.env.CLOUDFLARE_API_TOKEN;
+  const oldAccount = process.env.CLOUDFLARE_ACCOUNT_ID;
+  process.env.CLOUDFLARE_API_TOKEN = "cfat_account-token";
+  process.env.CLOUDFLARE_ACCOUNT_ID = "account-1";
+  const ctx = base();
+  ctx.cf.get
+    .mockResolvedValueOnce({ result: { id: "account-1" } })
+    .mockResolvedValueOnce({ result: { status: "active" } });
+  await handleAuth({ ...ctx, resource: "auth", action: "status" });
+  await handleAuth({ ...ctx, resource: "auth", action: "verify" });
+  expect(ctx.cf.get).toHaveBeenNthCalledWith(1, "/accounts/account-1");
+  expect(ctx.cf.get).toHaveBeenNthCalledWith(2, "/accounts/account-1/tokens/verify");
+  if (oldToken === undefined) delete process.env.CLOUDFLARE_API_TOKEN; else process.env.CLOUDFLARE_API_TOKEN = oldToken;
+  if (oldAccount === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID; else process.env.CLOUDFLARE_ACCOUNT_ID = oldAccount;
+});
+
+test("auth verify explains missing account id for account tokens", async () => {
+  const oldToken = process.env.CLOUDFLARE_API_TOKEN;
+  const oldAccount = process.env.CLOUDFLARE_ACCOUNT_ID;
+  process.env.CLOUDFLARE_API_TOKEN = "cfat_account-token";
+  delete process.env.CLOUDFLARE_ACCOUNT_ID;
+  const ctx = base();
+  await handleAuth({ ...ctx, resource: "auth", action: "verify" });
+  expect(ctx.fail).toHaveBeenCalledWith("Account API token verification requires --account-id or CLOUDFLARE_ACCOUNT_ID");
+  if (oldToken === undefined) delete process.env.CLOUDFLARE_API_TOKEN; else process.env.CLOUDFLARE_API_TOKEN = oldToken;
+  if (oldAccount === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID; else process.env.CLOUDFLARE_ACCOUNT_ID = oldAccount;
+});
+
+test("auth status lists accounts for an account token without an account id", async () => {
+  const oldToken = process.env.CLOUDFLARE_API_TOKEN;
+  const oldAccount = process.env.CLOUDFLARE_ACCOUNT_ID;
+  process.env.CLOUDFLARE_API_TOKEN = "cfat_account-token";
+  delete process.env.CLOUDFLARE_ACCOUNT_ID;
+  const ctx = base();
+  ctx.cf.get.mockResolvedValue({});
+  await handleAuth({ ...ctx, resource: "auth", action: "status", read: () => ({ active: null, profiles: {} }) });
+  expect(ctx.cf.get).toHaveBeenCalledWith("/accounts");
+  process.env.CLOUDFLARE_API_TOKEN = oldToken;
+  if (oldAccount === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID; else process.env.CLOUDFLARE_ACCOUNT_ID = oldAccount;
+});
+
+test("auth status prints account-token text output", async () => {
+  const oldToken = process.env.CLOUDFLARE_API_TOKEN;
+  const oldAccount = process.env.CLOUDFLARE_ACCOUNT_ID;
+  process.env.CLOUDFLARE_API_TOKEN = "cfat_account-token";
+  process.env.CLOUDFLARE_ACCOUNT_ID = "account-1";
+  const ctx = base();
+  await handleAuth({ ...ctx, resource: "auth", action: "status", outputJson: false });
+  expect(ctx.printer.log).toHaveBeenCalledWith("environment authenticated with account API token");
+  process.env.CLOUDFLARE_API_TOKEN = oldToken;
+  process.env.CLOUDFLARE_ACCOUNT_ID = oldAccount;
 });
 
 test("auth lists profiles without exposing credentials", async () => {
@@ -126,6 +181,54 @@ test("auth login accepts a token from stdin", async () => {
     undefined,
     undefined,
   );
+});
+
+test("auth login guides account-token setup and stores the account id", async () => {
+  const oldAccount = process.env.CLOUDFLARE_ACCOUNT_ID;
+  delete process.env.CLOUDFLARE_ACCOUNT_ID;
+  const write = jest.fn();
+  const ctx = base();
+  await handleAuth({
+    ...ctx,
+    resource: "auth",
+    action: "login",
+    opts: { profile: "account" },
+    promptTokenType: () => "account",
+    promptToken: () => "cfat_account-token",
+    promptAccountId: () => "account-1",
+    write,
+    writeCredentialImpl: jest.fn().mockResolvedValue(true),
+  });
+  expect(write).toHaveBeenCalledWith(expect.objectContaining({
+    active: "account",
+    profiles: { account: expect.objectContaining({ authMethod: "account-api-token", accountId: "account-1", zoneId: undefined }) },
+  }), undefined, undefined);
+  if (oldAccount === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID; else process.env.CLOUDFLARE_ACCOUNT_ID = oldAccount;
+});
+
+test("auth login rejects an unknown interactive token type", async () => {
+  const ctx = base();
+  await handleAuth({
+    ...ctx,
+    resource: "auth",
+    action: "login",
+    promptTokenType: () => "service",
+  });
+  expect(ctx.fail).toHaveBeenCalledWith("Token type must be user or account");
+});
+
+test("auth login explains token verification failures", async () => {
+  const ctx = base();
+  await handleAuth({ ...ctx, resource: "auth", action: "login", opts: { "token-stdin": true }, readToken: () => "token", inspectApiTokenImpl: jest.fn().mockRejectedValue(new Error("invalid token")) });
+  expect(ctx.fail).toHaveBeenCalledWith("Could not verify API token: invalid token");
+});
+
+test("auth login defaults an empty token type to user", async () => {
+  const write = jest.fn();
+  const promptAccountId = jest.fn();
+  await handleAuth({ ...base(), resource: "auth", action: "login", promptTokenType: () => "", promptToken: () => "user-token", promptAccountId, write, writeCredentialImpl: jest.fn().mockResolvedValue(true) });
+  expect(promptAccountId).not.toHaveBeenCalled();
+  expect(write).toHaveBeenCalled();
 });
 
 test("auth OAuth login saves and activates the returned token profile", async () => {
@@ -247,7 +350,7 @@ test("auth covers alternate profile and credential branches", async () => {
   expect(write).toHaveBeenCalled();
 
   const environmentLogin = base();
-  await handleAuth({ ...environmentLogin, resource: "auth", action: "login", opts: { profile: "environment" }, write: jest.fn(), writeCredentialImpl: jest.fn().mockResolvedValue(true) });
+  await handleAuth({ ...environmentLogin, resource: "auth", action: "login", opts: { profile: "environment" }, promptTokenType: () => "user", promptToken: () => "prompted-token", write: jest.fn(), writeCredentialImpl: jest.fn().mockResolvedValue(true) });
 
   const logoutWrite = jest.fn();
   const logout = base();

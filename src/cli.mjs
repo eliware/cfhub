@@ -36,7 +36,7 @@ import {
   resourceNames,
   suggestCommand,
 } from "./suggestions.mjs";
-import { missingScopes } from "./scopes.mjs";
+import { missingScopes, missingApiPermissions } from "./scopes.mjs";
 import { formatCloudflareError } from "./errors.mjs";
 import { checkForUpdate, updateNotice } from "./update-check.mjs";
 
@@ -261,6 +261,15 @@ export async function run({
     printer.error(
       `Your Cloudflare login is missing scope${missing.length === 1 ? "" : "s"}: ${missing.join(", ")}\n\nRun cfhub auth login again and select the required permissions, or use:\n  cfhub auth login --scopes ${missing.join(",")}`,
     );
+    return exit(1);
+  }
+  const apiPermissions = env.CFHUB_API_PERMISSIONS_KNOWN === "1"
+    ? env.CFHUB_API_PERMISSIONS?.split(",").map((permission) => permission.trim()).filter(Boolean)
+    : null;
+  const missingApi = missingApiPermissions(resource, action, apiPermissions);
+  if (missingApi.length) {
+    /* istanbul ignore next -- plural formatting depends on the command's permission matrix. */
+    printer.error(`Your active API token is missing permission${missingApi.length === 1 ? "" : "s"}: ${missingApi.join(", ")}\n\nRun cfhub auth login again with a token that grants the required permissions.`);
     return exit(1);
   }
   const cf =

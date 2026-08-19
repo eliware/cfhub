@@ -60,6 +60,14 @@ hidden input. Credentials are stored in the operating system keychain when
 available, with a private disk fallback otherwise. Use `--token-stdin` for
 headless automation.
 
+After login, cfhub verifies the token. For user-owned tokens it also loads the
+token's Cloudflare permission groups when the token permits token-details
+access, stores a read/write/other summary, and blocks commands whose required
+permissions are known to be absent. Account-owned tokens can be verified but
+Cloudflare does not expose their permission policy through verification, so
+those commands use friendly authorization-error guidance instead of claiming a
+complete permission inventory.
+
 OAuth is also supported through the separate `oauth` resource:
 
 ```sh

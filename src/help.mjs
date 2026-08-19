@@ -316,7 +316,9 @@ USAGE
   cfhub auth login [flags]
 
   The token is requested interactively with hidden input and stored in the
-  native credential store when available. Use --token-stdin for automation.
+  native credential store when available. cfhub verifies the token and loads
+  its permission summary when Cloudflare exposes the token policy. Use
+  --token-stdin for automation.
   The browser-based OAuth flow is available as 'cfhub oauth login'.
 
 FLAGS

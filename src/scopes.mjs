@@ -57,3 +57,23 @@ export function missingScopes(resource, action, granted) {
   const available = new Set(granted);
   return required.filter((scope) => !available.has(scope));
 }
+
+const apiPermissionAliases = new Map([
+  ["zone", "Zone"], ["dns", "DNS"], ["zone-settings", "Zone Settings"],
+  ["account-rulesets", "Account Rulesets"], ["account-rule-lists", "Account Rule Lists"],
+]);
+
+export function requiredApiPermissions(resource, action) {
+  return requiredScopes(resource, action).map((scope) => {
+    const [name, mode] = scope.split(".");
+    /* istanbul ignore next -- every built-in API permission has a read/write mode. */
+    return `${apiPermissionAliases.get(name) || name.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase())} ${mode === "write" ? "Write" : "Read"}`;
+  });
+}
+
+export function missingApiPermissions(resource, action, granted) {
+  if (!granted) return [];
+  const available = new Set(granted.map((permission) => permission.toLowerCase()));
+  return requiredApiPermissions(resource, action)
+    .filter((permission) => !available.has(permission.toLowerCase()));
+}

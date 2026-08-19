@@ -314,6 +314,21 @@ test("CLI reports missing OAuth scopes before creating a Cloudflare client", asy
   expect(exit).toHaveBeenCalledWith(1);
 });
 
+test("CLI reports missing known API-token permissions before creating a client", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 82}`);
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const exit = jest.fn();
+  const cfFactory = jest.fn();
+  await mod.run({
+    argv: ["dns-records", "create"],
+    env: { CFHUB_API_PERMISSIONS: "DNS Read", CFHUB_API_PERMISSIONS_KNOWN: "1" },
+    printer, loadEnv: jest.fn(), cfFactory, exit,
+  });
+  expect(cfFactory).not.toHaveBeenCalled();
+  expect(printer.error).toHaveBeenCalledWith(expect.stringContaining("DNS Write"));
+  expect(exit).toHaveBeenCalledWith(1);
+});
+
 test("CLI applies basic jq selection to JSON callbacks", async () => {
   const mod = await import(`../src/cli.mjs?ts=${Date.now() + 9}`);
   const printer = { log: jest.fn(), error: jest.fn() };

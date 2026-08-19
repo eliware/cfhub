@@ -7,6 +7,8 @@ import {
 } from "../credentials.mjs";
 import { fs } from '../fs.mjs';
 import process from 'node:process';
+import readline from 'node:readline/promises';
+import { inspectApiToken } from "../token-permissions.mjs";
 
 /* istanbul ignore next -- interactive terminal input is covered manually. */
 async function promptHidden(input = process.stdin, output = process.stderr) {
@@ -33,6 +35,17 @@ async function promptHidden(input = process.stdin, output = process.stderr) {
     input.setRawMode(true); input.resume(); input.on("data", onData);
   });
 }
+
+/* istanbul ignore next -- interactive terminal input is covered manually. */
+async function promptLine(message, input = process.stdin, output = process.stderr) {
+  const rl = readline.createInterface({ input, output });
+  try { return (await rl.question(message)).trim(); }
+  finally { rl.close(); }
+}
+/* istanbul ignore next -- interactive terminal input is covered manually. */
+const defaultPromptTokenType = () => promptLine("Token type (user/account) [user]: ");
+/* istanbul ignore next -- interactive terminal input is covered manually. */
+const defaultPromptAccountId = () => promptLine("Cloudflare account ID: ");
 import {
   DEFAULT_OAUTH_CLIENT_ID,
   DEFAULT_OAUTH_SCOPES,
@@ -55,11 +68,14 @@ export async function handleAuth({
   write = writeProfiles,
   readToken = () => fs.readFileSync(0, "utf8").trim(),
   promptToken = promptHidden,
+  promptTokenType = defaultPromptTokenType,
+  promptAccountId = defaultPromptAccountId,
   oauthLogin = loginOAuth,
   writeCredentialImpl = writeCredential,
   readCredentialImpl = readCredential,
   deleteCredentialImpl = deleteCredential,
   revokeOAuthImpl = revokeOAuth,
+  inspectApiTokenImpl = inspectApiToken,
 } = /* istanbul ignore next */ {}) {
   const data = read(profileHome, profileFs);
   if (action === "list") {
@@ -88,7 +104,6 @@ export async function handleAuth({
   }
   if (action === "login") {
     const name = opts?.profile || "default";
-    const hasEnvironmentCredentials = process.env.CLOUDFLARE_API_TOKEN;
     if (resource === "oauth") {
       const configuredScopes = (process.env.CFHUB_OAUTH_SCOPES || "")
         .split(",")
@@ -130,11 +145,17 @@ export async function handleAuth({
       return printer.log(`Saved and activated profile ${name}`);
     }
     /* istanbul ignore next -- interactive and environment branches are terminal-dependent. */
+    const interactive = !opts?.["token-stdin"];
+    const tokenType = interactive
+      ? (await promptTokenType()).toLowerCase() || "user"
+      : "user";
+    if (interactive && !["user", "account"].includes(tokenType)) {
+      fail("Token type must be user or account");
+      return;
+    }
     const suppliedToken = opts?.["token-stdin"]
       ? readToken()
-      : hasEnvironmentCredentials
-        ? process.env.CLOUDFLARE_API_TOKEN
-        : (printer.error?.("Create a Cloudflare API token at https://dash.cloudflare.com/profile/api-tokens\nGrant only the permissions needed by your cfhub commands, such as Zone Read, DNS Read, DNS Write, Zone Settings Read/Write, Account Rulesets Read/Write, and Account Lists Read/Write. The token is stored securely and is not displayed.") , await promptToken());
+      : (printer.error?.("Create a Cloudflare API token at https://dash.cloudflare.com/profile/api-tokens\nGrant only the permissions needed by your cfhub commands, such as Zone Read, DNS Read, DNS Write, Zone Settings Read/Write, Account Rulesets Read/Write, and Account Lists Read/Write. The token is stored securely and is not displayed.") , await promptToken());
     if (!suppliedToken?.trim()) {
       fail("No API token supplied. Run cfhub auth login again.");
       return;
@@ -142,6 +163,17 @@ export async function handleAuth({
     const credential = {
       apiToken: suppliedToken.trim(),
     };
+    const detectedAccountToken = credential.apiToken.startsWith("cfat_");
+    /* istanbul ignore next -- account context may come from a prompt, flag, or environment. */
+    const accountId = opts?.["account-id"] || process.env.CLOUDFLARE_ACCOUNT_ID ||
+      (interactive && (tokenType === "account" || detectedAccountToken) ? await promptAccountId() : undefined);
+    let tokenInfo;
+    try {
+      tokenInfo = await inspectApiTokenImpl({ token: credential.apiToken, accountId });
+    } catch (error) {
+      fail(`Could not verify API token: ${error.message}`);
+      return;
+    }
     const storedInKeychain = await writeCredentialImpl(name, credential);
     /* istanbul ignore next -- storage adapters are covered separately. */
     if (!storedInKeychain) {
@@ -149,13 +181,21 @@ export async function handleAuth({
       return;
     }
     data.profiles[name] = {
-      authMethod: "api-token",
-      accountId: opts?.["account-id"] || process.env.CLOUDFLARE_ACCOUNT_ID,
+      authMethod: detectedAccountToken
+        ? "account-api-token"
+        : "api-token",
+      accountId,
       zoneId: opts?.["zone-id"] || process.env.CLOUDFLARE_ZONE_ID,
+      apiPermissions: tokenInfo.permissions,
+      apiPermissionsKnown: tokenInfo.permissionsKnown,
+      apiPermissionSummary: tokenInfo.permissionSummary,
     };
     data.active = name;
     write(data, profileHome, profileFs);
-    return printer.log(`Saved and activated profile ${name}`);
+    const summary = tokenInfo.permissionSummary;
+    /* istanbul ignore next -- account tokens intentionally have unknown permissions. */
+    const discovered = tokenInfo.permissionsKnown ? `Permissions discovered: ${summary.total} (Read: ${summary.read}, Write/Edit: ${summary.write}, Other: ${summary.other})` : "Permissions could not be enumerated for this account token; authorization errors will be explained when encountered.";
+    return printer.log(`Saved and activated profile ${name}\n${discovered}`);
   }
   if (action === "switch") {
     const name = opts?.profile;
@@ -193,8 +233,24 @@ export async function handleAuth({
       fail("You are not logged into Cloudflare. Run: cfhub auth login");
       return;
     }
-    const identity = await cf.get("/user");
     const statusProfile = process.env.CLOUDFLARE_PROFILE || data.active || "environment";
+    const token = process.env.CLOUDFLARE_API_TOKEN;
+    if (token?.startsWith("cfat_")) {
+      const accountId = opts?.["account-id"] || data.profiles[statusProfile]?.accountId || process.env.CLOUDFLARE_ACCOUNT_ID;
+      /* istanbul ignore next -- account list response shape depends on Cloudflare account access. */
+      const accounts = await cf.get(accountId ? `/accounts/${accountId}` : "/accounts");
+      const status = {
+        authenticated: true,
+        profile: statusProfile,
+        method: "account-api-token",
+        accountId: accountId || null,
+        accounts: accountId ? undefined : accounts?.result || [],
+      };
+      return outputJson
+        ? toJsonOutput(Object.fromEntries(Object.entries(status).filter(([, value]) => value !== undefined)))
+        : printer.log(`${status.profile} authenticated with account API token`);
+    }
+    const identity = await cf.get("/user");
     const status = {
       authenticated: true,
       profile: statusProfile,
@@ -216,7 +272,16 @@ export async function handleAuth({
       fail("cfhub auth verify requires CLOUDFLARE_API_TOKEN");
       return;
     }
-    const result = await cf.get("/user/tokens/verify");
+    const statusProfile = process.env.CLOUDFLARE_PROFILE || data.active || "environment";
+    const token = process.env.CLOUDFLARE_API_TOKEN;
+    const accountId = opts?.["account-id"] || data.profiles[statusProfile]?.accountId || process.env.CLOUDFLARE_ACCOUNT_ID;
+    if (token?.startsWith("cfat_") && !accountId) {
+      fail("Account API token verification requires --account-id or CLOUDFLARE_ACCOUNT_ID");
+      return;
+    }
+    const result = await cf.get(token?.startsWith("cfat_")
+      ? `/accounts/${accountId}/tokens/verify`
+      : "/user/tokens/verify");
     const verified = {
       verified: result?.result?.status === "active",
       status: result?.result?.status || "unknown",
