@@ -53,7 +53,7 @@ test("prints command-specific help with gh-style sections", () => {
   const printer = { log: jest.fn() };
   printCommandHelp("auth", "login", printer);
   expect(printer.log.mock.calls[0][0]).toContain("USAGE");
-  expect(printer.log.mock.calls[0][0]).toContain("browser-based OAuth flow");
+  expect(printer.log.mock.calls[0][0]).toContain("hidden input");
   printCommandHelp("unknown", "action", printer);
   expect(printer.log.mock.calls[1][0]).toContain("Use 'cfhub unknown --help'");
   printCommandHelp("unknown", undefined, printer);

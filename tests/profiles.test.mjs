@@ -52,7 +52,7 @@ test('profile application preserves explicit environment values', async () => {
   expect(env).toEqual({ CLOUDFLARE_API_TOKEN: 'existing', CLOUDFLARE_ACCOUNT_ID: 'existing-account' });
 });
 
-test('profile application refreshes expiring OAuth credentials and falls back on refresh failure', async () => {
+test('profile application removes profiles when OAuth refresh fails', async () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-oauth-'));
   writeProfiles({ active: 'work', profiles: { work: {} } }, home);
   const credential = { oauthRefreshToken: 'refresh', oauthAccessToken: 'old', expiresAt: 100 };
@@ -63,7 +63,15 @@ test('profile application refreshes expiring OAuth credentials and falls back on
   expect(env.CLOUDFLARE_API_TOKEN).toBe('new'); expect(writeCredential).toHaveBeenCalled();
   const failing = { ...credential }; const fallbackEnv = {};
   await applyActiveProfile(fallbackEnv, home, fs, { readCredential: jest.fn().mockResolvedValue(failing), refreshOAuth: jest.fn().mockRejectedValue(new Error('expired')), now: () => 0 });
-  expect(fallbackEnv.CLOUDFLARE_API_TOKEN).toBe('old');
+  expect(fallbackEnv.CLOUDFLARE_API_TOKEN).toBeUndefined();
+  writeProfiles({ active: 'other', profiles: { work: {}, other: {} } }, home);
+  await applyActiveProfile({ CLOUDFLARE_PROFILE: 'work' }, home, fs, {
+    readCredential: jest.fn().mockResolvedValue(failing),
+    deleteCredential: jest.fn(),
+    refreshOAuth: jest.fn().mockRejectedValue(new Error('expired')),
+    now: () => 0,
+  });
+  expect(readProfiles(home).active).toBe('other');
 });
 
 test('refreshed OAuth credentials take precedence over legacy profile access tokens', async () => {

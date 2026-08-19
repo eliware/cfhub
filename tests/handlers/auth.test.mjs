@@ -15,7 +15,7 @@ test("auth status reports the OAuth identity", async () => {
   const oldToken = process.env.CLOUDFLARE_API_TOKEN;
   process.env.CLOUDFLARE_API_TOKEN = "token";
   const ctx = base();
-  await handleAuth({ ...ctx, action: "status" });
+  await handleAuth({ ...ctx, resource: "oauth", action: "status" });
   expect(ctx.toJsonOutput).toHaveBeenCalledWith({
     authenticated: true,
     profile: "environment",
@@ -26,10 +26,52 @@ test("auth status reports the OAuth identity", async () => {
   process.env.CLOUDFLARE_API_TOKEN = oldToken;
 });
 
+test("auth status identifies an API-token profile", async () => {
+  const oldToken = process.env.CLOUDFLARE_API_TOKEN;
+  process.env.CLOUDFLARE_API_TOKEN = "token";
+  const ctx = base();
+  await handleAuth({
+    ...ctx,
+    resource: "auth",
+    action: "status",
+    read: () => ({ active: "work", profiles: { work: { authMethod: "api-token" } } }),
+  });
+  expect(ctx.toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ method: "api-token" }));
+  process.env.CLOUDFLARE_API_TOKEN = oldToken;
+});
+
+test("auth lists API-token profiles with the API-token method", async () => {
+  const ctx = base();
+  await handleAuth({
+    ...ctx,
+    resource: "auth",
+    action: "list",
+    read: () => ({ active: "work", profiles: { work: {} } }),
+  });
+  expect(ctx.toJsonOutput).toHaveBeenCalledWith([
+    { name: "work", active: true, authMethod: "api-token" },
+  ]);
+});
+
+test("auth status defaults API-token method when profile metadata is absent", async () => {
+  const oldToken = process.env.CLOUDFLARE_API_TOKEN;
+  process.env.CLOUDFLARE_API_TOKEN = "token";
+  const ctx = base();
+  await handleAuth({
+    ...ctx,
+    resource: "auth",
+    action: "status",
+    read: () => ({ active: "work", profiles: { work: {} } }),
+  });
+  expect(ctx.toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ method: "api-token" }));
+  process.env.CLOUDFLARE_API_TOKEN = oldToken;
+});
+
 test("auth lists profiles without exposing credentials", async () => {
   const ctx = base();
   await handleAuth({
     ...ctx,
+    resource: "auth",
     action: "list",
     read: () => ({
       active: "work",
@@ -45,9 +87,10 @@ test("auth status and token login explain how to log in when unauthenticated", a
   const oldToken = process.env.CLOUDFLARE_API_TOKEN;
   delete process.env.CLOUDFLARE_API_TOKEN;
   const ctx = base();
-  await handleAuth({ ...ctx, action: "status" });
+  await handleAuth({ ...ctx, resource: "auth", action: "status" });
   await handleAuth({
     ...ctx,
+    resource: "auth",
     action: "login",
     opts: { "token-stdin": true },
     readToken: () => "",
@@ -66,16 +109,16 @@ test("auth login accepts a token from stdin", async () => {
     ...ctx,
     action: "login",
     opts: { profile: "ci", "token-stdin": true, "account-id": "acct" },
+    resource: "auth",
     write,
     readToken: () => "stdin-token",
-    writeCredentialImpl: jest.fn().mockResolvedValue(false),
+    writeCredentialImpl: jest.fn().mockResolvedValue(true),
   });
   expect(write).toHaveBeenCalledWith(
     expect.objectContaining({
       active: "ci",
       profiles: {
         ci: expect.objectContaining({
-          apiToken: "stdin-token",
           accountId: "acct",
         }),
       },
@@ -136,8 +179,26 @@ test("auth logout revokes stored OAuth credentials", async () => {
     revokeOAuthImpl,
     deleteCredentialImpl,
   });
-  expect(revokeOAuthImpl).toHaveBeenCalledWith({ accessToken: "oauth-token" });
+  expect(revokeOAuthImpl).toHaveBeenCalledWith({ token: "oauth-token" });
   expect(deleteCredentialImpl).toHaveBeenCalledWith("work");
+});
+
+test("auth logout clears local credentials when remote revocation fails", async () => {
+  const write = jest.fn();
+  const remove = jest.fn();
+  const ctx = base();
+  await handleAuth({
+    ...ctx,
+    resource: "oauth",
+    action: "logout",
+    read: () => ({ active: "work", profiles: { work: {} } }),
+    write,
+    readCredentialImpl: jest.fn().mockResolvedValue({ oauthRefreshToken: "expired" }),
+    revokeOAuthImpl: jest.fn().mockRejectedValue(new Error("expired")),
+    deleteCredentialImpl: remove,
+  });
+  expect(remove).toHaveBeenCalledWith("work");
+  expect(write).toHaveBeenCalledWith({ active: null, profiles: {} }, undefined, undefined);
 });
 
 test("auth lists an empty profile store", async () => {
@@ -182,11 +243,11 @@ test("auth covers alternate profile and credential branches", async () => {
   process.env.CLOUDFLARE_ZONE_ID = "environment-zone";
   const write = jest.fn();
   const tokenLogin = base();
-  await handleAuth({ ...tokenLogin, action: "login", opts: { profile: "env", "token-stdin": true, "account-id": "explicit-account", "zone-id": "explicit-zone" }, readToken: () => "", write, writeCredentialImpl: jest.fn().mockResolvedValue(true) });
+  await handleAuth({ ...tokenLogin, resource: "auth", action: "login", opts: { profile: "env", "token-stdin": true, "account-id": "explicit-account", "zone-id": "explicit-zone" }, readToken: () => "env-token", write, writeCredentialImpl: jest.fn().mockResolvedValue(true) });
   expect(write).toHaveBeenCalled();
 
   const environmentLogin = base();
-  await handleAuth({ ...environmentLogin, action: "login", opts: { profile: "environment" }, write: jest.fn(), writeCredentialImpl: jest.fn().mockResolvedValue(false) });
+  await handleAuth({ ...environmentLogin, resource: "auth", action: "login", opts: { profile: "environment" }, write: jest.fn(), writeCredentialImpl: jest.fn().mockResolvedValue(true) });
 
   const logoutWrite = jest.fn();
   const logout = base();
@@ -222,9 +283,9 @@ test("auth handles an empty token when environment credentials are absent", asyn
   delete process.env.CLOUDFLARE_API_TOKEN;
   const ctx = base();
   const readFileSync = jest.spyOn(fs, "readFileSync").mockReturnValue("");
-  await handleAuth({ ...ctx, action: "login", opts: { "token-stdin": true } });
+  await handleAuth({ ...ctx, resource: "auth", action: "login", opts: { "token-stdin": true } });
   readFileSync.mockRestore();
-  expect(ctx.fail).toHaveBeenCalledWith("You are not logged into Cloudflare. Run: cfhub auth login");
+  expect(ctx.fail).toHaveBeenCalledWith("No API token supplied. Run cfhub auth login again.");
   if (oldToken === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
   else process.env.CLOUDFLARE_API_TOKEN = oldToken;
 });

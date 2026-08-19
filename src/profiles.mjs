@@ -84,7 +84,16 @@ export async function applyActiveProfile(
         ...activeCredential,
       });
     } catch {
-      activeCredential = credential;
+      // A rejected refresh token cannot recover the old access token. Remove
+      // the unusable local credential so the next login starts cleanly.
+      await credentialDeleter(profile.name);
+      const data = readProfiles(homeDir, fsImpl);
+      delete data.profiles[profile.name];
+      data.active = data.active === profile.name
+        ? Object.keys(data.profiles)[0] || null
+        : data.active;
+      writeProfiles(data, homeDir, fsImpl);
+      return null;
     }
   }
   const values = { ...profile, ...activeCredential };

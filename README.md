@@ -2,26 +2,25 @@
 
 ## cfhub [![npm version](https://img.shields.io/npm/v/cfhub.svg)](https://www.npmjs.com/package/cfhub) [![license](https://img.shields.io/github/license/eliware/cfhub.svg)](LICENSE) [![build status](https://github.com/eliware/cfhub/actions/workflows/nodejs.yml/badge.svg)](https://github.com/eliware/cfhub/actions)
 
-An OAuth-first Cloudflare administration CLI for inspecting and managing zones, DNS, rules, settings, lists, and account services. `cfhub` is designed to feel familiar to anyone who uses the GitHub CLI: commands are composable, automation-friendly, and safe by default.
+Cloudflare administration CLI for inspecting and managing zones, DNS, rules, settings, lists, and account services. `cfhub` is designed to feel familiar to anyone who uses the GitHub CLI: commands are composable, automation-friendly, and safe by default.
 
 ## Features
 
-- OAuth browser login with a guided scope picker and OS keychain storage.
-- API-token login for headless automation with `--token-stdin`.
+- Zone, DNS, rules, settings, lists, and account-service management.
+- Read-only health, audit, inventory, SSL, Origin CA, and cache tooling.
+- Direct access to any Cloudflare API endpoint through `cfhub api`.
+- Human-readable tables and JSON output with jq-style selection and templates.
+- Safe writes with `--dry-run`, explicit confirmation for destructive operations, and automation-friendly output.
+- API-token and OAuth authentication with named profiles and secure credential storage.
 - Multiple named profiles with switch, status, verify, list, and logout commands.
-- Zone, DNS record, zone setting, ruleset, Cloudflare list, and list-item commands.
 - Account resource commands for load balancers, tunnels, Workers, Pages, R2, D1, Queues, Stream, Images, AI, and Access.
-- Read-only health, audit, inventory, SSL, Origin CA, and cache commands.
-- `cfhub api` for direct access to any Cloudflare API endpoint.
-- Human-readable and JSON output, including `--jq` and templates.
-- `--dry-run` for supported writes and `--force` for destructive operations.
 - GitHub CLI-style help, aliases, typo suggestions, and command discovery.
 - Dependency-injected ESM architecture with an extension/plugin contract and example extension.
 
 ## Requirements
 
 - Node.js 26 or newer.
-- A Cloudflare account and permission to authorize the Eliware OAuth client, or an API token for automation.
+- A Cloudflare account and either a scoped API token or permission to authorize the optional OAuth client.
 - Account and zone IDs for commands that need an explicit scope when defaults are not configured.
 
 ## Installation
@@ -48,19 +47,30 @@ cfhub --version
 cfhub --help
 ```
 
-## Authentication
+## Credentials
 
-Interactive users should start the OAuth flow:
+For normal CLI use, create a scoped Cloudflare API token and save it:
 
 ```sh
 cfhub auth login
 ```
 
-The local web interface lets users select the scopes they need before authorizing with Cloudflare. Access and refresh credentials are stored in the operating system keychain when available. The callback page confirms success or failure and then the temporary local server shuts down.
+`cfhub auth login` prints a short setup guide and prompts for the token with
+hidden input. Credentials are stored in the operating system keychain when
+available, with a private disk fallback otherwise. Use `--token-stdin` for
+headless automation.
+
+OAuth is also supported through the separate `oauth` resource:
+
+```sh
+cfhub oauth login
+cfhub oauth status
+cfhub oauth logout --profile work
+```
 
 ### Default OAuth client
 
-Running `cfhub auth login` uses the public Eliware OAuth client built into the
+Running `cfhub oauth login` uses the public Eliware OAuth client built into the
 CLI. The command starts a temporary local OAuth web server, opens the scope
 picker, and then sends the selected authorization request to Cloudflare. The
 client can request only scopes enabled in its Cloudflare registration, so the
@@ -84,10 +94,10 @@ or a different set of approved scopes:
 5. Start the normal login command with the client ID:
 
 ```sh
-CFHUB_OAUTH_CLIENT_ID=your-client-id cfhub auth login
+CFHUB_OAUTH_CLIENT_ID=your-client-id cfhub oauth login
 ```
 
-There is no separate OAuth-server command: `cfhub auth login` starts the
+There is no separate OAuth-server command: `cfhub oauth login` starts the
 temporary server automatically. The default browser redirect remains
 `127.0.0.1`; for remote access, the server can bind on all interfaces while
 the registered redirect remains local to the browser:
@@ -96,7 +106,7 @@ the registered redirect remains local to the browser:
 CFHUB_OAUTH_CLIENT_ID=your-client-id \
 CFHUB_OAUTH_BIND_HOST=0.0.0.0 \
 CFHUB_OAUTH_REDIRECT_HOST=127.0.0.1 \
-cfhub auth login
+cfhub oauth login
 ```
 
 The client ID environment variable overrides the built-in Eliware client for
@@ -111,14 +121,14 @@ printf '%s' "$CLOUDFLARE_API_TOKEN" | cfhub auth login --profile ci --token-stdi
 Use profiles to separate accounts or automation contexts:
 
 ```sh
-cfhub auth list
-cfhub auth status
-cfhub auth switch --profile work
-cfhub auth verify
-cfhub auth logout --profile work
+cfhub oauth list
+cfhub oauth status
+cfhub oauth switch --profile work
+cfhub oauth verify
+cfhub oauth logout --profile work
 ```
 
-An unauthenticated command reports that the user is not logged in and directs them to `cfhub auth login`, matching the familiar GitHub CLI workflow.
+An unauthenticated command reports that the user is not logged in and directs them to `cfhub auth login`.
 
 The CLI checks npm for a newer version at most once per day. The check is
 best-effort, does not delay commands, and never updates automatically. Disable
@@ -138,9 +148,9 @@ CLOUDFLARE_ACCOUNT_ID=your_account_id
 CLOUDFLARE_ZONE_ID=your_zone_id
 ```
 
-OAuth profiles are stored in the `~/.config/cfhub` configuration directory, while secrets are stored in the OS keychain when available. Existing environment variables take precedence over profile values. Keep tokens, `.env` files, keychain exports, and generated state private; none should be committed.
+Profiles are stored in the `~/.config/cfhub` configuration directory, while secrets are stored in the OS keychain when available. Existing environment variables take precedence over profile values. Keep tokens, `.env` files, keychain exports, and generated state private; none should be committed.
 
-If an OS keychain is unavailable, OAuth credentials are stored in
+If an OS keychain is unavailable, credentials are stored in
 `~/.config/cfhub/credentials.json` with `0600` permissions. This file contains
 the refresh token and expiry metadata needed to renew access tokens; protect it
 like any other credential file and exclude it from backups or shared home

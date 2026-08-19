@@ -42,7 +42,8 @@ Resources:
   lists                  List Cloudflare lists
   list-items             List or manage list items
   api                    Call any relative Cloudflare API path
-  auth                   Inspect Cloudflare authentication context
+  auth                   Save and manage API-token profiles
+  oauth                  Manage the OAuth browser authentication flow
   ssl                    Inspect or configure zone SSL/TLS settings
   cache                  Purge zone cache
   health                 Inspect zone health checks
@@ -77,11 +78,12 @@ Examples:
   cfhub zones list
   cfhub api /zones --json
   cfhub api zones/<zone_id>/dns_records --json
-  cfhub auth status
-  cfhub auth login --profile work                 # OAuth browser flow (default)
+  cfhub auth login
+  cfhub oauth status
+  cfhub oauth login --profile work                # OAuth browser flow
   printf '%s' "$CLOUDFLARE_API_TOKEN" | cfhub auth login --profile ci --token-stdin
-  cfhub auth switch --profile work
-  cfhub auth logout --profile work
+  cfhub oauth switch --profile work
+  cfhub oauth logout --profile work
   cfhub ssl get --zone-id <zone_id>
   cfhub cache purge --zone-id <zone_id> --data '{"purge_everything":true}' --force
   cfhub health list --zone-id <zone_id>
@@ -98,7 +100,8 @@ USAGE
   cfhub <command> <subcommand> [flags]
 
 CORE COMMANDS
-  auth:          Authenticate and manage Cloudflare profiles
+  auth:          Save and manage API-token profiles
+  oauth:         Manage OAuth browser authentication
   zones:         Manage zones
   dns-records:   Manage DNS records
   zone-settings: Manage zone settings
@@ -154,7 +157,8 @@ EXAMPLES
   $ cfhub zones list
   $ cfhub dns-records list --zone-id <zone_id>
   $ cfhub api /zones --json
-  $ cfhub auth status
+  $ cfhub auth login
+  $ cfhub oauth status
   $ cfhub extension list
 
 LEARN MORE
@@ -205,13 +209,42 @@ export function printResourceHelp(resource, printer = console) {
   Options: --method GET|POST|PUT|PATCH|DELETE, --data, --file,
   --json, --dry-run, and --force for DELETE`,
     auth: `auth
+  login                Save an API token profile (interactive by default)
+  status               Verify the active API-token identity
+  verify               Verify the active API token
+  list                 Show configured credential contexts
+  switch               Activate a saved profile
+  logout               Remove a saved profile
+
+  The token is stored in the OS keychain when available, or in the local
+  credentials fallback. Create a token with the permissions required by the
+  commands you use; see https://dash.cloudflare.com/profile/api-tokens.
+
+  --token-stdin        Read the token from standard input
+  --profile <name>     Save and activate this profile
+  --account-id <id>    Associate an account with the profile
+  --zone-id <id>       Associate a zone with the profile`,
+    oauth: `oauth
+  login                Start the OAuth browser flow
   status               Verify the active Cloudflare identity
   verify               Verify the active API token
   list                 Show configured credential contexts
-  login                Save a profile (OAuth browser flow by default; --token-stdin for API tokens)
   switch               Activate a saved profile
   logout               Remove a saved profile
-  verify               Verify the active API token`,
+
+  Login options:
+  --profile <name>     Save and activate this profile
+  --account-id <id>    Associate an account with the profile
+  --zone-id <id>       Associate a zone with the profile
+  --scopes <scopes>    Request additional comma-separated OAuth scopes
+  --scope <scope>      Request one additional OAuth scope
+  --no-scope-picker    Skip the browser scope picker
+
+  Environment:
+  CFHUB_OAUTH_CLIENT_ID     Override the public OAuth client
+  CFHUB_OAUTH_SCOPES        Comma-separated OAuth scopes
+  CFHUB_OAUTH_BIND_HOST     Local callback listener address
+  CFHUB_OAUTH_REDIRECT_HOST OAuth redirect host`,
     ssl: `ssl
   get                  Read a zone SSL/TLS setting
   set                  Update a zone SSL/TLS setting
@@ -236,6 +269,27 @@ export function printResourceHelp(resource, printer = console) {
   list/get/create/update/delete  Manage zone Load Balancers`,
     tunnel: `tunnel
   list/get/create/update/delete  Manage account tunnels`,
+    workers: `workers
+  list                  List Workers scripts
+  get --id <name>       Get a Workers script
+  create/update         Write a Workers resource (--data or --file)
+  delete --id <name>    Delete a Workers resource (requires --force)`,
+    pages: `pages
+  list/get/create/update/delete  Manage Pages projects`,
+    r2: `r2
+  list/get/create/update/delete  Manage R2 buckets`,
+    d1: `d1
+  list/get/create/update/delete  Manage D1 databases`,
+    queues: `queues
+  list/get/create/update/delete  Manage Queues`,
+    stream: `stream
+  list/get/create/update/delete  Manage Stream resources`,
+    images: `images
+  list/get/create/update/delete  Manage Images resources`,
+    ai: `ai
+  list/get/create/update/delete  Manage AI resources`,
+    access: `access
+  list/get/create/update/delete  Manage Access applications`,
     extension: `extension
   list                 List installed extensions
   info                 Show installed extension metadata
@@ -256,19 +310,18 @@ export function printResourceHelp(resource, printer = console) {
 }
 
 const commandHelp = {
-  "auth login": `Authenticate with Cloudflare.
+  "auth login": `Save a Cloudflare API token profile.
 
 USAGE
   cfhub auth login [flags]
 
-The default authentication mode is a browser-based OAuth flow. The profile is
-stored in the native credential store when available. Use --token-stdin for
-headless API-token authentication.
+  The token is requested interactively with hidden input and stored in the
+  native credential store when available. Use --token-stdin for automation.
+  The browser-based OAuth flow is available as 'cfhub oauth login'.
 
 FLAGS
   --profile <name>       Save and activate this profile (default: default)
   --token-stdin          Read an API token from standard input
-  --oauth                Explicitly select the OAuth browser flow
   --account-id <id>      Associate an account with the profile
   --zone-id <id>         Associate a zone with the profile
 
@@ -282,7 +335,16 @@ EXAMPLES
   $ cfhub auth login
   $ cfhub auth login --profile work
   $ printf '%s' "$CLOUDFLARE_API_TOKEN" | cfhub auth login --token-stdin
-  $ cfhub auth login --oauth --profile work`,
+`,
+  "oauth login": `Authenticate with Cloudflare using the browser-based OAuth flow.
+
+USAGE
+  cfhub oauth login [flags]
+
+The OAuth profile is stored in the native credential store when available.
+
+EXAMPLES
+  $ cfhub oauth login --profile work`,
   "auth status": `Show the active Cloudflare identity.
 
 USAGE
@@ -305,6 +367,28 @@ USAGE
 
 EXAMPLES
   $ cfhub auth logout --profile work`,
+  "oauth status": `Show the active Cloudflare identity.
+
+USAGE
+  cfhub oauth status [flags]
+
+EXAMPLES
+  $ cfhub oauth status
+  $ cfhub oauth status --json`,
+  "oauth switch": `Activate a saved Cloudflare profile.
+
+USAGE
+  cfhub oauth switch --profile <name>
+
+EXAMPLES
+  $ cfhub oauth switch --profile work`,
+  "oauth logout": `Remove a saved OAuth profile.
+
+USAGE
+  cfhub oauth logout [--profile <name>]
+
+EXAMPLES
+  $ cfhub oauth logout --profile work`,
   "zones list": `List zones available to the active profile.
 
 USAGE

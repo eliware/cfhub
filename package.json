@@ -1,7 +1,7 @@
 {
     "name": "cfhub",
     "version": "1.0.3",
-    "description": "OAuth-first Cloudflare administration CLI with GitHub CLI-style commands, profiles, safe writes, and direct API access.",
+    "description": "Cloudflare administration and automation CLI with GitHub CLI-style commands, profiles, safe writes, and direct API access.",
     "type": "module",
     "scripts": {
         "test": "npx --node-options=\"--experimental-vm-modules --no-warnings\" jest --detectOpenHandles --silent --coverage",
@@ -23,9 +23,9 @@
         "cloudflare-api",
         "cloudflare-cli",
         "cloudflare-management",
-        "oauth",
         "api-client",
         "api-token",
+        "oauth",
         "profiles",
         "dns",
         "zones",

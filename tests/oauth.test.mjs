@@ -550,7 +550,7 @@ test("OAuth callback rejects invalid state and provider errors", async () => {
                   ? "Authorization cancelled"
                   : "Authorization request expired",
               );
-              expect(body).toContain("cfhub auth login");
+              expect(body).toContain("cfhub oauth login");
               resolve();
             });
           },

@@ -159,6 +159,23 @@ test("CLI does not require API credentials before auth login", async () => {
   expect(cfFactory).not.toHaveBeenCalled();
 });
 
+test("CLI does not apply a profile before OAuth logout", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 21}`);
+  const oauth = jest.fn();
+  const applyEnv = { CLOUDFLARE_API_TOKEN: "must-not-be-loaded" };
+  await mod.run({
+    argv: ["oauth", "logout", "--profile", "work"],
+    env: applyEnv,
+    loadEnv: jest.fn(),
+    handlers: { oauth },
+    cfFactory: jest.fn(() => { throw new Error("client should not be created"); }),
+    printer: { log: jest.fn(), error: jest.fn() },
+    fsImpl: { existsSync: jest.fn(() => false), readFileSync: jest.fn(() => "") },
+    exit: jest.fn(),
+  });
+  expect(oauth).toHaveBeenCalledWith(expect.objectContaining({ cf: null }));
+});
+
 test("CLI reports unknown resources through injected dependencies", async () => {
   const mod = await import(`../src/cli.mjs?ts=${Date.now() + 2}`);
   const printer = { log: jest.fn(), error: jest.fn() };
@@ -236,7 +253,7 @@ test("CLI routes subcommand help to command-specific output", async () => {
     exit: jest.fn(),
   });
   expect(printer.log).toHaveBeenCalledWith(
-    expect.stringContaining("browser-based OAuth flow"),
+    expect.stringContaining("hidden input"),
   );
 });
 

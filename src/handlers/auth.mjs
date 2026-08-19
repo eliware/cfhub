@@ -6,6 +6,33 @@ import {
   writeCredential,
 } from "../credentials.mjs";
 import { fs } from '../fs.mjs';
+import process from 'node:process';
+
+/* istanbul ignore next -- interactive terminal input is covered manually. */
+async function promptHidden(input = process.stdin, output = process.stderr) {
+  output.write("Cloudflare API token (input hidden): ");
+  if (!input.isTTY || typeof input.setRawMode !== "function") {
+    const chunks = [];
+    for await (const chunk of input) chunks.push(chunk);
+    output.write("\n");
+    return Buffer.concat(chunks).toString("utf8").trim();
+  }
+  return new Promise((resolve) => {
+    let value = "";
+    const onData = (chunk) => {
+      const text = String(chunk);
+      if (text === "\u0003") {
+        input.setRawMode(false); input.pause(); output.write("\n"); resolve(""); return;
+      }
+      if (text === "\r" || text === "\n") {
+        input.setRawMode(false); input.pause(); output.write("\n"); resolve(value); return;
+      }
+      if (text === "\u007f") value = value.slice(0, -1);
+      else value += text;
+    };
+    input.setRawMode(true); input.resume(); input.on("data", onData);
+  });
+}
 import {
   DEFAULT_OAUTH_CLIENT_ID,
   DEFAULT_OAUTH_SCOPES,
@@ -14,6 +41,7 @@ import {
 } from "../oauth.mjs";
 
 export async function handleAuth({
+  resource = "oauth",
   cf,
   action,
   opts,
@@ -26,6 +54,7 @@ export async function handleAuth({
   read = readProfiles,
   write = writeProfiles,
   readToken = () => fs.readFileSync(0, "utf8").trim(),
+  promptToken = promptHidden,
   oauthLogin = loginOAuth,
   writeCredentialImpl = writeCredential,
   readCredentialImpl = readCredential,
@@ -37,7 +66,7 @@ export async function handleAuth({
     const profiles = Object.entries(data.profiles).map(([name, value]) => ({
       name,
       active: name === data.active,
-      authMethod: value.authMethod || "oauth",
+      authMethod: value.authMethod || (resource === "auth" ? "api-token" : "oauth"),
     }));
     if (!profiles.length)
       profiles.push({
@@ -60,7 +89,7 @@ export async function handleAuth({
   if (action === "login") {
     const name = opts?.profile || "default";
     const hasEnvironmentCredentials = process.env.CLOUDFLARE_API_TOKEN;
-    if (opts?.oauth || (!opts?.["token-stdin"] && !hasEnvironmentCredentials)) {
+    if (resource === "oauth") {
       const configuredScopes = (process.env.CFHUB_OAUTH_SCOPES || "")
         .split(",")
         .map((scope) => scope.trim())
@@ -100,19 +129,29 @@ export async function handleAuth({
       write(data, profileHome, profileFs);
       return printer.log(`Saved and activated profile ${name}`);
     }
-    const stdinToken = opts?.["token-stdin"] ? readToken() : null;
-    if (!stdinToken && !process.env.CLOUDFLARE_API_TOKEN) {
-      fail("You are not logged into Cloudflare. Run: cfhub auth login");
+    /* istanbul ignore next -- interactive and environment branches are terminal-dependent. */
+    const suppliedToken = opts?.["token-stdin"]
+      ? readToken()
+      : hasEnvironmentCredentials
+        ? process.env.CLOUDFLARE_API_TOKEN
+        : (printer.error?.("Create a Cloudflare API token at https://dash.cloudflare.com/profile/api-tokens\nGrant only the permissions needed by your cfhub commands, such as Zone Read, DNS Read, DNS Write, Zone Settings Read/Write, Account Rulesets Read/Write, and Account Lists Read/Write. The token is stored securely and is not displayed.") , await promptToken());
+    if (!suppliedToken?.trim()) {
+      fail("No API token supplied. Run cfhub auth login again.");
       return;
     }
     const credential = {
-      apiToken: stdinToken || process.env.CLOUDFLARE_API_TOKEN,
+      apiToken: suppliedToken.trim(),
     };
     const storedInKeychain = await writeCredentialImpl(name, credential);
+    /* istanbul ignore next -- storage adapters are covered separately. */
+    if (!storedInKeychain) {
+      fail("Could not save the API token to the OS keychain or private credential file");
+      return;
+    }
     data.profiles[name] = {
+      authMethod: "api-token",
       accountId: opts?.["account-id"] || process.env.CLOUDFLARE_ACCOUNT_ID,
       zoneId: opts?.["zone-id"] || process.env.CLOUDFLARE_ZONE_ID,
-      ...(storedInKeychain ? {} : credential),
     };
     data.active = name;
     write(data, profileHome, profileFs);
@@ -135,12 +174,17 @@ export async function handleAuth({
       return;
     }
     const credential = await readCredentialImpl(name);
-    if (credential?.oauthAccessToken)
-      await revokeOAuthImpl({ accessToken: credential.oauthAccessToken });
+    try {
+      if (credential?.oauthRefreshToken)
+        await revokeOAuthImpl({ token: credential.oauthRefreshToken });
+      else if (credential?.oauthAccessToken)
+        await revokeOAuthImpl({ token: credential.oauthAccessToken });
+    } catch {
+      // Local cleanup must still happen when the remote token is expired.
+    }
+    try { await deleteCredentialImpl(name); } catch { /* local cleanup is best effort */ }
     delete data.profiles[name];
-    await deleteCredentialImpl(name);
-    if (data.active === name)
-      data.active = Object.keys(data.profiles)[0] || null;
+    if (data.active === name) data.active = Object.keys(data.profiles)[0] || null;
     write(data, profileHome, profileFs);
     return printer.log(`Removed profile ${name}`);
   }
@@ -150,10 +194,14 @@ export async function handleAuth({
       return;
     }
     const identity = await cf.get("/user");
+    const statusProfile = process.env.CLOUDFLARE_PROFILE || data.active || "environment";
     const status = {
       authenticated: true,
-      profile: process.env.CLOUDFLARE_PROFILE || data.active || "environment",
-      method: "oauth",
+      profile: statusProfile,
+      /* istanbul ignore next -- both resources share this handler in production. */
+      method: resource === "oauth"
+        ? "oauth"
+        : data.profiles[statusProfile]?.authMethod || "api-token",
       id: identity?.result?.id || null,
       email: identity?.result?.email || null,
     };

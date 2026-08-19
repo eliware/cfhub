@@ -1,5 +1,6 @@
 const commandNames = {
   auth: ["login", "logout", "status", "switch", "list", "verify"],
+  oauth: ["login", "logout", "status", "switch", "list", "verify"],
   alias: ["list", "set", "delete"],
   config: ["list", "get", "set", "unset"],
   zones: ["list", "get", "create", "update", "delete", "audit", "security"],

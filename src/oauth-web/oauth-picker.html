@@ -140,7 +140,7 @@
       <details>
         <summary>Can I add permissions later?</summary>
         <p>
-          Yes. Run <code>cfhub auth login</code> again, select the additional
+          Yes. Run <code>cfhub oauth login</code> again, select the additional
           permissions, and authorize the updated profile. Existing credentials
           are replaced with the new authorization.
         </p>
@@ -158,7 +158,7 @@
           client should be allowed to request. Then start the normal login
           command with your client ID:
         </p>
-        <pre><code>CFHUB_OAUTH_CLIENT_ID=your-client-id cfhub auth login</code></pre>
+        <pre><code>CFHUB_OAUTH_CLIENT_ID=your-client-id cfhub oauth login</code></pre>
         <p>
           The command starts the local OAuth web server and opens the scope
           picker for you; no separate server command is required. The picker

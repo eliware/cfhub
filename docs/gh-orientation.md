@@ -14,7 +14,7 @@ Common translations:
 | `gh repo list`             | `cfhub zones list`                                      |
 | `gh api <endpoint>`        | `cfhub api <endpoint>`                                  |
 | `gh auth status`           | `cfhub auth status`                                     |
-| `gh auth login`            | `cfhub auth login --profile <name>` (defaults to OAuth) |
+| `gh auth login`            | `cfhub auth login --profile <name>` (API token)          |
 | `gh auth switch`           | `cfhub auth switch --profile <name>`                    |
 | `gh auth logout`           | `cfhub auth logout --profile <name>`                    |
 | `--json` / field filtering | `--json --jq '.result[].name'`                       |
@@ -37,10 +37,10 @@ or named profiles stored in `~/.config/cfhub/profiles.json` with mode 0600. Like
 `XDG_CONFIG_HOME/cfhub` is used when `XDG_CONFIG_HOME` is set. When the optional
 OS keychain adapter is available, `cfhub auth login` stores secrets in the native
 credential store and leaves only profile metadata in `profiles.json`; otherwise
-it safely falls back to the 0600 file. Interactive login uses OAuth; API tokens
-are supported for headless automation.
+it safely falls back to the 0600 file. API tokens are the straightforward
+default; OAuth browser login is also available through `cfhub oauth login`.
 
-Interactive login uses Cloudflare Authorization Code + PKCE OAuth. Register
+OAuth login uses Cloudflare Authorization Code + PKCE. Register
 these localhost callback URLs on the OAuth client so the CLI can fall back when
 one port is busy:
 
@@ -52,7 +52,7 @@ http://127.0.0.1:8768/oauth/callback
 http://127.0.0.1:8769/oauth/callback
 ```
 
-Then run `cfhub auth login --profile work --oauth`; the public Eliware client ID
+Then run `cfhub oauth login --profile work`; the public Eliware client ID
 is built in. `CFHUB_OAUTH_CLIENT_ID=...` overrides it for a different client. The
 default requested scopes are `account-settings.read,zone.read,account-rule-lists.read,user-details.read`; set
 `CFHUB_OAUTH_SCOPES=account-settings.read,zone.read,...` to request additional scopes that
@@ -60,7 +60,7 @@ are registered on the client. For a remote browser over Tailscale, bind the
 callback and use the server's Tailscale address, registering the matching URI:
 
 ```sh
-CFHUB_OAUTH_BIND_HOST=100.112.180.56 cfhub auth login --profile work --oauth
+CFHUB_OAUTH_BIND_HOST=100.112.180.56 cfhub oauth login --profile work
 ```
 
 The default listener binds to `0.0.0.0`; `CFHUB_OAUTH_BIND_HOST` overrides it. The

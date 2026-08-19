@@ -24,7 +24,7 @@ const moduleByResource = {
   images: "images",
   ai: "ai",
   access: "access",
-  auth: "auth",
+  oauth: "auth",
 };
 
 const writeActions = new Set([

@@ -111,6 +111,7 @@ export async function refreshOAuth({
 }
 
 export async function revokeOAuth({
+  token,
   accessToken,
   clientId = DEFAULT_OAUTH_CLIENT_ID,
   fetchImpl = fetch,
@@ -120,7 +121,7 @@ export async function revokeOAuth({
     {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ token: accessToken, client_id: clientId }),
+    body: new URLSearchParams({ token: token || accessToken, client_id: clientId }),
     },
   );
   return response.ok;

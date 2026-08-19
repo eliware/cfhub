@@ -249,7 +249,10 @@ export async function run({
   }
 
   loadEnv(projectRoot, env, fsImpl);
-  await applyActiveProfile(env, homeDir, fsImpl);
+  const managesCredentials =
+    (resource === "auth" && ["login", "logout", "list", "switch"].includes(action)) ||
+    (resource === "oauth" && (action === "login" || action === "logout"));
+  if (!managesCredentials) await applyActiveProfile(env, homeDir, fsImpl);
   const grantedScopes = env.CFHUB_OAUTH_SCOPES?.split(",")
     .map((scope) => scope.trim())
     .filter(Boolean);
@@ -261,7 +264,9 @@ export async function run({
     return exit(1);
   }
   const cf =
-    resource === "auth" && action === "login" ? null : cfFactory({ env });
+    managesCredentials
+      ? null
+      : cfFactory({ env });
   const outputJson = opts.json || opts.output === "json";
   const settings = readSettings(homeDir, fsImpl);
   if (!outputJson && !opts.quiet && settings["update-check"] !== false && settings["update-check"] !== "false") {
@@ -317,6 +322,7 @@ export async function run({
     exit(code);
   };
   const common = {
+    resource,
     cf,
     action,
     opts,
@@ -338,6 +344,7 @@ export async function run({
     "list-items": handlers.listItems || handleListItems,
     api: handlers.api || handleApi,
     auth: handlers.auth || handleAuth,
+    oauth: handlers.oauth || handleAuth,
     ssl: handlers.ssl || handleSsl,
     cache: handlers.cache || handleCache,
     health: handlers.health || handleHealth,
