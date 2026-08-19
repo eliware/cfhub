@@ -193,7 +193,6 @@ test("auth login guides account-token setup and stores the account id", async ()
     resource: "auth",
     action: "login",
     opts: { profile: "account" },
-    promptTokenType: () => "account",
     promptToken: () => "cfat_account-token",
     promptAccountId: () => "account-1",
     write,
@@ -206,27 +205,16 @@ test("auth login guides account-token setup and stores the account id", async ()
   if (oldAccount === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID; else process.env.CLOUDFLARE_ACCOUNT_ID = oldAccount;
 });
 
-test("auth login rejects an unknown interactive token type", async () => {
-  const ctx = base();
-  await handleAuth({
-    ...ctx,
-    resource: "auth",
-    action: "login",
-    promptTokenType: () => "service",
-  });
-  expect(ctx.fail).toHaveBeenCalledWith("Token type must be user or account");
-});
-
 test("auth login explains token verification failures", async () => {
   const ctx = base();
   await handleAuth({ ...ctx, resource: "auth", action: "login", opts: { "token-stdin": true }, readToken: () => "token", inspectApiTokenImpl: jest.fn().mockRejectedValue(new Error("invalid token")) });
   expect(ctx.fail).toHaveBeenCalledWith("Could not verify API token: invalid token");
 });
 
-test("auth login defaults an empty token type to user", async () => {
+test("auth login does not ask for an account id for a user token", async () => {
   const write = jest.fn();
   const promptAccountId = jest.fn();
-  await handleAuth({ ...base(), resource: "auth", action: "login", promptTokenType: () => "", promptToken: () => "user-token", promptAccountId, write, writeCredentialImpl: jest.fn().mockResolvedValue(true) });
+  await handleAuth({ ...base(), resource: "auth", action: "login", promptToken: () => "cfut_user-token", promptAccountId, write, writeCredentialImpl: jest.fn().mockResolvedValue(true) });
   expect(promptAccountId).not.toHaveBeenCalled();
   expect(write).toHaveBeenCalled();
 });
@@ -350,7 +338,7 @@ test("auth covers alternate profile and credential branches", async () => {
   expect(write).toHaveBeenCalled();
 
   const environmentLogin = base();
-  await handleAuth({ ...environmentLogin, resource: "auth", action: "login", opts: { profile: "environment" }, promptTokenType: () => "user", promptToken: () => "prompted-token", write: jest.fn(), writeCredentialImpl: jest.fn().mockResolvedValue(true) });
+  await handleAuth({ ...environmentLogin, resource: "auth", action: "login", opts: { profile: "environment" }, promptToken: () => "prompted-token", write: jest.fn(), writeCredentialImpl: jest.fn().mockResolvedValue(true) });
 
   const logoutWrite = jest.fn();
   const logout = base();

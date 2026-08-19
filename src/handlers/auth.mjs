@@ -43,8 +43,6 @@ async function promptLine(message, input = process.stdin, output = process.stder
   finally { rl.close(); }
 }
 /* istanbul ignore next -- interactive terminal input is covered manually. */
-const defaultPromptTokenType = () => promptLine("Token type (user/account) [user]: ");
-/* istanbul ignore next -- interactive terminal input is covered manually. */
 const defaultPromptAccountId = () => promptLine("Cloudflare account ID: ");
 import {
   DEFAULT_OAUTH_CLIENT_ID,
@@ -68,7 +66,6 @@ export async function handleAuth({
   write = writeProfiles,
   readToken = () => fs.readFileSync(0, "utf8").trim(),
   promptToken = promptHidden,
-  promptTokenType = defaultPromptTokenType,
   promptAccountId = defaultPromptAccountId,
   oauthLogin = loginOAuth,
   writeCredentialImpl = writeCredential,
@@ -146,13 +143,6 @@ export async function handleAuth({
     }
     /* istanbul ignore next -- interactive and environment branches are terminal-dependent. */
     const interactive = !opts?.["token-stdin"];
-    const tokenType = interactive
-      ? (await promptTokenType()).toLowerCase() || "user"
-      : "user";
-    if (interactive && !["user", "account"].includes(tokenType)) {
-      fail("Token type must be user or account");
-      return;
-    }
     const suppliedToken = opts?.["token-stdin"]
       ? readToken()
       : (printer.error?.("Create a Cloudflare API token at https://dash.cloudflare.com/profile/api-tokens\nGrant only the permissions needed by your cfhub commands, such as Zone Read, DNS Read, DNS Write, Zone Settings Read/Write, Account Rulesets Read/Write, and Account Lists Read/Write. The token is stored securely and is not displayed.") , await promptToken());
@@ -166,7 +156,7 @@ export async function handleAuth({
     const detectedAccountToken = credential.apiToken.startsWith("cfat_");
     /* istanbul ignore next -- account context may come from a prompt, flag, or environment. */
     const accountId = opts?.["account-id"] || process.env.CLOUDFLARE_ACCOUNT_ID ||
-      (interactive && (tokenType === "account" || detectedAccountToken) ? await promptAccountId() : undefined);
+      (interactive && detectedAccountToken ? await promptAccountId() : undefined);
     let tokenInfo;
     try {
       tokenInfo = await inspectApiTokenImpl({ token: credential.apiToken, accountId });
