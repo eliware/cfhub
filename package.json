@@ -1,6 +1,6 @@
 {
     "name": "cfhub",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Cloudflare administration and automation CLI with GitHub CLI-style commands, profiles, safe writes, and direct API access.",
     "type": "module",
     "scripts": {
