@@ -1,5 +1,10 @@
 # Release Notes
 
+## 1.0.5
+
+- Fixed CSS-only OAuth webpack entries producing empty JavaScript bundle files
+  during tagit releases by configuring the output as ES modules.
+
 ## 1.0.4
 
 - Added current Cloudflare Account API Token setup guidance to interactive login.

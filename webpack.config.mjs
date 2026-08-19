@@ -12,7 +12,9 @@ export default {
     filename: "[name].mjs",
     path: fileURLToPath(new URL("./src/oauth-web/bundled/", import.meta.url)),
     clean: true,
+    library: { type: "module" },
   },
+  experiments: { outputModule: true },
   module: {
     rules: [{ test: /\.css$/i, use: [MiniCssExtractPlugin.loader, "css-loader"] }],
   },
