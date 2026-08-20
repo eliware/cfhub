@@ -48,3 +48,7 @@ Tests should preserve 100% source coverage where practical.
 
 Update `README.md` when user-facing commands or configuration change.
 Keep `dream.md` as the product vision and `dream_sprints.md` as the roadmap.
+- Do not over-engineer simple tasks.
+- Do not guess when confused.
+- Do not make random, pointless changes.
+- Check your own work before saying you're done.
