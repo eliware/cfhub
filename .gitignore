@@ -13,5 +13,4 @@ dist/
 .tmp/
 .DS_Store
 
-.jest.result
 .agentx*
