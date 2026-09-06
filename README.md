@@ -2,6 +2,8 @@
 
 ## cfhub [![npm version](https://img.shields.io/npm/v/cfhub.svg)](https://www.npmjs.com/package/cfhub) [![license](https://img.shields.io/github/license/eliware/cfhub.svg)](LICENSE) [![build status](https://github.com/eliware/cfhub/actions/workflows/nodejs.yml/badge.svg)](https://github.com/eliware/cfhub/actions)
 
+Documentation: [docs](docs/README.md) · [specifications](specs/README.md) · [examples](examples/README.md)
+
 Cloudflare administration CLI for inspecting and managing zones, DNS, rules, settings, lists, and account services. `cfhub` is designed to feel familiar to anyone who uses the GitHub CLI: commands are composable, automation-friendly, and safe by default.
 
 ## Features
