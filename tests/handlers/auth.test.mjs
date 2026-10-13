@@ -111,6 +111,10 @@ test("auth coordinator routes switch, logout, and unknown actions", async () => 
   });
   expect(data.profiles).toEqual({});
   const fail = jest.fn();
+  await handleAuth({ action: "switch", opts: {}, read: emptyProfiles, fail });
+  await handleAuth({ action: "logout", opts: {}, read: emptyProfiles, fail });
+  expect(fail).toHaveBeenCalledWith("Unknown profile: (missing --profile)");
+  expect(fail).toHaveBeenCalledWith("Unknown profile: (none)");
   await handleAuth({ action: "unknown", read: emptyProfiles, fail });
   expect(fail).toHaveBeenCalledWith("Unknown auth action: unknown");
 });

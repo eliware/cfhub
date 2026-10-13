@@ -1,11 +1,11 @@
 import { parseArgs } from "../args.mjs";
 import { tokenizeCommand } from "../alias-tokenizer.mjs";
-import { discoverExtensions, loadExtensionCommand } from "../extensions.mjs";
+import { discoverExtensions } from "../extensions.mjs";
 import { readAliases } from "../aliases.mjs";
 import { printCommandHelp } from "../help/commands.mjs";
 import { printResourceHelp } from "../help/resources.mjs";
 import { commandNamesFor, resourceNames, suggestCommand } from "../suggestions.mjs";
-import { toJsonOutput } from "../output-printers.mjs";
+import { resolveExtensionCommand } from "./resolve-extension-command.mjs";
 
 export async function resolveCommand({ args, opts, printer, homeDir, fsImpl, exit, loadBody }) {
   let [resource, action] = args;
@@ -40,22 +40,16 @@ export async function resolveCommand({ args, opts, printer, homeDir, fsImpl, exi
   if (args.length === 1 && !extensionManifest)
     return { done: true, value: printResourceHelp(resource, printer) };
   if (extensionManifest) {
-    const handler = await loadExtensionCommand(extensionManifest, resource, homeDir);
-    if (!handler)
-      return { done: true, value: printer.error(`Extension command is not loadable: ${resource}`) };
-    return {
-      done: true,
-      value: handler({
-        cf: null,
-        action,
-        opts,
-        body: loadBody(opts, fsImpl),
-        outputJson: opts.json || opts.output === "json",
-        printer,
-        toJsonOutput: (value) => toJsonOutput(value, printer.log),
-        fail: (message) => printer.error(message),
-      }),
-    };
+    return resolveExtensionCommand({
+      extensionManifest,
+      resource,
+      action,
+      opts,
+      printer,
+      homeDir,
+      fsImpl,
+      loadBody,
+    });
   }
   if (
     resource !== "api" &&

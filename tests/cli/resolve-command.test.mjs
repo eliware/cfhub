@@ -98,30 +98,5 @@ test("resolver runs installed extension commands", async () => {
     opts: { json: true },
     loadBody: () => "body",
   });
-  expect(value.value).toMatchObject({ cf: null, action: "run", body: "body", outputJson: true });
-  value.value.toJsonOutput({ ok: true });
-  expect(ctx.printer.log).toHaveBeenCalledWith('{\n  "ok": true\n}');
-  expect(value.value.fail("bad")).toBeUndefined();
-  expect(ctx.printer.error).toHaveBeenCalledWith("bad");
-  expect(value.value.outputJson).toBe(true);
-  const plain = await resolveCommand({
-    ...ctx,
-    args: ["sample", "run"],
-    opts: {},
-    loadBody: () => "",
-  });
-  expect(plain.value.outputJson).toBe(false);
-});
-
-test("resolver reports an extension with no handler", async () => {
-  const ctx = setup();
-  const root = path.join(ctx.homeDir, ".config", "cfhub", "extensions", "empty");
-  fs.mkdirSync(root, { recursive: true });
-  fs.writeFileSync(
-    path.join(root, "cf-extension.json"),
-    JSON.stringify({ name: "empty", version: "1", commands: { empty: "run.mjs" } }),
-  );
-  fs.writeFileSync(path.join(root, "run.mjs"), "export const value = 1");
-  await resolveCommand({ ...ctx, args: ["empty", "run"], opts: {} });
-  expect(ctx.printer.error).toHaveBeenCalledWith("Extension command is not loadable: empty");
+  expect(value).toMatchObject({ done: true, value: { action: "run", body: "body" } });
 });

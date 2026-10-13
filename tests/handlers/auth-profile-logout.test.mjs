@@ -45,3 +45,11 @@ test("removes local profiles without OAuth tokens and preserves another active p
   expect(input.data.active).toBe("next");
   expect(input.data.profiles.old).toBeUndefined();
 });
+
+test("removes a profile when the credential store has no entry", async () => {
+  const input = options();
+  input.readCredentialImpl.mockResolvedValue(null);
+  await logoutAuthProfile(input);
+  expect(input.revokeOAuthImpl).not.toHaveBeenCalled();
+  expect(input.data.profiles.old).toBeUndefined();
+});

@@ -1,35 +1,34 @@
 import { handleAuthProfile } from "./auth-profile.mjs";
 import { handleAuthStatus } from "./auth-status.mjs";
 import { handleAuthLogin } from "./auth-login.mjs";
-import { defaultPromptAccountId, promptHidden } from "./auth-prompts.mjs";
-import { readProfiles, writeProfiles } from "../profiles.mjs";
-import { deleteCredential, readCredential, writeCredential } from "../credential-store.mjs";
-import { fs } from "../fs.mjs";
-import { inspectApiToken } from "../token-permissions.mjs";
-import { loginOAuth, revokeOAuth } from "../oauth.mjs";
-export async function handleAuth({
-  resource = "oauth",
-  cf,
-  action,
-  opts,
-  outputJson,
-  printer = console,
-  toJsonOutput,
-  fail = () => {},
-  profileHome,
-  profileFs,
-  read = readProfiles,
-  write = writeProfiles,
-  readToken = () => fs.readFileSync(0, "utf8").trim(),
-  promptToken = promptHidden,
-  promptAccountId = defaultPromptAccountId,
-  oauthLogin = loginOAuth,
-  writeCredentialImpl = writeCredential,
-  readCredentialImpl = readCredential,
-  deleteCredentialImpl = deleteCredential,
-  revokeOAuthImpl = revokeOAuth,
-  inspectApiTokenImpl = inspectApiToken,
-} = {}) {
+import { createAuthDependencies } from "./auth-dependencies.mjs";
+
+export async function handleAuth(context = {}) {
+  const {
+    resource = "oauth",
+    cf,
+    action,
+    opts,
+    outputJson,
+    printer = console,
+    toJsonOutput,
+    fail = () => {},
+    profileHome,
+    profileFs,
+  } = context;
+  const {
+    read,
+    write,
+    readToken,
+    promptToken,
+    promptAccountId,
+    oauthLogin,
+    writeCredentialImpl,
+    readCredentialImpl,
+    deleteCredentialImpl,
+    revokeOAuthImpl,
+    inspectApiTokenImpl,
+  } = createAuthDependencies(context);
   const data = read(profileHome, profileFs);
   if (action === "login")
     return handleAuthLogin({
