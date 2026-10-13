@@ -14,6 +14,7 @@ function escapeHtml(value) {
 function moduleCard(module, enabled) {
   return `<div class="module"><strong>${escapeHtml(module.name)}</strong><small>${enabled ? "Enabled · ready for its selected scopes." : `Requires: ${escapeHtml(module.scopes.join(", "))}`}</small></div>`;
 }
+
 export function successPage({ account, scopes, summary }) {
   const enabled = summary.enabled;
   const disabled = MODULE_CATALOG.filter((module) => !enabled.includes(module));
@@ -46,16 +47,6 @@ export function successPage({ account, scopes, summary }) {
       disabled.map((module) => moduleCard(module, false)).join(""),
     )
     .replaceAll("__EXAMPLES__", examples || "<p>Select a module to see command examples.</p>")
-    .replaceAll("__COPYRIGHT__", copyrightYear())
-    .replaceAll("__VERSION__", VERSION);
-}
-export function failurePage({ title, detail }) {
-  const logoData = encodeURIComponent(pickerAsset("oauth-web/cf-logo.svg")).replace(/'/g, "%27");
-  return pickerAsset("oauth-web/oauth-result.html")
-    .replaceAll("__RESULT_TITLE__", escapeHtml(title))
-    .replaceAll("__RESULT_DETAIL__", escapeHtml(detail))
-    .replaceAll("__RESULT_CSS__", pickerAsset("oauth-web/oauth-result.css"))
-    .replaceAll("__CFHUB_LOGO_DATA__", logoData)
     .replaceAll("__COPYRIGHT__", copyrightYear())
     .replaceAll("__VERSION__", VERSION);
 }

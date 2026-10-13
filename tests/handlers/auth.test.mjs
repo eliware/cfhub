@@ -1,6 +1,7 @@
 import { jest } from "@jest/globals";
 import { handleAuth } from "../../src/handlers/auth.mjs";
 import { fs } from "../../src/fs.mjs";
+import "../../test-fixtures/unit/auth-coordinator-edges.mjs";
 
 const emptyProfiles = () => ({ active: null, profiles: {} });
 

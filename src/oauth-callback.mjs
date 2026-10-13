@@ -1,4 +1,4 @@
-import { failurePage } from "./oauth-result-pages.mjs";
+import { failurePage } from "./oauth-failure-page.mjs";
 import { serveOAuthPickerRoute } from "./oauth-picker-routes.mjs";
 
 export function createOAuthCallback({

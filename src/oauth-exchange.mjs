@@ -1,5 +1,5 @@
 import { collectOAuthSummary } from "./oauth-pages.mjs";
-import { successPage } from "./oauth-result-pages.mjs";
+import { successPage } from "./oauth-success-page.mjs";
 
 const TOKEN_URL = "https://dash.cloudflare.com/oauth2/token";
 const USER_URL = "https://api.cloudflare.com/client/v4/user";
