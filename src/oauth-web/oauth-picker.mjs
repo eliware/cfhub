@@ -42,20 +42,14 @@ export function initializePicker() {
     document
       .querySelectorAll("[data-module]")
       .forEach((button) =>
-        button.classList.toggle(
-          "active",
-          enabledModules.has(button.dataset.module),
-        ),
+        button.classList.toggle("active", enabledModules.has(button.dataset.module)),
       );
     document.querySelectorAll("[data-module]").forEach((button) => {
-      button.setAttribute(
-        "aria-pressed",
-        String(enabledModules.has(button.dataset.module)),
-      );
+      button.setAttribute("aria-pressed", String(enabledModules.has(button.dataset.module)));
     });
     document.querySelectorAll("[data-category-count]").forEach((counter) => {
-      const values = categories[counter.dataset.categoryCount].flatMap(
-        (feature) => feature.scopes.map((scope) => scope.scope),
+      const values = categories[counter.dataset.categoryCount].flatMap((feature) =>
+        feature.scopes.map((scope) => scope.scope),
       );
       counter.textContent = `${values.filter((scope) => selected.has(scope)).length}/${values.length}`;
     });
@@ -79,9 +73,7 @@ export function initializePicker() {
   const moduleTier = (tier, enable) =>
     modules
       .filter((module) => module.tier === tier)
-      .forEach((module) =>
-        enable ? enableModule(module.id) : disableModule(module.id),
-      );
+      .forEach((module) => (enable ? enableModule(module.id) : disableModule(module.id)));
   for (const [tier, title] of [
     ["basic", "Basic modules"],
     ["advanced", "Advanced modules"],
@@ -108,22 +100,20 @@ export function initializePicker() {
     box.addEventListener("change", () => {
       if (box.checked) selected.add(box.value);
       else selected.delete(box.value);
-      if (!box.checked)
-        (owners.get(box.value) || []).forEach((id) =>
-          enabledModules.delete(id),
-        );
+      if (!box.checked) (owners.get(box.value) || []).forEach((id) => enabledModules.delete(id));
       render();
     }),
   );
   sessionOptions.forEach((option) =>
     option.addEventListener("change", () => {
-      sessionOptions.forEach((other) => { other.checked = option.checked; });
+      sessionOptions.forEach((other) => {
+        other.checked = option.checked;
+      });
     }),
   );
   document.querySelectorAll("[data-module]").forEach((button) =>
     button.addEventListener("click", () => {
-      if (enabledModules.has(button.dataset.module))
-        disableModule(button.dataset.module);
+      if (enabledModules.has(button.dataset.module)) disableModule(button.dataset.module);
       else enableModule(button.dataset.module);
       render();
     }),

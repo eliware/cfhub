@@ -2,12 +2,12 @@
 
 The public CLI client starts with read-only scopes:
 
-| CLI capability | OAuth scope |
-| --- | --- |
-| Zone discovery | `zone.read` |
-| Account settings and membership context | `account-settings.read` |
-| Account lists | `account-rule-lists.read` |
-| User identity | `user-details.read` |
+| CLI capability                          | OAuth scope               |
+| --------------------------------------- | ------------------------- |
+| Zone discovery                          | `zone.read`               |
+| Account settings and membership context | `account-settings.read`   |
+| Account lists                           | `account-rule-lists.read` |
+| User identity                           | `user-details.read`       |
 
 Additional commands require the corresponding Cloudflare resource scope. Add
 only the scopes required by the commands an installation will use. The current

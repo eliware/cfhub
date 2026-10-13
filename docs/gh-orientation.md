@@ -9,16 +9,16 @@ cfhub <resource> <action> [flags]
 
 Common translations:
 
-| GitHub CLI habit           | Cloudflare CLI equivalent                            |
-| -------------------------- | ---------------------------------------------------- |
-| `gh repo list`             | `cfhub zones list`                                      |
-| `gh api <endpoint>`        | `cfhub api <endpoint>`                                  |
-| `gh auth status`           | `cfhub auth status`                                     |
-| `gh auth login`            | `cfhub auth login --profile <name>` (API token)          |
-| `gh auth switch`           | `cfhub auth switch --profile <name>`                    |
-| `gh auth logout`           | `cfhub auth logout --profile <name>`                    |
-| `--json` / field filtering | `--json --jq '.result[].name'`                       |
-| preview a mutation         | `--dry-run`                                          |
+| GitHub CLI habit           | Cloudflare CLI equivalent                       |
+| -------------------------- | ----------------------------------------------- |
+| `gh repo list`             | `cfhub zones list`                              |
+| `gh api <endpoint>`        | `cfhub api <endpoint>`                          |
+| `gh auth status`           | `cfhub auth status`                             |
+| `gh auth login`            | `cfhub auth login --profile <name>` (API token) |
+| `gh auth switch`           | `cfhub auth switch --profile <name>`            |
+| `gh auth logout`           | `cfhub auth logout --profile <name>`            |
+| `--json` / field filtering | `--json --jq '.result[].name'`                  |
+| preview a mutation         | `--dry-run`                                     |
 
 Cloudflare resources use explicit names such as `zones`, `dns-records`,
 `zone-settings`, `rulesets`, and `lists`. Use `cfhub alias` for personal shortcuts.

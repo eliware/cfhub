@@ -11,19 +11,13 @@ function cloudflareDetails(error) {
       : [];
 }
 
-export function formatCloudflareError(
-  error,
-  { resource, action, outputJson = false } = {},
-) {
+export function formatCloudflareError(error, { resource, action, outputJson = false } = {}) {
   const status = cloudflareStatus(error);
   const details = cloudflareDetails(error);
   if (status !== 401 && status !== 403) return null;
   const reason =
     details
-      .map(
-        (item) =>
-          `${item.code ?? "?"}: ${item.message || "authorization denied"}`,
-      )
+      .map((item) => `${item.code ?? "?"}: ${item.message || "authorization denied"}`)
       .join("; ") ||
     error?.message ||
     "Cloudflare rejected the request";

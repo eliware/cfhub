@@ -54,8 +54,25 @@ test("does not rewrite non-authorization failures", () => {
 });
 
 test("formats authorization errors with fallback details", () => {
-  expect(formatCloudflareError({ status: 401, message: "expired" }, { resource: "auth", action: "verify" })).toContain("expired");
-  expect(formatCloudflareError({ status: 403, data: { errors: [{ code: 1 }] } }, { resource: "zones", action: "list" })).toContain("1: authorization denied");
-  expect(formatCloudflareError({ status: 403, body: { errors: [{ message: "denied" }] } }, { resource: "zones", action: "list" })).toContain("?: denied");
-  expect(formatCloudflareError({ status: 403 }, undefined)).toContain("Cloudflare denied undefined undefined");
+  expect(
+    formatCloudflareError(
+      { status: 401, message: "expired" },
+      { resource: "auth", action: "verify" },
+    ),
+  ).toContain("expired");
+  expect(
+    formatCloudflareError(
+      { status: 403, data: { errors: [{ code: 1 }] } },
+      { resource: "zones", action: "list" },
+    ),
+  ).toContain("1: authorization denied");
+  expect(
+    formatCloudflareError(
+      { status: 403, body: { errors: [{ message: "denied" }] } },
+      { resource: "zones", action: "list" },
+    ),
+  ).toContain("?: denied");
+  expect(formatCloudflareError({ status: 403 }, undefined)).toContain(
+    "Cloudflare denied undefined undefined",
+  );
 });

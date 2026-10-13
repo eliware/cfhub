@@ -1,0 +1,13 @@
+version: "12.0"
+description: Defines product rules for cfhub.
+directives:
+  - id: E-1120.0
+    dos:
+      - Manage Cloudflare resources through the Cloudflare API.
+      - Keep credentials out of output, errors, logs, tests, and committed files.
+      - Require explicit confirmation for destructive operations.
+      - Support dry-run mode for supported writes.
+      - Preserve JSON output for automation.
+    donts:
+      - Do not perform destructive operations without explicit confirmation.
+      - Do not write to Cloudflare during dry-run mode.

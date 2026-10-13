@@ -1,132 +1,158 @@
 {
-    "name": "cfhub",
-    "version": "1.0.5",
-    "description": "Cloudflare administration and automation CLI with GitHub CLI-style commands, profiles, safe writes, and direct API access.",
-    "type": "module",
-    "scripts": {
-        "test": "npx --node-options=\"--experimental-vm-modules --no-warnings\" jest --detectOpenHandles --silent --coverage",
-        "lint": "npx oxlint .",
-        "test:gaps": "node scripts/test-gaps.mjs",
-        "test:live": "npm run test:live:dry",
-        "test:live:dry": "node scripts/test-live.mjs --dry",
-        "test:live:wet": "node scripts/test-live.mjs --wet",
-        "test:e2e:screenshots": "node tests/e2e/oauth-picker.e2e.mjs",
-        "test:e2e:lighthouse": "node tests/e2e/oauth-picker.lighthouse.mjs",
-        "test:e2e:web": "npm run test:e2e:screenshots && npm run test:e2e:lighthouse",
-        "build:web": "node scripts/build-web.mjs",
-        "prepack": "npm run build:web",
-        "pack": "npm pack --dry-run"
-    },
-    "keywords": [
-        "cloudflare",
-        "cli",
-        "cloudflare-api",
-        "cloudflare-cli",
-        "cloudflare-management",
-        "api-client",
-        "api-token",
-        "oauth",
-        "profiles",
-        "dns",
-        "zones",
-        "workers",
-        "r2",
-        "pages",
-        "d1",
-        "queues",
-        "stream",
-        "waf",
-        "rulesets",
-        "zero-trust",
-        "security",
-        "account-management",
-        "infrastructure",
-        "automation",
-        "javascript",
-        "nodejs",
-        "esm",
-        "devops"
+  "name": "@eliware/cfhub",
+  "version": "12.0.0",
+  "type": "module",
+  "description": "Cloudflare administration and automation CLI with GitHub CLI-style commands, profiles, safe writes, and direct API access.",
+  "keywords": [
+    "cloudflare",
+    "cli",
+    "cloudflare-api",
+    "cloudflare-cli",
+    "cloudflare-management",
+    "api-client",
+    "api-token",
+    "oauth",
+    "profiles",
+    "dns",
+    "zones",
+    "workers",
+    "r2",
+    "pages",
+    "d1",
+    "queues",
+    "stream",
+    "waf",
+    "rulesets",
+    "zero-trust",
+    "security",
+    "account-management",
+    "infrastructure",
+    "automation",
+    "javascript",
+    "nodejs",
+    "esm",
+    "devops"
+  ],
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "bin": {
+    "cfhub": "bin/cfhub.mjs"
+  },
+  "files": [
+    "src/",
+    "docs/",
+    "README.md",
+    "AGENTS.md",
+    "LICENSE",
+    "RELEASE_NOTES.md",
+    "bin/",
+    "specs/",
+    "data/",
+    "completions/",
+    "examples/",
+    "public/"
+  ],
+  "scripts": {
+    "test": "eliware-test",
+    "lint": "eliware-test --lint",
+    "audit": "eliware-test --audit",
+    "format": "eliware-test --format",
+    "format:check": "eliware-test --format-check",
+    "build": "webpack --config src/webpack.config.mjs --mode production --output-path dist",
+    "build:web": "node bin/build-web.mjs",
+    "pack": "eliware-test --pack",
+    "test:gaps": "node bin/test-gaps.mjs",
+    "test:live": "npm run test:live:dry",
+    "test:live:dry": "node bin/test-live.mjs --dry",
+    "test:live:wet": "node bin/test-live.mjs --wet",
+    "test:e2e:screenshots": "node test-fixtures/e2e/oauth-picker.e2e.mjs",
+    "test:e2e:lighthouse": "node test-fixtures/e2e/oauth-picker.lighthouse.mjs",
+    "test:e2e:web": "npm run test:e2e:screenshots && npm run test:e2e:lighthouse",
+    "puppeteer": "node test-fixtures/e2e/oauth-picker.e2e.mjs",
+    "lighthouse": "node test-fixtures/e2e/oauth-picker.lighthouse.mjs"
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "dependencies": {
+    "@eliware/common": "^12.0.1",
+    "cloudflare": "^7.1.0"
+  },
+  "devDependencies": {
+    "@eliware/test": "^12.0.0",
+    "chrome-launcher": "^1.2.1",
+    "css-loader": "^7.1.4",
+    "css-minimizer-webpack-plugin": "^8.0.0",
+    "lighthouse": "^13.4.1",
+    "mini-css-extract-plugin": "^2.10.2",
+    "puppeteer": "^25.8.0",
+    "webpack": "^5.109.2",
+    "webpack-cli": "^7.2.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.mjs"
     ],
-    "author": "Eli Sterling <eli@eliware.org>",
-    "license": "ISC",
-    "dependencies": {
-        "cloudflare": "^7.1.0"
-    },
-    "bin": {
-        "cfhub": "bin/cfhub.mjs"
-    },
-    "devDependencies": {
-        "chrome-launcher": "^1.2.1",
-        "css-loader": "^7.1.4",
-        "css-minimizer-webpack-plugin": "^8.0.0",
-        "jest": "^30.0.4",
-        "lighthouse": "^13.4.1",
-        "mini-css-extract-plugin": "^2.10.2",
-        "oxlint": "^1.79.0",
-        "puppeteer": "^25.8.0",
-        "webpack": "^5.109.2",
-        "webpack-cli": "^7.2.2"
-    },
-    "jest": {
-        "testEnvironment": "node",
-        "testMatch": [
-            "**/?(*.)+(spec|test).mjs"
-        ],
-        "coveragePathIgnorePatterns": [
-            "/bin/",
-            "/tests/live/"
-        ],
-        "testPathIgnorePatterns": [
-            "/node_modules/",
-            "/tests/live/"
-        ]
-    },
-    "allowScripts": {
-        "unrs-resolver@1.12.2": true,
-        "keytar@7.9.0": true
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/eliware/cfhub.git"
-    },
-    "homepage": "https://eliware.org/cfhub",
-    "bugs": {
-        "url": "https://github.com/eliware/cfhub/issues"
-    },
-    "engines": {
-        "node": ">=26"
-    },
-    "files": [
-        "bin",
-        "src",
-        "README.md",
-        "RELEASE_NOTES.md",
-        "LICENSE",
-        "data",
-        "docs",
-        "completions",
-        "examples"
+    "collectCoverageFrom": [
+      "src/**/*.mjs"
     ],
-    "optionalDependencies": {
-        "keytar": "^7.9.0"
-    },
-    "prettier": {
-      "printWidth": 100,
-      "tabWidth": 2,
-      "useTabs": false,
-      "semi": true,
-      "singleQuote": false,
-      "quoteProps": "as-needed",
-      "jsxSingleQuote": false,
-      "trailingComma": "all",
-      "bracketSpacing": true,
-      "bracketSameLine": false,
-      "arrowParens": "always",
-      "proseWrap": "preserve",
-      "endOfLine": "lf"
-    },
-    "eliware": {
-      "id": "E-1120",
-      "apply": ["general", "application", "cli", "npm-published"]
+    "coverageReporters": [
+      "text",
+      "json-summary"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
     }
+  },
+  "prettier": {
+    "printWidth": 100,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": false,
+    "quoteProps": "as-needed",
+    "jsxSingleQuote": false,
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "bracketSameLine": false,
+    "arrowParens": "always",
+    "proseWrap": "preserve",
+    "endOfLine": "lf"
+  },
+  "author": "Eliware <eliware@eliware.org>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eliware/cfhub.git"
+  },
+  "homepage": "https://github.com/eliware/cfhub#readme",
+  "bugs": {
+    "url": "https://github.com/eliware/cfhub/issues"
+  },
+  "eliware": {
+    "id": "E-1120",
+    "apply": [
+      "general",
+      "application",
+      "cli",
+      "web",
+      "npm-published"
+    ]
+  },
+  "optionalDependencies": {
+    "keytar": "^7.9.0"
+  },
+  "allowScripts": {
+    "unrs-resolver@1.12.2": true,
+    "keytar@7.9.0": true
+  }
 }

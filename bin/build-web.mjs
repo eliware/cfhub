@@ -6,13 +6,11 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const webpackCli = fileURLToPath(
   new URL("../node_modules/webpack-cli/bin/cli.js", import.meta.url),
 );
-const webpack = spawn(process.execPath, [
-  webpackCli,
-  "--config",
-  "webpack.config.mjs",
-  "--mode",
-  "production",
-], { cwd: root, stdio: "inherit" });
+const webpack = spawn(
+  process.execPath,
+  [webpackCli, "--config", "src/webpack.config.mjs", "--mode", "production"],
+  { cwd: root, stdio: "inherit" },
+);
 
 const exitCode = await new Promise((resolve) => {
   webpack.on("close", resolve);

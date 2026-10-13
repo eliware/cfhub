@@ -42,32 +42,33 @@ export async function findBrowser({
     throw new Error(`CHROME_PATH does not exist: ${env.CHROME_PATH}`);
   }
 
-  const candidates = platform === "win32"
-    ? windowsCandidates
-      .map(([variable, ...parts]) => env[variable] && win32.join(env[variable], ...parts))
-      .filter(Boolean)
-    : unixCandidates;
+  const candidates =
+    platform === "win32"
+      ? windowsCandidates
+          .map(([variable, ...parts]) => env[variable] && win32.join(env[variable], ...parts))
+          .filter(Boolean)
+      : unixCandidates;
   for (const candidate of candidates) {
     if (await accessImpl(candidate)) return candidate;
   }
 
-  if (puppeteerPath && await accessImpl(puppeteerPath)) return puppeteerPath;
+  if (puppeteerPath && (await accessImpl(puppeteerPath))) return puppeteerPath;
   const pathDelimiter = platform === "win32" ? ";" : ":";
   /* istanbul ignore next -- PATH is always present in supported runtimes. */
   const pathEntries = (env.PATH ?? "").split(pathDelimiter).filter(Boolean);
-  const executableNames = platform === "win32"
-    ? ["chrome.exe", "msedge.exe"]
-    : ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "microsoft-edge"];
+  const executableNames =
+    platform === "win32"
+      ? ["chrome.exe", "msedge.exe"]
+      : ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "microsoft-edge"];
   for (const directory of pathEntries) {
     for (const name of executableNames) {
-      const candidate = platform === "win32"
-        ? win32.join(directory, name)
-        : posix.join(directory, name);
+      const candidate =
+        platform === "win32" ? win32.join(directory, name) : posix.join(directory, name);
       if (await accessImpl(candidate)) return candidate;
     }
   }
   throw new Error(
     "No supported Chrome, Edge, or Chromium browser was found. " +
-    "Install one or set CHROME_PATH to its executable.",
+      "Install one or set CHROME_PATH to its executable.",
   );
 }

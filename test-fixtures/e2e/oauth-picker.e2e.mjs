@@ -5,9 +5,7 @@ import puppeteer from "puppeteer";
 import { loginOAuth } from "../../src/oauth.mjs";
 import { findBrowser } from "../../src/browser.mjs";
 
-const outputDir = resolve(
-  process.env.CFHUB_SCREENSHOT_DIR ?? "artifacts/oauth-screenshots",
-);
+const outputDir = resolve(process.env.CFHUB_SCREENSHOT_DIR ?? "artifacts/oauth-screenshots");
 const executablePath = await findBrowser({ puppeteerPath: puppeteer.executablePath() });
 const printed = [];
 const fetchImpl = async () => ({
@@ -50,9 +48,7 @@ try {
       fullPage: false,
     });
     assert.equal(
-      await page.$eval("#scope-search", (input) =>
-        input.getAttribute("aria-label"),
-      ),
+      await page.$eval("#scope-search", (input) => input.getAttribute("aria-label")),
       "Search permission scopes",
     );
     const pickerText = await page.$eval(".faq", (faq) => faq.textContent);
@@ -140,9 +136,7 @@ try {
     method: "POST",
     redirect: "manual",
   });
-  const cancellationAuthorization = new URL(
-    cancellationStart.headers.get("location"),
-  );
+  const cancellationAuthorization = new URL(cancellationStart.headers.get("location"));
   const cancellationCallback = new URL(cancellationUrl);
   cancellationCallback.pathname = "/oauth/callback";
   cancellationCallback.search = new URLSearchParams({
@@ -196,10 +190,7 @@ try {
   });
   assert.equal(invalidStateResponse?.status(), 400);
   assert.equal(await page.title(), "Authorization request expired · cfhub");
-  assert.match(
-    await page.$eval("h1", (heading) => heading.textContent),
-    /request expired/i,
-  );
+  assert.match(await page.$eval("h1", (heading) => heading.textContent), /request expired/i);
   for (const [name, viewport] of [
     ["desktop", { width: 1440, height: 1000 }],
     ["mobile", { width: 390, height: 844, isMobile: true, hasTouch: true }],
@@ -217,10 +208,7 @@ try {
     console.log(`Captured ${name} OAuth invalid-state screenshot`);
   }
   const invalidStateError = await invalidStateFailure;
-  assert.match(
-    invalidStateError.message,
-    /OAuth login expired or was opened in another browser/,
-  );
+  assert.match(invalidStateError.message, /OAuth login expired or was opened in another browser/);
 } finally {
   await browser.close();
 }

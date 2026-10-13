@@ -2,15 +2,13 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const mode = process.argv[2];
-if (!['--dry', '--wet'].includes(mode)) {
+if (!["--dry", "--wet"].includes(mode)) {
   console.error("Usage: npm run test:live:dry | npm run test:live:wet");
   process.exit(2);
 }
 
 const projectRoot = fileURLToPath(new URL("..", import.meta.url));
-const jestBin = fileURLToPath(
-  new URL("../node_modules/jest/bin/jest.js", import.meta.url),
-);
+const jestBin = fileURLToPath(new URL("../node_modules/jest/bin/jest.js", import.meta.url));
 const environment = {
   ...process.env,
   CFHUB_LIVE_TESTS: "1",
@@ -25,7 +23,7 @@ const child = spawn(
     "--runInBand",
     "--testPathIgnorePatterns=/node_modules/",
     "--runTestsByPath",
-    "tests/live/cli-live.test.mjs",
+    "test-fixtures/live/cli-live.test.mjs",
   ],
   { cwd: projectRoot, env: environment, stdio: "inherit" },
 );

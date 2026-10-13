@@ -22,11 +22,7 @@ describe("cfhub run()", () => {
       exit: jest.fn(),
     });
 
-    expect(loadEnv).toHaveBeenCalledWith(
-      "/tmp/project",
-      process.env,
-      expect.any(Object),
-    );
+    expect(loadEnv).toHaveBeenCalledWith("/tmp/project", process.env, expect.any(Object));
     expect(cfFactory).toHaveBeenCalled();
     expect(zones).toHaveBeenCalled();
   });
@@ -74,10 +70,17 @@ describe("cfhub run()", () => {
     const printer = { log: jest.fn(), error: jest.fn() };
     const exit = jest.fn();
     await mod.run({
-      argv: ["zones", "list"], env: {}, loadEnv: jest.fn(),
+      argv: ["zones", "list"],
+      env: {},
+      loadEnv: jest.fn(),
       cfFactory: jest.fn(() => ({})),
-      handlers: { zones: jest.fn().mockRejectedValue({ status: 403, errors: [{ code: 9109, message: "denied" }] }) },
-      printer, exit,
+      handlers: {
+        zones: jest
+          .fn()
+          .mockRejectedValue({ status: 403, errors: [{ code: 9109, message: "denied" }] }),
+      },
+      printer,
+      exit,
     });
     expect(printer.error).toHaveBeenCalledWith(expect.stringContaining("Cloudflare denied"));
     expect(exit).toHaveBeenCalledWith(1);
@@ -87,11 +90,53 @@ describe("cfhub run()", () => {
     const mod = await import(`../src/cli.mjs?ts=${Date.now() + 400}`);
     const printer = { log: jest.fn(), error: jest.fn() };
     const exit = jest.fn();
-    await mod.run({ argv: ["zones", "--help"], printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") } });
-    await mod.run({ argv: ["zones", "far-away"], printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") }, cfFactory: jest.fn() });
-    await mod.run({ argv: ["zones", "list"], env: { CFHUB_OAUTH_SCOPES: "dns.read" }, printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") }, cfFactory: jest.fn() });
-    await mod.run({ argv: ["inventory", "export"], env: { CFHUB_OAUTH_SCOPES: "" }, printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") }, cfFactory: jest.fn() });
-    await expect(mod.run({ argv: ["audit", "list"], env: { CFHUB_OAUTH_SCOPES: "account-settings.read,zone.read,dns.read,ssl-and-certificates.read" }, printer, exit, loadEnv: jest.fn(), fsImpl: { readFileSync: jest.fn(() => "") }, handlers: { audit: jest.fn().mockRejectedValue(new Error("raw failure")) }, cfFactory: jest.fn(() => ({})) })).rejects.toThrow("raw failure");
+    await mod.run({
+      argv: ["zones", "--help"],
+      printer,
+      exit,
+      loadEnv: jest.fn(),
+      fsImpl: { readFileSync: jest.fn(() => "") },
+    });
+    await mod.run({
+      argv: ["zones", "far-away"],
+      printer,
+      exit,
+      loadEnv: jest.fn(),
+      fsImpl: { readFileSync: jest.fn(() => "") },
+      cfFactory: jest.fn(),
+    });
+    await mod.run({
+      argv: ["zones", "list"],
+      env: { CFHUB_OAUTH_SCOPES: "dns.read" },
+      printer,
+      exit,
+      loadEnv: jest.fn(),
+      fsImpl: { readFileSync: jest.fn(() => "") },
+      cfFactory: jest.fn(),
+    });
+    await mod.run({
+      argv: ["inventory", "export"],
+      env: { CFHUB_OAUTH_SCOPES: "" },
+      printer,
+      exit,
+      loadEnv: jest.fn(),
+      fsImpl: { readFileSync: jest.fn(() => "") },
+      cfFactory: jest.fn(),
+    });
+    await expect(
+      mod.run({
+        argv: ["audit", "list"],
+        env: {
+          CFHUB_OAUTH_SCOPES: "account-settings.read,zone.read,dns.read,ssl-and-certificates.read",
+        },
+        printer,
+        exit,
+        loadEnv: jest.fn(),
+        fsImpl: { readFileSync: jest.fn(() => "") },
+        handlers: { audit: jest.fn().mockRejectedValue(new Error("raw failure")) },
+        cfFactory: jest.fn(() => ({})),
+      }),
+    ).rejects.toThrow("raw failure");
   });
 
   test("run uses safe defaults when called with only an empty argv", async () => {
@@ -168,7 +213,9 @@ test("CLI does not apply a profile before OAuth logout", async () => {
     env: applyEnv,
     loadEnv: jest.fn(),
     handlers: { oauth },
-    cfFactory: jest.fn(() => { throw new Error("client should not be created"); }),
+    cfFactory: jest.fn(() => {
+      throw new Error("client should not be created");
+    }),
     printer: { log: jest.fn(), error: jest.fn() },
     fsImpl: { existsSync: jest.fn(() => false), readFileSync: jest.fn(() => "") },
     exit: jest.fn(),
@@ -204,9 +251,7 @@ test("CLI exercises JSON output callback", async () => {
     handlers: { zones: handler },
     exit: jest.fn(),
   });
-  expect(printer.log).toHaveBeenCalledWith(
-    JSON.stringify({ ok: true }, null, 2),
-  );
+  expect(printer.log).toHaveBeenCalledWith(JSON.stringify({ ok: true }, null, 2));
 });
 
 test("CLI default exit dependency is exercised safely", async () => {
@@ -252,9 +297,7 @@ test("CLI routes subcommand help to command-specific output", async () => {
     fsImpl: { readFileSync: jest.fn(() => "") },
     exit: jest.fn(),
   });
-  expect(printer.log).toHaveBeenCalledWith(
-    expect.stringContaining("hidden input"),
-  );
+  expect(printer.log).toHaveBeenCalledWith(expect.stringContaining("hidden input"));
 });
 
 test("CLI exercises injected failure callback", async () => {
@@ -308,9 +351,7 @@ test("CLI reports missing OAuth scopes before creating a Cloudflare client", asy
     exit,
   });
   expect(cfFactory).not.toHaveBeenCalled();
-  expect(printer.error).toHaveBeenCalledWith(
-    expect.stringContaining("zone.read"),
-  );
+  expect(printer.error).toHaveBeenCalledWith(expect.stringContaining("zone.read"));
   expect(exit).toHaveBeenCalledWith(1);
 });
 
@@ -322,7 +363,10 @@ test("CLI reports missing known API-token permissions before creating a client",
   await mod.run({
     argv: ["dns-records", "create"],
     env: { CFHUB_API_PERMISSIONS: "DNS Read", CFHUB_API_PERMISSIONS_KNOWN: "1" },
-    printer, loadEnv: jest.fn(), cfFactory, exit,
+    printer,
+    loadEnv: jest.fn(),
+    cfFactory,
+    exit,
   });
   expect(cfFactory).not.toHaveBeenCalled();
   expect(printer.error).toHaveBeenCalledWith(expect.stringContaining("DNS Write"));
@@ -422,9 +466,7 @@ test("CLI manages aliases and config through the command surface", async () => {
   await mod.run({ ...common, argv: ["config", "set", "missing"] });
   await mod.run({ ...common, argv: ["config", "unset", "pager"] });
   await mod.run({ ...common, argv: ["config", "unknown"] });
-  expect(printer.error).toHaveBeenCalledWith(
-    "Usage: cfhub config set <name> <value>",
-  );
+  expect(printer.error).toHaveBeenCalledWith("Usage: cfhub config set <name> <value>");
 });
 
 test("CLI supports a bare pager flag with and without saved pager settings", async () => {
@@ -490,9 +532,7 @@ test("CLI prints dashboard links before dispatch", async () => {
     ...common,
     argv: ["zones", "get", "--zone-id", "z1", "--web"],
   });
-  expect(printer.log).toHaveBeenCalledWith(
-    "https://dash.cloudflare.com/zones/z1",
-  );
+  expect(printer.log).toHaveBeenCalledWith("https://dash.cloudflare.com/zones/z1");
   await mod.run({
     ...common,
     argv: ["zones", "get", "--account-id", "a1", "--web"],
@@ -565,9 +605,7 @@ test("CLI reports an installed extension with no runnable handler", async () => 
   fs.writeFileSync(path.join(root, "empty.mjs"), "export const value = 1");
   const printer = { log: jest.fn(), error: jest.fn() };
   await mod.run({ argv: ["empty", "run"], printer, fsImpl: fs, homeDir: home });
-  expect(printer.error).toHaveBeenCalledWith(
-    "Extension command is not loadable: empty",
-  );
+  expect(printer.error).toHaveBeenCalledWith("Extension command is not loadable: empty");
 });
 
 test("CLI passes output and failure helpers to extensions", async () => {
@@ -612,9 +650,7 @@ test("CLI manages extensions without Cloudflare credentials", async () => {
   const fs = await import("node:fs");
   const os = await import("node:os");
   const path = await import("node:path");
-  const home = fs.mkdtempSync(
-    path.join(os.tmpdir(), "cf-cli-extension-command-"),
-  );
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-cli-extension-command-"));
   const printer = { log: jest.fn(), error: jest.fn() };
   await mod.run({
     argv: ["extension", "list"],
@@ -630,9 +666,7 @@ test("CLI routes the extension resource through its built-in handler", async () 
   const fs = await import("node:fs");
   const os = await import("node:os");
   const path = await import("node:path");
-  const home = fs.mkdtempSync(
-    path.join(os.tmpdir(), "cf-cli-extension-dispatch-"),
-  );
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-cli-extension-dispatch-"));
   const printer = { log: jest.fn(), error: jest.fn() };
   await mod.run({
     argv: ["extension", "list", "--json"],
@@ -647,9 +681,7 @@ test("CLI routes the extension resource through its built-in handler", async () 
     homeDir: home,
   });
   expect(printer.log).toHaveBeenCalledWith("[]");
-  expect(printer.error).toHaveBeenCalledWith(
-    "Missing --path to an extension directory",
-  );
+  expect(printer.error).toHaveBeenCalledWith("Missing --path to an extension directory");
 });
 
 test("CLI dispatches built-in load-balancer and tunnel handlers", async () => {

@@ -1,5 +1,5 @@
 import os from "node:os";
-import * as fs from 'node:fs';
+import * as fs from "node:fs";
 import { configRoot } from "./config.mjs";
 import { deleteCredential, readCredential, writeCredential } from "./credentials.mjs";
 import { refreshOAuth } from "./oauth.mjs";
@@ -25,11 +25,7 @@ export function writeProfiles(data, homeDir = os.homedir(), fsImpl = fs) {
   if (typeof fsImpl.chmodSync === "function") fsImpl.chmodSync(path, 0o600);
 }
 
-export function activeProfile(
-  env = process.env,
-  homeDir = os.homedir(),
-  fsImpl = fs,
-) {
+export function activeProfile(env = process.env, homeDir = os.homedir(), fsImpl = fs) {
   const data = readProfiles(homeDir, fsImpl);
   const name = env.CLOUDFLARE_PROFILE || data.active;
   return name && data.profiles[name] ? { name, ...data.profiles[name] } : null;
@@ -41,9 +37,14 @@ export async function applyActiveProfile(
   fsImpl = fs,
   effects = {},
 ) {
-  const credentialReader = effects.readCredential || ((profile) => readCredential(profile, undefined, fsImpl, homeDir));
-  const credentialWriter = effects.writeCredential || ((profile, value) => writeCredential(profile, value, undefined, fsImpl, homeDir));
-  const credentialDeleter = effects.deleteCredential || ((profile) => deleteCredential(profile, undefined, fsImpl, homeDir));
+  const credentialReader =
+    effects.readCredential || ((profile) => readCredential(profile, undefined, fsImpl, homeDir));
+  const credentialWriter =
+    effects.writeCredential ||
+    ((profile, value) => writeCredential(profile, value, undefined, fsImpl, homeDir));
+  const credentialDeleter =
+    effects.deleteCredential ||
+    ((profile) => deleteCredential(profile, undefined, fsImpl, homeDir));
   const refresh = effects.refreshOAuth || refreshOAuth;
   const now = effects.now || Date.now;
   const profile = activeProfile(env, homeDir, fsImpl);
@@ -58,9 +59,8 @@ export async function applyActiveProfile(
     await credentialDeleter(profile.name);
     const data = readProfiles(homeDir, fsImpl);
     delete data.profiles[profile.name];
-    data.active = data.active === profile.name
-      ? Object.keys(data.profiles)[0] || null
-      : data.active;
+    data.active =
+      data.active === profile.name ? Object.keys(data.profiles)[0] || null : data.active;
     writeProfiles(data, homeDir, fsImpl);
     return null;
   }
@@ -89,9 +89,8 @@ export async function applyActiveProfile(
       await credentialDeleter(profile.name);
       const data = readProfiles(homeDir, fsImpl);
       delete data.profiles[profile.name];
-      data.active = data.active === profile.name
-        ? Object.keys(data.profiles)[0] || null
-        : data.active;
+      data.active =
+        data.active === profile.name ? Object.keys(data.profiles)[0] || null : data.active;
       writeProfiles(data, homeDir, fsImpl);
       return null;
     }

@@ -64,16 +64,8 @@ function base64url(value) {
   return value.toString("base64url");
 }
 export function openBrowser(url, options, spawnImpl = spawn) {
-  const {
-    platform = process.platform,
-    spawnImpl: configuredSpawnImpl = spawnImpl,
-  } = options ?? {};
-  const command =
-    platform === "darwin"
-      ? "open"
-      : platform === "win32"
-        ? "start"
-        : "xdg-open";
+  const { platform = process.platform, spawnImpl: configuredSpawnImpl = spawnImpl } = options ?? {};
+  const command = platform === "darwin" ? "open" : platform === "win32" ? "start" : "xdg-open";
   const child = configuredSpawnImpl(command, [url], {
     detached: true,
     stdio: "ignore",
@@ -97,11 +89,9 @@ export async function refreshOAuth({
       refresh_token: refreshToken,
     }),
   });
-  if (!response.ok)
-    throw new Error(`OAuth token refresh failed (${response.status})`);
+  if (!response.ok) throw new Error(`OAuth token refresh failed (${response.status})`);
   const tokens = await response.json();
-  if (!tokens.access_token)
-    throw new Error("OAuth refresh response did not include access_token");
+  if (!tokens.access_token) throw new Error("OAuth refresh response did not include access_token");
   return {
     accessToken: tokens.access_token,
     refreshToken: tokens.refresh_token || refreshToken,
@@ -116,14 +106,11 @@ export async function revokeOAuth({
   clientId = DEFAULT_OAUTH_CLIENT_ID,
   fetchImpl = fetch,
 }) {
-  const response = await fetchImpl(
-    "https://dash.cloudflare.com/oauth2/revoke",
-    {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
+  const response = await fetchImpl("https://dash.cloudflare.com/oauth2/revoke", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ token: token || accessToken, client_id: clientId }),
-    },
-  );
+  });
   return response.ok;
 }
 
@@ -132,9 +119,7 @@ function escapeHtml(value) {
   return String(value ?? "").replace(
     /[&<>"']/g,
     (character) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        character
-      ],
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character],
   );
 }
 function currentCopyright() {
@@ -179,28 +164,36 @@ function successPage({ account, scopes, summary }) {
   const examples = [
     enabled.some((module) => module.id === "zones") && `cfhub zone list`,
     enabled.some((module) => module.id === "dns") && `cfhub dns record list --zone ${zone}`,
-    enabled.some((module) => module.id === "zone-settings") && `cfhub zone settings list --zone ${zone}`,
+    enabled.some((module) => module.id === "zone-settings") &&
+      `cfhub zone settings list --zone ${zone}`,
     enabled.some((module) => module.id === "workers") && "cfhub workers list",
-  ].filter(Boolean).map((example) => `<div class="example"><code>${escapeHtml(example)}</code></div>`).join("");
+  ]
+    .filter(Boolean)
+    .map((example) => `<div class="example"><code>${escapeHtml(example)}</code></div>`)
+    .join("");
   const logoData = encodeURIComponent(pickerAsset("oauth-web/cf-logo.svg")).replace(/'/g, "%27");
   return pickerAsset("oauth-web/oauth-success.html")
     .replaceAll("__SUCCESS_CSS__", pickerAsset("oauth-web/bundled/oauth-success.css"))
     .replaceAll("__CFHUB_LOGO_DATA__", logoData)
-    .replaceAll("__ACCOUNT__", escapeHtml(account?.name || account?.email || "your Cloudflare account"))
+    .replaceAll(
+      "__ACCOUNT__",
+      escapeHtml(account?.name || account?.email || "your Cloudflare account"),
+    )
     .replaceAll("__SCOPE_COUNT__", String(scopes.length))
     .replaceAll("__ENABLED_COUNT__", String(enabled.length))
     .replaceAll("__ZONE_COUNT__", String(summary.zones.length))
     .replaceAll("__DNS_COUNT__", String(summary.dns.length))
     .replaceAll("__ENABLED_MODULES__", enabled.map((module) => moduleCard(module, true)).join(""))
-    .replaceAll("__DISABLED_MODULES__", disabled.map((module) => moduleCard(module, false)).join(""))
+    .replaceAll(
+      "__DISABLED_MODULES__",
+      disabled.map((module) => moduleCard(module, false)).join(""),
+    )
     .replaceAll("__EXAMPLES__", examples || "<p>Select a module to see command examples.</p>")
     .replaceAll("__COPYRIGHT__", currentCopyright())
     .replaceAll("__VERSION__", VERSION);
 }
 function failurePage({ title, detail }) {
-  const logoData = encodeURIComponent(
-    pickerAsset("oauth-web/cf-logo.svg"),
-  ).replace(/'/g, "%27");
+  const logoData = encodeURIComponent(pickerAsset("oauth-web/cf-logo.svg")).replace(/'/g, "%27");
   return pickerAsset("oauth-web/oauth-result.html")
     .replaceAll("__RESULT_TITLE__", escapeHtml(title))
     .replaceAll("__RESULT_DETAIL__", escapeHtml(detail))
@@ -217,14 +210,21 @@ const ALLOWED_OAUTH_SCOPES = new Set(
     features.flatMap((feature) => feature.scopes.map((scope) => scope.scope)),
   ),
 );
-const pickerAsset = (name) =>
-  readFileSync(fileURLToPath(new URL(`./${name}`, import.meta.url)), "utf8");
+const publicAssets = new Set([
+  "oauth-web/cf-logo.svg",
+  "oauth-web/cloudflare-115x53.png",
+  "oauth-web/eliware-58x58.png",
+]);
+const pickerAsset = (name) => {
+  const root = publicAssets.has(name) ? "../public/" : "./";
+  return readFileSync(fileURLToPath(new URL(`${root}${name}`, import.meta.url)), "utf8");
+};
 function sendAsset(
   request,
   response,
   body,
   contentType,
-    { cacheControl = "public, max-age=31536000, immutable" } = {},
+  { cacheControl = "public, max-age=31536000, immutable" } = {},
 ) {
   const acceptsGzip = /(?:^|,\s*)gzip(?:\s*;|\s*,|\s*$)/i.test(
     request.headers["accept-encoding"] || "",
@@ -244,8 +244,14 @@ const pickerHtml = () =>
   pickerAsset("oauth-web/oauth-picker.html")
     .replaceAll('href="/oauth-web/cf-logo.svg"', `href="/oauth-web/cf-logo.svg?v=${VERSION}"`)
     .replaceAll('href="/oauth-picker.css"', `href="/oauth-picker.css?v=${VERSION}"`)
-    .replaceAll('src="/oauth-web/cloudflare-115x53.png"', `src="/oauth-web/cloudflare-115x53.png?v=${VERSION}"`)
-    .replaceAll('src="/oauth-web/eliware-58x58.png"', `src="/oauth-web/eliware-58x58.png?v=${VERSION}"`)
+    .replaceAll(
+      'src="/oauth-web/cloudflare-115x53.png"',
+      `src="/oauth-web/cloudflare-115x53.png?v=${VERSION}"`,
+    )
+    .replaceAll(
+      'src="/oauth-web/eliware-58x58.png"',
+      `src="/oauth-web/eliware-58x58.png?v=${VERSION}"`,
+    )
     .replaceAll('src="/oauth-picker.mjs"', `src="/oauth-picker.mjs?v=${VERSION}"`)
     .replace(
       "__CFHUB_SCOPE_MODEL__",
@@ -255,10 +261,7 @@ const pickerHtml = () =>
         requiredScopes: REQUIRED_OAUTH_SCOPES,
       }).replace(/</g, "\\u003c"),
     )
-    .replaceAll(
-      "__COPYRIGHT_YEAR__",
-      copyrightYear(),
-    )
+    .replaceAll("__COPYRIGHT_YEAR__", copyrightYear())
     .replaceAll("__APP_VERSION__", VERSION);
 function readRequestBody(request) {
   return new Promise((resolve) => {
@@ -284,28 +287,28 @@ export async function loginOAuth({
 }) {
   if (!clientId) throw new Error("Missing CFHUB_OAUTH_CLIENT_ID");
   const verifier = base64url(crypto.randomBytes(32));
-  const challenge = base64url(
-    crypto.createHash("sha256").update(verifier).digest(),
-  );
+  const challenge = base64url(crypto.createHash("sha256").update(verifier).digest());
   const state = base64url(crypto.randomBytes(24));
   let server;
   let port;
   for (const candidate of ports) {
     try {
       server = serverFactory();
-      await /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
-        const onError = (error) => {
-          server.removeListener("listening", onListen);
-          reject(error);
-        };
-        const onListen = () => {
-          server.removeListener("error", onError);
-          resolve();
-        };
-        server.once("error", onError);
-        server.once("listening", onListen);
-        server.listen(candidate, bindHost);
-      }));
+      await /** @type {Promise<void>} */ (
+        new Promise((resolve, reject) => {
+          const onError = (error) => {
+            server.removeListener("listening", onListen);
+            reject(error);
+          };
+          const onListen = () => {
+            server.removeListener("error", onError);
+            resolve();
+          };
+          server.once("error", onError);
+          server.once("listening", onListen);
+          server.listen(candidate, bindHost);
+        })
+      );
       port = server.address()?.port || candidate;
       break;
     } catch (error) {
@@ -313,14 +316,11 @@ export async function loginOAuth({
       if (error.code !== "EADDRINUSE") throw error;
     }
   }
-  if (!server || !port)
-    throw new Error("No OAuth callback port available (tried 8765-8769)");
+  if (!server || !port) throw new Error("No OAuth callback port available (tried 8765-8769)");
   const redirectUri = `http://${redirectHost}:${port}/oauth/callback`;
   const makeAuthorization = (selected, offlineAccess = false) => {
     const authorization = new URL(AUTH_URL);
-    const authorizationScopes = offlineAccess
-      ? [...selected, "offline_access"]
-      : selected;
+    const authorizationScopes = offlineAccess ? [...selected, "offline_access"] : selected;
     const params = new URLSearchParams({
       response_type: "code",
       client_id: clientId,
@@ -341,7 +341,9 @@ export async function loginOAuth({
     server.on("request", (request, response) => {
       const url = new URL(request.url, redirectUri);
       if (scopePicker && url.pathname === "/" && request.method === "GET") {
-        sendAsset(request, response, pickerHtml(), "text/html; charset=utf-8", { cacheControl: "no-store" });
+        sendAsset(request, response, pickerHtml(), "text/html; charset=utf-8", {
+          cacheControl: "no-store",
+        });
         return;
       }
       if (url.pathname === "/api/version" && request.method === "GET") {
@@ -355,27 +357,25 @@ export async function loginOAuth({
         response.end(JSON.stringify({ name: "cfhub", version: VERSION }) + "\n");
         return;
       }
-      if (
-        scopePicker &&
-        url.pathname === "/oauth-picker.css" &&
-        request.method === "GET"
-      ) {
-        sendAsset(request, response, pickerAsset("oauth-web/bundled/oauth-picker.css"), "text/css; charset=utf-8");
+      if (scopePicker && url.pathname === "/oauth-picker.css" && request.method === "GET") {
+        sendAsset(
+          request,
+          response,
+          pickerAsset("oauth-web/bundled/oauth-picker.css"),
+          "text/css; charset=utf-8",
+        );
         return;
       }
-      if (
-        scopePicker &&
-        url.pathname === "/oauth-picker.mjs" &&
-        request.method === "GET"
-      ) {
-        sendAsset(request, response, pickerAsset("oauth-web/oauth-picker.mjs"), "text/javascript; charset=utf-8");
+      if (scopePicker && url.pathname === "/oauth-picker.mjs" && request.method === "GET") {
+        sendAsset(
+          request,
+          response,
+          pickerAsset("oauth-web/oauth-picker.mjs"),
+          "text/javascript; charset=utf-8",
+        );
         return;
       }
-      if (
-        scopePicker &&
-        url.pathname === "/oauth-web/cf-logo.svg" &&
-        request.method === "GET"
-      ) {
+      if (scopePicker && url.pathname === "/oauth-web/cf-logo.svg" && request.method === "GET") {
         sendAsset(request, response, pickerAsset("oauth-web/cf-logo.svg"), "image/svg+xml");
         return;
       }
@@ -384,7 +384,14 @@ export async function loginOAuth({
         url.pathname === "/oauth-web/cloudflare-115x53.png" &&
         request.method === "GET"
       ) {
-        sendAsset(request, response, readFileSync(fileURLToPath(new URL("./oauth-web/cloudflare-115x53.png", import.meta.url))), "image/png");
+        sendAsset(
+          request,
+          response,
+          readFileSync(
+            fileURLToPath(new URL("../public/oauth-web/cloudflare-115x53.png", import.meta.url)),
+          ),
+          "image/png",
+        );
         return;
       }
       if (
@@ -392,34 +399,36 @@ export async function loginOAuth({
         url.pathname === "/oauth-web/eliware-58x58.png" &&
         request.method === "GET"
       ) {
-        sendAsset(request, response, readFileSync(fileURLToPath(new URL("./oauth-web/eliware-58x58.png", import.meta.url))), "image/png");
+        sendAsset(
+          request,
+          response,
+          readFileSync(
+            fileURLToPath(new URL("../public/oauth-web/eliware-58x58.png", import.meta.url)),
+          ),
+          "image/png",
+        );
         return;
       }
-      if (
-        scopePicker &&
-        url.pathname === "/oauth-result.css" &&
-        request.method === "GET"
-      ) {
-        sendAsset(request, response, pickerAsset("oauth-web/bundled/oauth-result.css"), "text/css; charset=utf-8");
+      if (scopePicker && url.pathname === "/oauth-result.css" && request.method === "GET") {
+        sendAsset(
+          request,
+          response,
+          pickerAsset("oauth-web/bundled/oauth-result.css"),
+          "text/css; charset=utf-8",
+        );
         return;
       }
-      if (
-        scopePicker &&
-        url.pathname === "/oauth/start" &&
-        request.method === "POST"
-      ) {
+      if (scopePicker && url.pathname === "/oauth/start" && request.method === "POST") {
         readRequestBody(request).then((form) => {
-          const requested = form
-            .getAll("scope")
-            .filter((scope) => ALLOWED_OAUTH_SCOPES.has(scope));
+          const requested = form.getAll("scope").filter((scope) => ALLOWED_OAUTH_SCOPES.has(scope));
           selectedScopes = [
-            ...new Set([
-              ...REQUIRED_OAUTH_SCOPES,
-              ...(requested.length ? requested : scopes),
-            ]),
+            ...new Set([...REQUIRED_OAUTH_SCOPES, ...(requested.length ? requested : scopes)]),
           ];
           response.writeHead(302, {
-            location: makeAuthorization(selectedScopes, form.get("keep-signed-in") === "on").toString(),
+            location: makeAuthorization(
+              selectedScopes,
+              form.get("keep-signed-in") === "on",
+            ).toString(),
           });
           response.end();
         });
@@ -454,10 +463,7 @@ export async function loginOAuth({
         response.writeHead(400, { "content-type": "text/html; charset=utf-8" });
         response.end(
           failurePage({
-            title:
-              error === "access_denied"
-                ? "Authorization cancelled"
-                : "Authorization failed",
+            title: error === "access_denied" ? "Authorization cancelled" : "Authorization failed",
             detail: description,
           }),
         );
@@ -496,8 +502,7 @@ export async function loginOAuth({
           code_verifier: verifier,
         }),
       });
-      if (!response.ok)
-        throw new Error(`OAuth token exchange failed (${response.status})`);
+      if (!response.ok) throw new Error(`OAuth token exchange failed (${response.status})`);
       const tokens = await response.json();
       if (!tokens.access_token)
         throw new Error("OAuth token response did not include access_token");
@@ -506,8 +511,7 @@ export async function loginOAuth({
         const accountResponse = await fetchImpl(USER_URL, {
           headers: { authorization: `Bearer ${tokens.access_token}` },
         });
-        if (accountResponse.ok)
-          account = (await accountResponse.json())?.result;
+        if (accountResponse.ok) account = (await accountResponse.json())?.result;
       } catch {
         /* account confirmation is best effort */
       }
@@ -520,9 +524,7 @@ export async function loginOAuth({
       callbackResponse.writeHead(200, {
         "content-type": "text/html; charset=utf-8",
       });
-      callbackResponse.end(
-        successPage({ account, scopes: selectedScopes, summary }),
-      );
+      callbackResponse.end(successPage({ account, scopes: selectedScopes, summary }));
       return {
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,

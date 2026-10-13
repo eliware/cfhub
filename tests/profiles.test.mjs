@@ -1,37 +1,59 @@
-import { jest } from '@jest/globals';
-import * as fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { activeProfile, applyActiveProfile, profilesPath, readProfiles, writeProfiles } from '../src/profiles.mjs';
-import { deleteCredential, readCredential, writeCredential } from '../src/credentials.mjs';
+import { jest } from "@jest/globals";
+import * as fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import {
+  activeProfile,
+  applyActiveProfile,
+  profilesPath,
+  readProfiles,
+  writeProfiles,
+} from "../src/profiles.mjs";
+import { deleteCredential, readCredential, writeCredential } from "../src/credentials.mjs";
 
-test('profile storage writes private JSON and applies active values', async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-'));
-  const data = { active: 'work', profiles: { work: { apiToken: 'token', accountId: 'a1', zoneId: 'z1' } } };
+test("profile storage writes private JSON and applies active values", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-"));
+  const data = {
+    active: "work",
+    profiles: { work: { apiToken: "token", accountId: "a1", zoneId: "z1" } },
+  };
   writeProfiles(data, home);
-  expect(profilesPath(home)).toContain('/.config/cfhub/profiles.json');
+  expect(profilesPath(home)).toContain("/.config/cfhub/profiles.json");
   expect(readProfiles(home)).toEqual(data);
-  const env = {}; expect(activeProfile(env, home)).toMatchObject({ name: 'work', apiToken: 'token' });
+  const env = {};
+  expect(activeProfile(env, home)).toMatchObject({ name: "work", apiToken: "token" });
   await applyActiveProfile(env, home);
-  expect(env).toEqual({ CLOUDFLARE_API_TOKEN: 'token', CLOUDFLARE_ACCOUNT_ID: 'a1', CLOUDFLARE_ZONE_ID: 'z1' });
+  expect(env).toEqual({
+    CLOUDFLARE_API_TOKEN: "token",
+    CLOUDFLARE_ACCOUNT_ID: "a1",
+    CLOUDFLARE_ZONE_ID: "z1",
+  });
 });
 
-test('profile application exports known API permissions', async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-permissions-'));
-  writeProfiles({ active: 'work', profiles: { work: { apiToken: 'token', apiPermissions: ['DNS Read'], apiPermissionsKnown: true } } }, home);
+test("profile application exports known API permissions", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-permissions-"));
+  writeProfiles(
+    {
+      active: "work",
+      profiles: {
+        work: { apiToken: "token", apiPermissions: ["DNS Read"], apiPermissionsKnown: true },
+      },
+    },
+    home,
+  );
   const env = {};
   await applyActiveProfile(env, home);
-  expect(env.CFHUB_API_PERMISSIONS).toBe('DNS Read');
-  expect(env.CFHUB_API_PERMISSIONS_KNOWN).toBe('1');
+  expect(env.CFHUB_API_PERMISSIONS).toBe("DNS Read");
+  expect(env.CFHUB_API_PERMISSIONS_KNOWN).toBe("1");
 });
 
-test('profile selection honors explicit profile and missing storage', async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-empty-'));
+test("profile selection honors explicit profile and missing storage", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-empty-"));
   expect(readProfiles(home)).toEqual({ active: null, profiles: {} });
-  expect(activeProfile({ CLOUDFLARE_PROFILE: 'none' }, home)).toBeNull();
-  expect(await applyActiveProfile({ CLOUDFLARE_ACCOUNT_ID: 'existing' }, home)).toBeNull();
+  expect(activeProfile({ CLOUDFLARE_PROFILE: "none" }, home)).toBeNull();
+  expect(await applyActiveProfile({ CLOUDFLARE_ACCOUNT_ID: "existing" }, home)).toBeNull();
   expect(readProfiles(home, {})).toEqual({ active: null, profiles: {} });
-  expect(profilesPath()).toContain('/.config/cfhub/profiles.json');
+  expect(profilesPath()).toContain("/.config/cfhub/profiles.json");
   expect(readProfiles(undefined, {})).toEqual({ active: null, profiles: {} });
   expect(activeProfile({}, undefined, {})).toBeNull();
   expect(await applyActiveProfile({}, undefined, {})).toBeNull();
@@ -39,108 +61,148 @@ test('profile selection honors explicit profile and missing storage', async () =
   expect(await applyActiveProfile({}, home, {})).toBeNull();
   expect(await applyActiveProfile({}, home, {})).toBeNull();
   const implicit = activeProfile();
-  expect(implicit === null || typeof implicit === 'object').toBe(true);
+  expect(implicit === null || typeof implicit === "object").toBe(true);
   expect(await applyActiveProfile(undefined, undefined, {})).toBeNull();
 });
 
-test('profile writer tolerates adapters without chmod', () => {
+test("profile writer tolerates adapters without chmod", () => {
   const files = new Map();
   const adapter = {
-    mkdirSync: jest.fn(), writeFileSync: jest.fn((name, value) => files.set(name, value)),
+    mkdirSync: jest.fn(),
+    writeFileSync: jest.fn((name, value) => files.set(name, value)),
   };
-  writeProfiles({ active: null, profiles: {} }, '/tmp/cf-test-home', adapter);
+  writeProfiles({ active: null, profiles: {} }, "/tmp/cf-test-home", adapter);
   writeProfiles({ active: null, profiles: {} }, undefined, adapter);
-  expect(adapter.mkdirSync).toHaveBeenCalled(); expect(files.size).toBe(2);
+  expect(adapter.mkdirSync).toHaveBeenCalled();
+  expect(files.size).toBe(2);
 });
 
-test('profile application preserves explicit environment values', async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-values-'));
-  writeProfiles({ active: 'work', profiles: { work: { apiToken: 'token', accountId: 'a1' } } }, home);
-  const env = { CLOUDFLARE_API_TOKEN: 'existing', CLOUDFLARE_ACCOUNT_ID: 'existing-account' };
+test("profile application preserves explicit environment values", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-values-"));
+  writeProfiles(
+    { active: "work", profiles: { work: { apiToken: "token", accountId: "a1" } } },
+    home,
+  );
+  const env = { CLOUDFLARE_API_TOKEN: "existing", CLOUDFLARE_ACCOUNT_ID: "existing-account" };
   await applyActiveProfile(env, home);
-  expect(env).toEqual({ CLOUDFLARE_API_TOKEN: 'existing', CLOUDFLARE_ACCOUNT_ID: 'existing-account' });
-});
-
-test('profile application removes profiles when OAuth refresh fails', async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-oauth-'));
-  writeProfiles({ active: 'work', profiles: { work: {} } }, home);
-  const credential = { oauthRefreshToken: 'refresh', oauthAccessToken: 'old', expiresAt: 100 };
-  const readCredential = jest.fn().mockResolvedValue(credential); const writeCredential = jest.fn();
-  const refreshOAuth = jest.fn().mockResolvedValue({ accessToken: 'new', refreshToken: 'next', expiresAt: 9999 });
-  const env = {};
-  await applyActiveProfile(env, home, fs, { readCredential, writeCredential, refreshOAuth, now: () => 0 });
-  expect(env.CLOUDFLARE_API_TOKEN).toBe('new'); expect(writeCredential).toHaveBeenCalled();
-  const failing = { ...credential }; const fallbackEnv = {};
-  await applyActiveProfile(fallbackEnv, home, fs, { readCredential: jest.fn().mockResolvedValue(failing), refreshOAuth: jest.fn().mockRejectedValue(new Error('expired')), now: () => 0 });
-  expect(fallbackEnv.CLOUDFLARE_API_TOKEN).toBeUndefined();
-  writeProfiles({ active: 'other', profiles: { work: {}, other: {} } }, home);
-  await applyActiveProfile({ CLOUDFLARE_PROFILE: 'work' }, home, fs, {
-    readCredential: jest.fn().mockResolvedValue(failing),
-    deleteCredential: jest.fn(),
-    refreshOAuth: jest.fn().mockRejectedValue(new Error('expired')),
-    now: () => 0,
+  expect(env).toEqual({
+    CLOUDFLARE_API_TOKEN: "existing",
+    CLOUDFLARE_ACCOUNT_ID: "existing-account",
   });
-  expect(readProfiles(home).active).toBe('other');
 });
 
-test('refreshed OAuth credentials take precedence over legacy profile access tokens', async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-legacy-oauth-'));
-  writeProfiles({ active: 'work', profiles: { work: { apiToken: 'expired', accountId: 'a1' } } }, home);
+test("profile application removes profiles when OAuth refresh fails", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-oauth-"));
+  writeProfiles({ active: "work", profiles: { work: {} } }, home);
+  const credential = { oauthRefreshToken: "refresh", oauthAccessToken: "old", expiresAt: 100 };
+  const readCredential = jest.fn().mockResolvedValue(credential);
+  const writeCredential = jest.fn();
+  const refreshOAuth = jest
+    .fn()
+    .mockResolvedValue({ accessToken: "new", refreshToken: "next", expiresAt: 9999 });
   const env = {};
   await applyActiveProfile(env, home, fs, {
-    readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: 'fresh' }),
+    readCredential,
+    writeCredential,
+    refreshOAuth,
     now: () => 0,
   });
-  expect(env.CLOUDFLARE_API_TOKEN).toBe('fresh');
+  expect(env.CLOUDFLARE_API_TOKEN).toBe("new");
+  expect(writeCredential).toHaveBeenCalled();
+  const failing = { ...credential };
+  const fallbackEnv = {};
+  await applyActiveProfile(fallbackEnv, home, fs, {
+    readCredential: jest.fn().mockResolvedValue(failing),
+    refreshOAuth: jest.fn().mockRejectedValue(new Error("expired")),
+    now: () => 0,
+  });
+  expect(fallbackEnv.CLOUDFLARE_API_TOKEN).toBeUndefined();
+  writeProfiles({ active: "other", profiles: { work: {}, other: {} } }, home);
+  await applyActiveProfile({ CLOUDFLARE_PROFILE: "work" }, home, fs, {
+    readCredential: jest.fn().mockResolvedValue(failing),
+    deleteCredential: jest.fn(),
+    refreshOAuth: jest.fn().mockRejectedValue(new Error("expired")),
+    now: () => 0,
+  });
+  expect(readProfiles(home).active).toBe("other");
 });
 
-test('default credential writer persists refreshed OAuth credentials to disk', async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-disk-refresh-'));
-  writeProfiles({ active: 'work', profiles: { work: {} } }, home);
+test("refreshed OAuth credentials take precedence over legacy profile access tokens", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-legacy-oauth-"));
+  writeProfiles(
+    { active: "work", profiles: { work: { apiToken: "expired", accountId: "a1" } } },
+    home,
+  );
+  const env = {};
+  await applyActiveProfile(env, home, fs, {
+    readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: "fresh" }),
+    now: () => 0,
+  });
+  expect(env.CLOUDFLARE_API_TOKEN).toBe("fresh");
+});
+
+test("default credential writer persists refreshed OAuth credentials to disk", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-disk-refresh-"));
+  writeProfiles({ active: "work", profiles: { work: {} } }, home);
   await applyActiveProfile({}, home, fs, {
-    readCredential: jest.fn().mockResolvedValue({ oauthRefreshToken: 'refresh', oauthAccessToken: 'old', expiresAt: 1 }),
-    refreshOAuth: jest.fn().mockResolvedValue({ accessToken: 'new', refreshToken: 'next', expiresAt: 9999 }),
-    writeCredential: (profile, value) => writeCredential(profile, value, jest.fn().mockResolvedValue(null), fs, home),
+    readCredential: jest
+      .fn()
+      .mockResolvedValue({ oauthRefreshToken: "refresh", oauthAccessToken: "old", expiresAt: 1 }),
+    refreshOAuth: jest
+      .fn()
+      .mockResolvedValue({ accessToken: "new", refreshToken: "next", expiresAt: 9999 }),
+    writeCredential: (profile, value) =>
+      writeCredential(profile, value, jest.fn().mockResolvedValue(null), fs, home),
     now: () => 0,
   });
-  const credentials = JSON.parse(fs.readFileSync(`${home}/.config/cfhub/credentials.json`, 'utf8'));
-  expect(credentials.work).toMatchObject({ oauthAccessToken: 'new', oauthRefreshToken: 'next' });
+  const credentials = JSON.parse(fs.readFileSync(`${home}/.config/cfhub/credentials.json`, "utf8"));
+  expect(credentials.work).toMatchObject({ oauthAccessToken: "new", oauthRefreshToken: "next" });
 });
 
-test('default credential writer persists through the configured credential adapter', async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-keychain-'));
-  writeProfiles({ active: 'keychain-test', profiles: { 'keychain-test': {} } }, home);
+test("default credential writer persists through the configured credential adapter", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-keychain-"));
+  writeProfiles({ active: "keychain-test", profiles: { "keychain-test": {} } }, home);
   await applyActiveProfile({}, home, fs, {
-    readCredential: jest.fn().mockResolvedValue({ oauthRefreshToken: 'refresh', oauthAccessToken: 'old', expiresAt: 1 }),
-    refreshOAuth: jest.fn().mockResolvedValue({ accessToken: 'new', refreshToken: 'next', expiresAt: 9999 }),
+    readCredential: jest
+      .fn()
+      .mockResolvedValue({ oauthRefreshToken: "refresh", oauthAccessToken: "old", expiresAt: 1 }),
+    refreshOAuth: jest
+      .fn()
+      .mockResolvedValue({ accessToken: "new", refreshToken: "next", expiresAt: 9999 }),
     now: () => 0,
   });
-  await expect(readCredential('keychain-test', undefined, fs, home)).resolves.toMatchObject({ oauthAccessToken: 'new' });
-  await deleteCredential('keychain-test', undefined, fs, home);
+  await expect(readCredential("keychain-test", undefined, fs, home)).resolves.toMatchObject({
+    oauthAccessToken: "new",
+  });
+  await deleteCredential("keychain-test", undefined, fs, home);
 });
 
-test('expired OAuth credentials without refresh tokens are logged out', async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-profile-expired-'));
-  writeProfiles({ active: 'work', profiles: { work: {}, other: {} } }, home);
+test("expired OAuth credentials without refresh tokens are logged out", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-expired-"));
+  writeProfiles({ active: "work", profiles: { work: {}, other: {} } }, home);
   const deleteCredential = jest.fn().mockResolvedValue(true);
   const result = await applyActiveProfile({}, home, fs, {
-    readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: 'expired', expiresAt: 1 }),
+    readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: "expired", expiresAt: 1 }),
     deleteCredential,
     now: () => 0,
   });
   expect(result).toBeNull();
-  expect(deleteCredential).toHaveBeenCalledWith('work');
-  expect(readProfiles(home)).toEqual({ active: 'other', profiles: { other: {} } });
-  writeProfiles({ active: 'other', profiles: { work: {}, other: {} } }, home);
-  await expect(applyActiveProfile({ CLOUDFLARE_PROFILE: 'work' }, home, fs, {
-    readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: 'expired', expiresAt: 1 }),
-    now: () => 0,
-  })).resolves.toBeNull();
-  expect(readProfiles(home)).toEqual({ active: 'other', profiles: { other: {} } });
-  writeProfiles({ active: 'work', profiles: { work: {} } }, home);
-  await expect(applyActiveProfile({}, home, fs, {
-    readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: 'expired', expiresAt: 1 }),
-    now: () => 0,
-  })).resolves.toBeNull();
+  expect(deleteCredential).toHaveBeenCalledWith("work");
+  expect(readProfiles(home)).toEqual({ active: "other", profiles: { other: {} } });
+  writeProfiles({ active: "other", profiles: { work: {}, other: {} } }, home);
+  await expect(
+    applyActiveProfile({ CLOUDFLARE_PROFILE: "work" }, home, fs, {
+      readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: "expired", expiresAt: 1 }),
+      now: () => 0,
+    }),
+  ).resolves.toBeNull();
+  expect(readProfiles(home)).toEqual({ active: "other", profiles: { other: {} } });
+  writeProfiles({ active: "work", profiles: { work: {} } }, home);
+  await expect(
+    applyActiveProfile({}, home, fs, {
+      readCredential: jest.fn().mockResolvedValue({ oauthAccessToken: "expired", expiresAt: 1 }),
+      now: () => 0,
+    }),
+  ).resolves.toBeNull();
   expect(readProfiles(home)).toEqual({ active: null, profiles: {} });
 });

@@ -1,4 +1,4 @@
-import * as fs from 'node:fs';
+import * as fs from "node:fs";
 import { configRoot } from "./config.mjs";
 
 const PACKAGE_URL = "https://registry.npmjs.org/cfhub/latest";
@@ -9,7 +9,10 @@ function cachePath(homeDir) {
 }
 
 function newerVersion(latest, current) {
-  const parse = (value) => String(value).split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const parse = (value) =>
+    String(value)
+      .split(".")
+      .map((part) => Number.parseInt(part, 10) || 0);
   const a = parse(latest);
   const b = parse(current);
   for (const index of [0, 1, 2]) {
@@ -42,14 +45,17 @@ export async function checkForUpdate({
   if (typeof fetchImpl !== "function") return null;
   try {
     /* istanbul ignore next -- supported Node versions provide AbortSignal.timeout. */
-    const signal = typeof globalThis.AbortSignal?.timeout === "function"
-      ? globalThis.AbortSignal.timeout(2000)
-      : undefined;
+    const signal =
+      typeof globalThis.AbortSignal?.timeout === "function"
+        ? globalThis.AbortSignal.timeout(2000)
+        : undefined;
     const response = await fetchImpl(PACKAGE_URL, signal ? { signal } : {});
     if (!response.ok) return null;
     const latestVersion = (await response.json()).version;
     fsImpl.mkdirSync(configRoot(homeDir), { recursive: true });
-    fsImpl.writeFileSync(path, `${JSON.stringify({ checkedAt: now, latestVersion })}\n`, { mode: 0o600 });
+    fsImpl.writeFileSync(path, `${JSON.stringify({ checkedAt: now, latestVersion })}\n`, {
+      mode: 0o600,
+    });
     if (typeof fsImpl.chmodSync === "function") fsImpl.chmodSync(path, 0o600);
     return newerVersion(latestVersion, currentVersion) ? latestVersion : null;
   } catch {

@@ -1,34 +1,54 @@
 # [![eliware.org](https://eliware.org/logos/brand.png)](https://discord.gg/M6aTR9eTwN)
 
-## cfhub [![npm version](https://img.shields.io/npm/v/cfhub.svg)](https://www.npmjs.com/package/cfhub) [![license](https://img.shields.io/github/license/eliware/cfhub.svg)](LICENSE) [![build status](https://github.com/eliware/cfhub/actions/workflows/nodejs.yml/badge.svg)](https://github.com/eliware/cfhub/actions)
+## @eliware/cfhub [![npm](https://img.shields.io/npm/v/@eliware/cfhub)](https://www.npmjs.com/package/@eliware/cfhub) [![License](https://img.shields.io/github/license/eliware/cfhub)](https://github.com/eliware/cfhub/blob/main/LICENSE) [![CI](https://github.com/eliware/cfhub/actions/workflows/ci.yaml/badge.svg)](https://github.com/eliware/cfhub/actions/workflows/ci.yaml)
 
-Cloudflare administration CLI for inspecting and managing zones, DNS, rules, settings, lists, and account services. `cfhub` is designed to feel familiar to anyone who uses the GitHub CLI: commands are composable, automation-friendly, and safe by default.
+Cloudflare administration and automation CLI with GitHub CLI-style commands, profiles, safe writes, and direct API access.
+
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Setup](#setup)
+- [Usage](#usage)
+- [Development](#development)
+- [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
+- [Security](#security)
+- [Configuration](#configuration)
+- [Operations](#operations)
+- [Commands](#commands)
+- [Exit codes](#exit-codes)
+- [Routes](#routes)
+- [Assets](#assets)
+- [Development server](#development-server)
+- [Build](#build)
+- [Deployment](#deployment)
+- [Support](#support)
+- [Links](#links)
+- [License](#license)
 
 ## Features
 
-- Zone, DNS, rules, settings, lists, and account-service management.
-- Read-only health, audit, inventory, SSL, Origin CA, and cache tooling.
-- Direct access to any Cloudflare API endpoint through `cfhub api`.
-- Human-readable tables and JSON output with jq-style selection and templates.
-- Safe writes with `--dry-run`, explicit confirmation for destructive operations, and automation-friendly output.
-- API-token and OAuth authentication with named profiles and secure credential storage.
-- Multiple named profiles with switch, status, verify, list, and logout commands.
-- Account resource commands for load balancers, tunnels, Workers, Pages, R2, D1, Queues, Stream, Images, AI, and Access.
-- GitHub CLI-style help, aliases, typo suggestions, and command discovery.
-- Dependency-injected ESM architecture with an extension/plugin contract and example extension.
+- Manage Cloudflare zones, DNS, settings, rules, lists, and account services.
+- Inspect health, audit, inventory, SSL, Origin CA, and cache state.
+- Call any Cloudflare API endpoint with `cfhub api`.
+- Select JSON fields and render command output as templates.
+- Preview writes with `--dry-run`. Confirm destructive actions with `--force`.
+- Sign in with API tokens or OAuth profiles.
+- Extend the CLI with local commands.
 
 ## Requirements
 
-- Node.js 26 or newer.
-- A Cloudflare account and either a scoped API token or permission to authorize the optional OAuth client.
-- Account and zone IDs for commands that need an explicit scope when defaults are not configured.
+- Use Node.js 26 or later.
+- Use a Cloudflare account and a scoped API token or OAuth access.
+- Provide account or zone IDs when a command needs a scope.
 
-## Installation
+## Setup
 
-Install the published package:
+Install the public package:
 
 ```sh
-npm install --global cfhub
+npm install --global @eliware/cfhub
 ```
 
 Or install from source:
@@ -36,130 +56,85 @@ Or install from source:
 ```sh
 git clone https://github.com/eliware/cfhub.git
 cd cfhub
-npm install
+npm ci
 npm link
 ```
 
-Verify the installation:
+Save a scoped API token with `cfhub auth login`. Use `cfhub oauth login` for OAuth access.
+
+## Usage
+
+List zones and DNS records:
 
 ```sh
-cfhub --version
-cfhub --help
+cfhub zones list
+cfhub zones get --zone-id <zone_id>
+cfhub dns-records list --zone-id <zone_id>
 ```
 
-## Credentials
-
-For normal CLI use, create a scoped Cloudflare API token and save it:
+Preview a DNS write:
 
 ```sh
-cfhub auth login
+cfhub dns-records create --zone-id <zone_id> --data '{"type":"A","name":"www","content":"192.0.2.1"}' --dry-run
 ```
 
-`cfhub auth login` prints a short setup guide and prompts for the token with
-hidden input. Credentials are stored in the operating system keychain when
-available, with a private disk fallback otherwise. Use `--token-stdin` for
-headless automation.
-
-The interactive setup follows Cloudflare’s current Account API Token flow:
-
-1. Open **Manage account > Account API tokens**.
-2. Choose **Create Token**, enter a name, and select an appropriate policy
-   such as Read all resources, Write all resources, Edit Cloudflare Workers,
-   Edit zone DNS, or a custom policy.
-3. Set expiration and optional client IP filtering, then choose **Review
-   Token**, scroll down, and choose **Create Token**.
-4. Paste the one-time token into cfhub, then provide the Cloudflare Account ID
-   when prompted.
-
-After login, cfhub verifies the token. For user-owned tokens it also loads the
-token's Cloudflare permission groups when the token permits token-details
-access, stores a read/write/other summary, and blocks commands whose required
-permissions are known to be absent. Account-owned tokens can be verified but
-Cloudflare does not expose their permission policy through verification, so
-those commands use friendly authorization-error guidance instead of claiming a
-complete permission inventory.
-
-OAuth is also supported through the separate `oauth` resource:
+Delete a DNS record with confirmation:
 
 ```sh
-cfhub oauth login
-cfhub oauth status
-cfhub oauth logout --profile work
+cfhub dns-records delete --zone-id <zone_id> --id <record_id> --force
 ```
 
-### Default OAuth client
-
-Running `cfhub oauth login` uses the public Eliware OAuth client built into the
-CLI. The command starts a temporary local OAuth web server, opens the scope
-picker, and then sends the selected authorization request to Cloudflare. The
-client can request only scopes enabled in its Cloudflare registration, so the
-picker's selections are limited by that registration.
-
-### Use your own OAuth client
-
-You can register and manage a Cloudflare OAuth client in your own account or
-organization. This is useful for teams that want their own application identity
-or a different set of approved scopes:
-
-1. Create an OAuth application in Cloudflare.
-2. Enable the authorization-code response type (`Code`), rather than an
-   implicit token response.
-3. Register `http://127.0.0.1:8765/oauth/callback` as the redirect URL. If the
-   registration accepts multiple redirect URLs, also add ports `8766` through
-   `8769`; `cfhub` uses those ports when an earlier one is busy.
-4. Select all scopes the client is allowed to request. The scope picker can
-   select permissions only when the Cloudflare client registration permits
-   them.
-5. Start the normal login command with the client ID:
+Select JSON output:
 
 ```sh
-CFHUB_OAUTH_CLIENT_ID=your-client-id cfhub oauth login
+cfhub zones list --json --jq '.result[].name'
+cfhub api /zones --json --template '{{.result}}'
 ```
 
-There is no separate OAuth-server command: `cfhub oauth login` starts the
-temporary server automatically. The default browser redirect remains
-`127.0.0.1`; for remote access, the server can bind on all interfaces while
-the registered redirect remains local to the browser:
+Read [RELEASE_NOTES.md](RELEASE_NOTES.md) for version history. Read [docs/extensions.md](docs/extensions.md) for the extension contract.
+
+## Development
+
+Install dependencies and build OAuth web assets:
 
 ```sh
-CFHUB_OAUTH_CLIENT_ID=your-client-id \
-CFHUB_OAUTH_BIND_HOST=0.0.0.0 \
-CFHUB_OAUTH_REDIRECT_HOST=127.0.0.1 \
-cfhub oauth login
+npm ci
+npm run build:web
 ```
 
-The client ID environment variable overrides the built-in Eliware client for
-that login only. Do not commit client credentials, tokens, or `.env` files.
+Use `.env` for local defaults. Set `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, or `CLOUDFLARE_ZONE_ID` when needed.
 
-For headless automation, provide an API token through standard input:
+## Testing
+
+Run validation from the repository root:
 
 ```sh
-printf '%s' "$CLOUDFLARE_API_TOKEN" | cfhub auth login --profile ci --token-stdin
+npm test
+npm run lint
+npm run audit
+npm run format:check
+npm run pack
 ```
 
-Use profiles to separate accounts or automation contexts:
+Run browser checks with `npm run test:e2e:web`. The checks save reports under the ignored `artifacts/` directory.
 
-```sh
-cfhub oauth list
-cfhub oauth status
-cfhub oauth switch --profile work
-cfhub oauth verify
-cfhub oauth logout --profile work
-```
+## Troubleshooting
 
-An unauthenticated command reports that the user is not logged in and directs them to `cfhub auth login`.
+If a command reports that you are not logged in, run `cfhub auth login` or `cfhub oauth login`.
 
-The CLI checks npm for a newer version at most once per day. The check is
-best-effort, does not delay commands, and never updates automatically. Disable
-it with `CFHUB_NO_UPDATE_CHECK=1` or permanently with:
+If a command reports missing permissions, create a token with the required Cloudflare permissions.
 
-```sh
-cfhub config set update-check false
-```
+If OAuth port 8765 is busy, cfhub checks ports 8766 through 8769.
+
+## Security
+
+Keep API tokens, OAuth credentials, and `.env` files private. Store credentials in the operating system keychain when available.
+
+The CLI stores profile data under `~/.config/cfhub`. It uses a private file for credentials when no keychain is available.
 
 ## Configuration
 
-Environment variables may be supplied directly, through a local `.env`, or as optional defaults in the project configuration:
+Set optional defaults in `.env`:
 
 ```env
 CLOUDFLARE_API_TOKEN=your_api_token
@@ -167,128 +142,63 @@ CLOUDFLARE_ACCOUNT_ID=your_account_id
 CLOUDFLARE_ZONE_ID=your_zone_id
 ```
 
-Profiles are stored in the `~/.config/cfhub` configuration directory, while secrets are stored in the OS keychain when available. Existing environment variables take precedence over profile values. Keep tokens, `.env` files, keychain exports, and generated state private; none should be committed.
+Environment values take precedence over profile values. Use named profiles for separate accounts.
 
-If an OS keychain is unavailable, credentials are stored in
-`~/.config/cfhub/credentials.json` with `0600` permissions. This file contains
-the refresh token and expiry metadata needed to renew access tokens; protect it
-like any other credential file and exclude it from backups or shared home
-directories. Profile metadata never stores OAuth access or refresh tokens.
+## Operations
 
-## Usage
+Use `cfhub auth login` to save an API token. Use `cfhub oauth login` to start the local OAuth flow.
 
-Inspect zones and DNS records:
+Use `cfhub auth status`, `cfhub auth verify`, and `cfhub auth logout` to manage authentication.
 
-```sh
-cfhub zones list
-cfhub zones get --zone-id <zone_id>
-cfhub dns-records list --zone-id <zone_id>
-cfhub dns-records get --zone-id <zone_id> --id <record_id> --output json
-```
+Use `cfhub config set update-check false` to disable the daily package update check.
 
-Create or preview a DNS change:
+## Commands
 
-```sh
-cfhub dns-records create --zone-id <zone_id> \
-  --data '{"type":"A","name":"www","content":"192.0.2.1"}' \
-  --dry-run
-```
+Run `cfhub --help` to list resources. Run `cfhub <resource> --help` for resource actions.
 
-Destructive operations require explicit confirmation:
+Read the [documentation index](docs/README.md) for guides and command references.
 
-```sh
-cfhub dns-records delete --zone-id <zone_id> --id <record_id> --force
-```
+## Exit codes
 
-Use JSON, jq selection, templates, or dashboard links in automation:
+The CLI returns 0 after success. It returns 1 after command or API errors.
 
-```sh
-cfhub zones list --json
-cfhub zones list --json --jq '.result[]'
-cfhub api /zones --json --jq '.result[].name'
-cfhub api /zones --json --template '{{.result}}'
-cfhub zones get --zone-id <zone_id> --web
-```
+## Routes
 
-Access the full Cloudflare API when a built-in command is not available:
+The local OAuth server serves the picker, result, and success pages. It receives OAuth callbacks at `127.0.0.1`.
 
-```sh
-cfhub api /zones
-cfhub api zones/<zone_id>/dns_records --method POST \
-  --data '{"type":"TXT","name":"example.com","content":"hello"}'
-```
+## Assets
 
-Run `<resource> --help` or `<resource> <command> --help` for detailed command-specific help. Singular aliases such as `cfhub zone`, `cfhub dns`, `cfhub rules`, and `cfhub list` are supported.
+OAuth page sources and image assets live in `src/oauth-web/`. The server serves these files during login.
 
-## Extensions
+## Development server
 
-Extensions add local commands without changing the built-in CLI. The repository includes an example extension and documents the extension manifest and handler contract:
+`cfhub oauth login` starts a temporary local web server. The default redirect port is 8765. The CLI tries ports 8766 through 8769 when needed.
 
-```sh
-cfhub extension list
-cfhub extension install --path examples/extensions/hello
-cfhub hello --name Eli
-```
+## Build
 
-See [docs/extensions.md](docs/extensions.md) for the extension contract and [docs/gh-orientation.md](docs/gh-orientation.md) for the GitHub CLI familiarity guide.
+Run `npm run build:web` after you edit OAuth page sources or styles. The build writes browser bundles under `src/oauth-web/bundled/`.
 
-## Development
+## Deployment
 
-Install dependencies and run the validation suite:
-
-```sh
-npm install
-npm test
-npm run lint
-npm run test:gaps
-npm run build:web
-npm run pack
-```
-
-The OAuth pages keep their readable source stylesheets in `src/oauth-web/`.
-Run `npm run build:web` after editing them to regenerate the minified bundles
-served by the local OAuth server; `npm pack` runs that build automatically.
-
-The test suite uses dependency injection for Cloudflare clients, filesystem access, environment loading, output, handlers, and process exits. Browser checks for the OAuth web interface are available without authenticating:
-
-```sh
-npm run test:e2e:screenshots
-npm run test:e2e:lighthouse
-npm run test:e2e:web
-```
-
-Screenshots and Lighthouse reports are written under the ignored `artifacts/` directory. Puppeteer is a development dependency and the local web test page can simulate the OAuth picker and callback result states.
-
-## Project structure
-
-- `bin/` - executable CLI entry point.
-- `src/cli.mjs` - dependency-injected command runtime.
-- `src/handlers/` - built-in resource and authentication handlers.
-- `src/oauth-web/` - standalone OAuth picker and callback pages.
-- `src/` - argument, environment, API, profile, output, and extension utilities.
-- `examples/extensions/` - example extension.
-- `tests/` - unit and integration tests.
-- `tests/e2e/` - Puppeteer and Lighthouse checks.
-- `dream.md` - product vision.
-- `dream_sprints.md` - roadmap.
+cfhub does not deploy a hosted web service. The OAuth server runs on the user's computer during login.
 
 ## Support
 
-For help, questions, or community chat:
+For help, questions, or to chat with the author and community, visit:
 
-[![Discord](https://eliware.org/logos/discord_96.png)](https://discord.gg/M6aTR9eTwN)  
+[![Discord](https://eliware.org/logos/discord_96.png)](https://discord.gg/M6aTR9eTwN)[![eliware.org](https://eliware.org/logos/eliware_96.png)](https://discord.gg/M6aTR9eTwN)
+
 **[eliware.org on Discord](https://discord.gg/M6aTR9eTwN)**
-
-## License
-
-[ISC © 2026 Eli Sterling, eliware.org](LICENSE)
 
 ## Links
 
-- [Project Home](https://eliware.org/cfhub)
-- [Privacy Policy](https://eliware.org/cfhub/policy)
-- [Terms of Service](https://eliware.org/cfhub/tos)
-- [GitHub Repository](https://github.com/eliware/cfhub)
-- [GitHub Organization](https://github.com/eliware)
-- [npm Package](https://www.npmjs.com/package/cfhub)
+- [Home Page](https://eliware.org)
+- [GitHub Org](https://github.com/eliware)
+- [GitHub Repo](https://github.com/eliware/cfhub)
+- [Bug Reports](https://github.com/eliware/cfhub/issues)
+- [npm](https://www.npmjs.com/package/@eliware/cfhub)
 - [Discord](https://discord.gg/M6aTR9eTwN)
+
+## License
+
+[MIT © Eliware](LICENSE)

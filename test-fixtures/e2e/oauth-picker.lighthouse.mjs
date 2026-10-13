@@ -6,9 +6,7 @@ import lighthouse, { generateReport } from "lighthouse";
 import { loginOAuth } from "../../src/oauth.mjs";
 import { findBrowser } from "../../src/browser.mjs";
 
-const outputDir = resolve(
-  process.env.CFHUB_LIGHTHOUSE_DIR ?? "artifacts/oauth-lighthouse",
-);
+const outputDir = resolve(process.env.CFHUB_LIGHTHOUSE_DIR ?? "artifacts/oauth-lighthouse");
 const executablePath = await findBrowser();
 const printed = [];
 const fetchImpl = async () => ({
@@ -28,10 +26,7 @@ const url = printed[0]?.match(/https?:\/\/\S+/)?.[0];
 assert.ok(url, "OAuth preview URL was not created");
 const chrome = await launch({
   chromePath: executablePath,
-  chromeFlags: [
-    "--headless",
-    ...(process.getuid?.() === 0 ? ["--no-sandbox"] : []),
-  ],
+  chromeFlags: ["--headless", ...(process.getuid?.() === 0 ? ["--no-sandbox"] : [])],
 });
 try {
   const result = await lighthouse(url, {
@@ -48,14 +43,8 @@ try {
   });
   assert.ok(result?.lhr, "Lighthouse did not return a result");
   await mkdir(outputDir, { recursive: true });
-  await writeFile(
-    join(outputDir, "report.html"),
-    generateReport(result.lhr, "html"),
-  );
-  await writeFile(
-    join(outputDir, "report.json"),
-    `${JSON.stringify(result.lhr, null, 2)}\n`,
-  );
+  await writeFile(join(outputDir, "report.html"), generateReport(result.lhr, "html"));
+  await writeFile(join(outputDir, "report.json"), `${JSON.stringify(result.lhr, null, 2)}\n`);
   console.log(`OAuth Lighthouse reports written to ${outputDir}`);
   console.log(
     `Scores: ${JSON.stringify(Object.fromEntries(Object.entries(result.lhr.categories).map(([key, category]) => [key, category.score == null ? null : Math.round(category.score * 100)])))}`,

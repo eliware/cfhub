@@ -1,8 +1,8 @@
 import { jest } from "@jest/globals";
 import { handleLists } from "../../src/handlers/lists.mjs";
 
-test('handleLists is exported', () => {
-  expect(typeof handleLists).toBe('function');
+test("handleLists is exported", () => {
+  expect(typeof handleLists).toBe("function");
 });
 
 function context(overrides = {}) {
@@ -33,9 +33,7 @@ function context(overrides = {}) {
 test("lists list and get use the SDK and JSON output", async () => {
   const list = context();
   await handleLists(list);
-  expect(list.toJsonOutput).toHaveBeenCalledWith([
-    { id: "list-1", name: "blocklist" },
-  ]);
+  expect(list.toJsonOutput).toHaveBeenCalledWith([{ id: "list-1", name: "blocklist" }]);
 
   const get = context({ action: "get", opts: { "account-id": "account-1", id: "list-1" } });
   await handleLists(get);
@@ -44,43 +42,76 @@ test("lists list and get use the SDK and JSON output", async () => {
 });
 
 test("lists create and update support dry runs and writes", async () => {
-  const createDry = context({ action: "create", opts: { "account-id": "account-1", "dry-run": true }, body: { name: "blocklist", kind: "ip" } });
+  const createDry = context({
+    action: "create",
+    opts: { "account-id": "account-1", "dry-run": true },
+    body: { name: "blocklist", kind: "ip" },
+  });
   await handleLists(createDry);
   expect(createDry.cf.post).not.toHaveBeenCalled();
   expect(createDry.printer.log).toHaveBeenCalled();
 
   const create = context({ action: "create", body: { name: "blocklist", kind: "ip" } });
   await handleLists(create);
-  expect(create.cf.post).toHaveBeenCalledWith("/accounts/account-1/rules/lists", { body: create.body });
+  expect(create.cf.post).toHaveBeenCalledWith("/accounts/account-1/rules/lists", {
+    body: create.body,
+  });
 
   const createText = context({ action: "create", outputJson: false, body: { name: "text" } });
   await handleLists(createText);
   expect(createText.printer.log).toHaveBeenCalledWith(JSON.stringify({ id: "list-2" }, null, 2));
 
-  const updateDry = context({ action: "update", opts: { "account-id": "account-1", id: "list-2", "dry-run": true }, body: { name: "updated" } });
+  const updateDry = context({
+    action: "update",
+    opts: { "account-id": "account-1", id: "list-2", "dry-run": true },
+    body: { name: "updated" },
+  });
   await handleLists(updateDry);
   expect(updateDry.cf.put).not.toHaveBeenCalled();
 
-  const update = context({ action: "update", opts: { "account-id": "account-1", id: "list-2" }, body: { name: "updated" } });
+  const update = context({
+    action: "update",
+    opts: { "account-id": "account-1", id: "list-2" },
+    body: { name: "updated" },
+  });
   await handleLists(update);
-  expect(update.cf.put).toHaveBeenCalledWith("/accounts/account-1/rules/lists/list-2", { body: update.body });
+  expect(update.cf.put).toHaveBeenCalledWith("/accounts/account-1/rules/lists/list-2", {
+    body: update.body,
+  });
 
-  const updateText = context({ action: "update", outputJson: false, opts: { "account-id": "account-1", id: "list-2" }, body: { name: "text" } });
+  const updateText = context({
+    action: "update",
+    outputJson: false,
+    opts: { "account-id": "account-1", id: "list-2" },
+    body: { name: "text" },
+  });
   await handleLists(updateText);
-  expect(updateText.printer.log).toHaveBeenCalledWith(JSON.stringify({ id: "list-2", name: "updated" }, null, 2));
+  expect(updateText.printer.log).toHaveBeenCalledWith(
+    JSON.stringify({ id: "list-2", name: "updated" }, null, 2),
+  );
 });
 
 test("lists delete requires force and sends the request", async () => {
-  const missingForce = context({ action: "delete", opts: { "account-id": "account-1", id: "list-1" } });
+  const missingForce = context({
+    action: "delete",
+    opts: { "account-id": "account-1", id: "list-1" },
+  });
   await handleLists(missingForce);
   expect(missingForce.fail).toHaveBeenCalledWith("Refusing lists delete without --force");
 
-  const deletion = context({ action: "delete", opts: { "account-id": "account-1", id: "list-1", force: true } });
+  const deletion = context({
+    action: "delete",
+    opts: { "account-id": "account-1", id: "list-1", force: true },
+  });
   await handleLists(deletion);
   expect(deletion.cf.delete).toHaveBeenCalledWith("/accounts/account-1/rules/lists/list-1");
   expect(deletion.toJsonOutput).toHaveBeenCalledWith({ success: true });
 
-  const deletionText = context({ action: "delete", outputJson: false, opts: { "account-id": "account-1", id: "list-1", force: true } });
+  const deletionText = context({
+    action: "delete",
+    outputJson: false,
+    opts: { "account-id": "account-1", id: "list-1", force: true },
+  });
   await handleLists(deletionText);
   expect(deletionText.printer.log).toHaveBeenCalledWith(JSON.stringify({ success: true }, null, 2));
 });
@@ -102,11 +133,17 @@ test("lists reports missing values and unknown actions", async () => {
   await handleLists(missingUpdateId);
   expect(missingUpdateId.fail).toHaveBeenCalledWith("Missing --id");
 
-  const missingUpdateBody = context({ action: "update", opts: { "account-id": "account-1", id: "list-1" } });
+  const missingUpdateBody = context({
+    action: "update",
+    opts: { "account-id": "account-1", id: "list-1" },
+  });
   await handleLists(missingUpdateBody);
   expect(missingUpdateBody.fail).toHaveBeenCalledWith("Missing --data or --file");
 
-  const missingDeleteId = context({ action: "delete", opts: { "account-id": "account-1", force: true } });
+  const missingDeleteId = context({
+    action: "delete",
+    opts: { "account-id": "account-1", force: true },
+  });
   await handleLists(missingDeleteId);
   expect(missingDeleteId.fail).toHaveBeenCalledWith("Missing --id");
 

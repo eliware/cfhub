@@ -1,74 +1,70 @@
 # Release Notes
 
-## 1.0.5
+## Unreleased
 
-- Fixed CSS-only OAuth webpack entries producing empty JavaScript bundle files
-  during tagit releases by configuring the output as ES modules.
+### Changed
 
-## 1.0.4
+- No changes are pending.
 
-- Added current Cloudflare Account API Token setup guidance to interactive login.
-- Migrated supported zone, DNS, settings, ruleset, list, inventory, and health
-  operations to verified raw Cloudflare API endpoints while preserving legacy
-  injected-client compatibility for tests and integrations.
-- Added opt-in live validation for real-token reads and non-mutating dry-run
-  write paths, with account-wide inventory scanning disabled by default.
-- Updated handler fixtures and maintained complete automated coverage.
+## 12.0.0 — 2026-10-13
+
+### Changed
+
+- Aligned repository metadata, documentation, and workflows with Convention v12.
+- Added the Eliware common runtime package and validation package.
+- This version is under local review. It is not published.
+
+## 1.0.5 — 2026-08-19
+
+### Fixed
+
+- Fixed empty OAuth release bundles by configuring webpack output as ES modules.
+
+## 1.0.4 — 2026-08-19
+
+### Added
+
+- Added Cloudflare Account API token setup guidance.
+- Added dry-run live checks for real-token reads and write previews.
+
+### Changed
+
+- Moved supported resource operations to verified Cloudflare API endpoints.
 - Updated Cloudflare, build, lint, and browser-test dependencies.
 
-## 1.0.3
+## 1.0.3 — 2026-08-15
 
-- Completed the remaining CLI branding transition from `cf` to `cfhub`, including OAuth pages, update notices, tests, and the credential keychain service namespace.
-- Improved the OAuth browser experience with better contrast, reduced layout shift, responsive image sizing, CSS minification, gzip compression, cache headers, and versioned static assets.
-- Restricted the publish workflow to `v*` tags and validated the browser flows with Lighthouse and screenshot tests.
+### Added
 
-## 1.0.2
+- Added OAuth browser checks with Lighthouse and screenshot reports.
 
-- Added opt-in OAuth `offline_access` support through the “Keep me logged in” picker option.
-- Persisted OAuth access, refresh, and expiry metadata in the OS keychain when
-  available, with a secure `0600` disk fallback when it is not.
-- Automatically refreshes expiring OAuth credentials and removes expired
-  profiles that have no refresh token.
-- Added synchronized session controls above both OAuth login buttons and
-  tightened the picker layout for desktop and mobile screens.
+### Changed
+
+- Updated product branding and links from `cf` to `cfhub`.
+- Improved OAuth layout, styles, compression, caching, and asset versioning.
+
+## 1.0.2 — 2026-08-14
+
+### Added
+
+- Added optional OAuth `offline_access` support.
+- Added secure storage for OAuth refresh tokens and expiry data.
+
+### Changed
+
+- Improved session controls and the OAuth picker layout.
 - Updated Puppeteer to 25.7.0.
 
-## 1.0.1
+## 1.0.1 — 2026-08-12
 
-- Updated product branding and project links from `cf` to `cfhub` across the
-  package metadata, documentation, and OAuth web pages.
+### Changed
 
-## 1.0.0
+- Updated product branding and project links from `cf` to `cfhub`.
 
-`cfhub` is an OAuth-first command-line tool for Cloudflare administration. It
-provides a familiar, automation-friendly interface for inspecting and safely
-managing Cloudflare resources.
+## 1.0.0 — 2026-08-12
 
-### Baseline feature set
+### Added
 
-- OAuth login with a browser-based scope selector.
-- OAuth profiles with profile switching, status, verification, and logout.
-- OS keychain-backed credential storage.
-- Environment-variable and token-stdin authentication for automation.
-- Cloudflare zones: list, inspect, create, update, and delete.
-- DNS records: list, inspect, create, update, delete, diff, and apply.
-- Zone settings and SSL configuration management.
-- Ruleset inspection and management.
-- Cloudflare lists and list items.
-- Health checks, audit reports, inventory, cache, and Origin CA commands.
-- Direct Cloudflare API access through `cfhub api`.
-- Human-readable tables and JSON output with filtering and templates.
-- Dry-run support for supported write operations.
-- `--force` protection for destructive operations.
-- Command aliases, resource-specific help, and shell completions.
-- Local extension discovery and installation support.
-- Daily npm update checks, with an option to disable them.
-- Cross-platform support for Windows, macOS, and Linux.
-
-### Quality and safety
-
-- Credential-free automated test suite with full source coverage.
-- Static linting and test-gap validation.
-- Dependency-injected filesystem, environment, output, and process behavior.
-- Secrets are kept out of source, logs, fixtures, and generated artifacts.
-- Package validation is performed before release.
+- Added Cloudflare zone, DNS, rules, settings, list, and account commands.
+- Added API-token login, profiles, dry-run writes, and confirmation for deletes.
+- Added JSON output, OAuth login, command help, and local extensions.

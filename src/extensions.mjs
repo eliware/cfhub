@@ -1,24 +1,31 @@
-import os from 'node:os';
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-import * as fs from 'node:fs';
-import { configRoot } from './config.mjs';
+import os from "node:os";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import * as fs from "node:fs";
+import { configRoot } from "./config.mjs";
 
-export function extensionRoot(homeDir = os.homedir()) { return `${configRoot(homeDir)}/extensions`; }
+export function extensionRoot(homeDir = os.homedir()) {
+  return `${configRoot(homeDir)}/extensions`;
+}
 
-function manifestPath(root, name) { return path.join(root, name, 'cf-extension.json'); }
+function manifestPath(root, name) {
+  return path.join(root, name, "cf-extension.json");
+}
 
 export function readExtensionManifest(root, name, fsImpl = fs) {
-  const manifest = JSON.parse(fsImpl.readFileSync(manifestPath(root, name), 'utf8'));
-  if (!manifest.name || manifest.name !== name || !manifest.version || !manifest.commands) throw new Error(`Invalid cfhub extension manifest: ${name}`);
+  const manifest = JSON.parse(fsImpl.readFileSync(manifestPath(root, name), "utf8"));
+  if (!manifest.name || manifest.name !== name || !manifest.version || !manifest.commands)
+    throw new Error(`Invalid cfhub extension manifest: ${name}`);
   return manifest;
 }
 
 export function discoverExtensions(homeDir = os.homedir(), fsImpl = fs) {
   const root = extensionRoot(homeDir);
-  if (typeof fsImpl.existsSync !== 'function' || !fsImpl.existsSync(root)) return [];
-  return fsImpl.readdirSync(root, { withFileTypes: true }).filter(entry => entry.isDirectory())
-    .map(entry => readExtensionManifest(root, entry.name, fsImpl));
+  if (typeof fsImpl.existsSync !== "function" || !fsImpl.existsSync(root)) return [];
+  return fsImpl
+    .readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => readExtensionManifest(root, entry.name, fsImpl));
 }
 
 export async function loadExtensionCommand(manifest, command, homeDir = os.homedir()) {

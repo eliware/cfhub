@@ -27,15 +27,7 @@ const moduleByResource = {
   oauth: "auth",
 };
 
-const writeActions = new Set([
-  "apply",
-  "create",
-  "delete",
-  "purge",
-  "revoke",
-  "set",
-  "update",
-]);
+const writeActions = new Set(["apply", "create", "delete", "purge", "revoke", "set", "update"]);
 const modules = new Map(catalog.modules.map((module) => [module.id, module]));
 
 export function requiredScopes(resource, action) {
@@ -44,9 +36,7 @@ export function requiredScopes(resource, action) {
   if (resource === "cache" && action === "purge") return ["cache.purge"];
   const write = writeActions.has(action);
   const selected = module.scopes.filter((scope) =>
-    write
-      ? scope.endsWith(".write") || scope === "cache.purge"
-      : scope.endsWith(".read"),
+    write ? scope.endsWith(".write") || scope === "cache.purge" : scope.endsWith(".read"),
   );
   return selected.length ? selected : module.scopes;
 }
@@ -59,8 +49,11 @@ export function missingScopes(resource, action, granted) {
 }
 
 const apiPermissionAliases = new Map([
-  ["zone", "Zone"], ["dns", "DNS"], ["zone-settings", "Zone Settings"],
-  ["account-rulesets", "Account Rulesets"], ["account-rule-lists", "Account Rule Lists"],
+  ["zone", "Zone"],
+  ["dns", "DNS"],
+  ["zone-settings", "Zone Settings"],
+  ["account-rulesets", "Account Rulesets"],
+  ["account-rule-lists", "Account Rule Lists"],
 ]);
 
 export function requiredApiPermissions(resource, action) {
@@ -74,6 +67,7 @@ export function requiredApiPermissions(resource, action) {
 export function missingApiPermissions(resource, action, granted) {
   if (!granted) return [];
   const available = new Set(granted.map((permission) => permission.toLowerCase()));
-  return requiredApiPermissions(resource, action)
-    .filter((permission) => !available.has(permission.toLowerCase()));
+  return requiredApiPermissions(resource, action).filter(
+    (permission) => !available.has(permission.toLowerCase()),
+  );
 }

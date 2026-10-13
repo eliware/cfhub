@@ -1,9 +1,9 @@
 export function getAccountId(opts, env = process.env) {
-  return opts['account-id'] || env.CLOUDFLARE_ACCOUNT_ID;
+  return opts["account-id"] || env.CLOUDFLARE_ACCOUNT_ID;
 }
 
 export function getZoneId(opts) {
-  return opts['zone-id'] || process.env.CLOUDFLARE_ZONE_ID;
+  return opts["zone-id"] || process.env.CLOUDFLARE_ZONE_ID;
 }
 
 export function getId(opts) {
@@ -11,7 +11,7 @@ export function getId(opts) {
 }
 
 export function requireValue(value, message, fail) {
-  if (!value || (typeof value === 'string' && !value.trim())) fail(message);
+  if (!value || (typeof value === "string" && !value.trim())) fail(message);
   return value;
 }
 

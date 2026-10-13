@@ -1,4 +1,4 @@
-import * as fs from 'node:fs';
+import * as fs from "node:fs";
 import os from "node:os";
 import { parseArgs, tokenizeCommand } from "./args.mjs";
 import { loadProjectEnv } from "./env.mjs";
@@ -26,16 +26,8 @@ import { applyActiveProfile } from "./profiles.mjs";
 import { discoverExtensions, loadExtensionCommand } from "./extensions.mjs";
 import { readAliases, writeAliases } from "./aliases.mjs";
 import { readSettings, writeSettings } from "./settings.mjs";
-import {
-  createTerminalOutput,
-  terminalColorMode,
-  terminalWidth,
-} from "./terminal.mjs";
-import {
-  commandNamesFor,
-  resourceNames,
-  suggestCommand,
-} from "./suggestions.mjs";
+import { createTerminalOutput, terminalColorMode, terminalWidth } from "./terminal.mjs";
+import { commandNamesFor, resourceNames, suggestCommand } from "./suggestions.mjs";
 import { missingScopes, missingApiPermissions } from "./scopes.mjs";
 import { formatCloudflareError } from "./errors.mjs";
 import { checkForUpdate, updateNotice } from "./update-check.mjs";
@@ -128,12 +120,9 @@ export async function run({
     if (action === "list")
       return opts.json || opts.output === "json"
         ? printer.log(JSON.stringify(stored, null, 2))
-        : Object.entries(stored).forEach(([name, command]) =>
-            printer.log(`${name} ${command}`),
-          );
+        : Object.entries(stored).forEach(([name, command]) => printer.log(`${name} ${command}`));
     if (action === "set") {
-      if (!aliasName || !args[3])
-        return printer.error("Usage: cfhub alias set <name> <command>");
+      if (!aliasName || !args[3]) return printer.error("Usage: cfhub alias set <name> <command>");
       stored[aliasName] = args.slice(3).join(" ");
       writeAliases(stored, homeDir, fsImpl);
       return printer.log(`Set alias ${aliasName}`);
@@ -153,9 +142,7 @@ export async function run({
     if (action === "list")
       return opts.json || opts.output === "json"
         ? printer.log(JSON.stringify(settings, null, 2))
-        : Object.entries(settings).forEach(([name, value]) =>
-            printer.log(`${name} ${value}`),
-          );
+        : Object.entries(settings).forEach(([name, value]) => printer.log(`${name} ${value}`));
     if (action === "get") return printer.log(settings[key] ?? "");
     if (action === "set") {
       if (!key || args[3] === undefined)
@@ -173,9 +160,7 @@ export async function run({
   }
   const expansion = readAliases(homeDir, fsImpl)[args[0]];
   if (expansion) {
-    const expanded = parseArgs(
-      tokenizeCommand(`${expansion} ${args.slice(1).join(" ")}`.trim()),
-    );
+    const expanded = parseArgs(tokenizeCommand(`${expansion} ${args.slice(1).join(" ")}`.trim()));
     args = expanded.args;
     opts = { ...expanded.opts, ...opts };
     resource = args[0];
@@ -197,17 +182,11 @@ export async function run({
     return args.length > 1
       ? printCommandHelp(resource, action, printer)
       : printResourceHelp(resource, printer);
-  if (args.length === 1 && !extensionManifest)
-    return printResourceHelp(resource, printer);
+  if (args.length === 1 && !extensionManifest) return printResourceHelp(resource, printer);
 
   if (extensionManifest) {
-    const extensionHandler = await loadExtensionCommand(
-      extensionManifest,
-      resource,
-      homeDir,
-    );
-    if (!extensionHandler)
-      return printer.error(`Extension command is not loadable: ${resource}`);
+    const extensionHandler = await loadExtensionCommand(extensionManifest, resource, homeDir);
+    if (!extensionHandler) return printer.error(`Extension command is not loadable: ${resource}`);
     const extensionBody = loadBody(opts, fsImpl);
     const extensionFail = (message) => printer.error(message);
     return extensionHandler({
@@ -263,22 +242,29 @@ export async function run({
     );
     return exit(1);
   }
-  const apiPermissions = env.CFHUB_API_PERMISSIONS_KNOWN === "1"
-    ? env.CFHUB_API_PERMISSIONS?.split(",").map((permission) => permission.trim()).filter(Boolean)
-    : null;
+  const apiPermissions =
+    env.CFHUB_API_PERMISSIONS_KNOWN === "1"
+      ? env.CFHUB_API_PERMISSIONS?.split(",")
+          .map((permission) => permission.trim())
+          .filter(Boolean)
+      : null;
   const missingApi = missingApiPermissions(resource, action, apiPermissions);
   if (missingApi.length) {
     /* istanbul ignore next -- plural formatting depends on the command's permission matrix. */
-    printer.error(`Your active API token is missing permission${missingApi.length === 1 ? "" : "s"}: ${missingApi.join(", ")}\n\nRun cfhub auth login again with a token that grants the required permissions.`);
+    printer.error(
+      `Your active API token is missing permission${missingApi.length === 1 ? "" : "s"}: ${missingApi.join(", ")}\n\nRun cfhub auth login again with a token that grants the required permissions.`,
+    );
     return exit(1);
   }
-  const cf =
-    managesCredentials
-      ? null
-      : cfFactory({ env });
+  const cf = managesCredentials ? null : cfFactory({ env });
   const outputJson = opts.json || opts.output === "json";
   const settings = readSettings(homeDir, fsImpl);
-  if (!outputJson && !opts.quiet && settings["update-check"] !== false && settings["update-check"] !== "false") {
+  if (
+    !outputJson &&
+    !opts.quiet &&
+    settings["update-check"] !== false &&
+    settings["update-check"] !== "false"
+  ) {
     /* istanbul ignore next -- best-effort async notification. */
     void updateCheck({ currentVersion: VERSION, homeDir, env, fsImpl })
       /* istanbul ignore next -- best-effort async notification callback. */

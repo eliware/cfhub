@@ -29,12 +29,7 @@
           </div>
           <div class="brand-powered">
             <span>Powered by</span>
-            <img
-              src="/oauth-web/eliware-58x58.png"
-              alt="Eliware"
-              width="34"
-              height="34"
-            />
+            <img src="/oauth-web/eliware-58x58.png" alt="Eliware" width="34" height="34" />
           </div>
         </div>
         <h1>Set up cfhub</h1>
@@ -50,20 +45,21 @@
         </details>
       </section>
       <p class="required-scopes">
-        <strong>Required:</strong> identity access and zone discovery are always
-        enabled so cfhub can confirm your account and provide basic commands.
+        <strong>Required:</strong> identity access and zone discovery are always enabled so cfhub
+        can confirm your account and provide basic commands.
       </p>
       <form method="post" action="/oauth/start" id="scope-form">
         <label class="session-option">
           <input type="checkbox" name="keep-signed-in" />
-          <span><strong>Keep me logged in</strong><small>Request a refresh token so this profile can renew access after about one hour.</small></span>
+          <span
+            ><strong>Keep me logged in</strong
+            ><small
+              >Request a refresh token so this profile can renew access after about one hour.</small
+            ></span
+          >
         </label>
-        <button class="login" type="submit" disabled>
-          Log in with Cloudflare
-        </button>
-        <p class="login-hint" id="login-hint">
-          Select at least one permission scope to continue.
-        </p>
+        <button class="login" type="submit" disabled>Log in with Cloudflare</button>
+        <p class="login-hint" id="login-hint">Select at least one permission scope to continue.</p>
         <div class="scope-heading">
           <h2>Select permission scopes</h2>
           <span aria-live="polite"><b id="scope-count">0</b> selected</span>
@@ -89,11 +85,14 @@
         <div id="scope-groups"></div>
         <label class="session-option session-option-bottom">
           <input type="checkbox" name="keep-signed-in" />
-          <span><strong>Keep me logged in</strong><small>Request a refresh token so this profile can renew access after about one hour.</small></span>
+          <span
+            ><strong>Keep me logged in</strong
+            ><small
+              >Request a refresh token so this profile can renew access after about one hour.</small
+            ></span
+          >
         </label>
-        <button class="login" type="submit" disabled>
-          Log in with Cloudflare
-        </button>
+        <button class="login" type="submit" disabled>Log in with Cloudflare</button>
         <p class="login-hint bottom-hint" id="bottom-login-hint">
           Select at least one permission scope to continue.
         </p>
@@ -105,81 +104,74 @@
         <summary>What does “Keep me logged in” do?</summary>
         <p>
           When selected, cfhub requests Cloudflare's <code>offline_access</code>
-          permission. If your OAuth client allows refresh tokens, the profile
-          can renew itself after the roughly one-hour access-token lifetime.
-          It is off by default because it creates a longer-lived credential.
-          If you leave it off, you will need to authorize again when the access
-          token expires.
+          permission. If your OAuth client allows refresh tokens, the profile can renew itself after
+          the roughly one-hour access-token lifetime. It is off by default because it creates a
+          longer-lived credential. If you leave it off, you will need to authorize again when the
+          access token expires.
         </p>
       </details>
       <details>
         <summary>What are scopes?</summary>
         <p>
-          Scopes are permissions granted to cfhub by Cloudflare. Each scope
-          controls a capability, such as reading zones or changing DNS records.
-          Choose only the permissions you expect to use.
+          Scopes are permissions granted to cfhub by Cloudflare. Each scope controls a capability,
+          such as reading zones or changing DNS records. Choose only the permissions you expect to
+          use.
         </p>
       </details>
       <details>
         <summary>What do the modules do?</summary>
         <p>
-          Modules group the scopes used by built-in cfhub commands. Enabling a
-          module selects its required permissions; shared permissions stay
-          selected while another enabled module still needs them.
+          Modules group the scopes used by built-in cfhub commands. Enabling a module selects its
+          required permissions; shared permissions stay selected while another enabled module still
+          needs them.
         </p>
       </details>
       <details>
         <summary>How do I use custom scopes with cfhub api?</summary>
         <p>
-          Expand the full scope list and select the permissions for the
-          Cloudflare endpoints you plan to call with <code>cfhub api</code>. The
-          raw API command can reach endpoints beyond the built-in modules, so
-          its required scopes depend on the endpoint and HTTP method you use.
+          Expand the full scope list and select the permissions for the Cloudflare endpoints you
+          plan to call with <code>cfhub api</code>. The raw API command can reach endpoints beyond
+          the built-in modules, so its required scopes depend on the endpoint and HTTP method you
+          use.
         </p>
       </details>
       <details>
         <summary>Can I add permissions later?</summary>
         <p>
-          Yes. Run <code>cfhub oauth login</code> again, select the additional
-          permissions, and authorize the updated profile. Existing credentials
-          are replaced with the new authorization.
+          Yes. Run <code>cfhub oauth login</code> again, select the additional permissions, and
+          authorize the updated profile. Existing credentials are replaced with the new
+          authorization.
         </p>
       </details>
       <details>
         <summary>Can I use my own OAuth client?</summary>
         <p>
-          Yes. Create a Cloudflare OAuth application in your own account or
-          organization, enable the authorization-code flow, and register the
-          local callback URL
-          <code>http://127.0.0.1:8765/oauth/callback</code>. If your client
-          registration supports multiple redirect URLs, also register ports
-          <code>8766</code> through <code>8769</code> because cfhub uses them as
-          fallbacks when a port is busy. Select every Cloudflare scope your
-          client should be allowed to request. Then start the normal login
+          Yes. Create a Cloudflare OAuth application in your own account or organization, enable the
+          authorization-code flow, and register the local callback URL
+          <code>http://127.0.0.1:8765/oauth/callback</code>. If your client registration supports
+          multiple redirect URLs, also register ports <code>8766</code> through
+          <code>8769</code> because cfhub uses them as fallbacks when a port is busy. Select every
+          Cloudflare scope your client should be allowed to request. Then start the normal login
           command with your client ID:
         </p>
         <pre><code>CFHUB_OAUTH_CLIENT_ID=your-client-id cfhub oauth login</code></pre>
         <p>
-          The command starts the local OAuth web server and opens the scope
-          picker for you; no separate server command is required. The picker
-          can only request scopes allowed by your Cloudflare client. For a
-          remote or headless setup, keep the registered redirect host at
-          <code>127.0.0.1</code> and use
-          <code>CFHUB_OAUTH_BIND_HOST=0.0.0.0</code> if the browser reaches the
-          machine through another address.
+          The command starts the local OAuth web server and opens the scope picker for you; no
+          separate server command is required. The picker can only request scopes allowed by your
+          Cloudflare client. For a remote or headless setup, keep the registered redirect host at
+          <code>127.0.0.1</code> and use <code>CFHUB_OAUTH_BIND_HOST=0.0.0.0</code> if the browser
+          reaches the machine through another address.
         </p>
       </details>
       <details>
         <summary>Can Eliware access my Cloudflare account?</summary>
         <p>
-          No. The default Eliware OAuth client identifies the application, but
-          cfhub sends the authorization flow directly between your browser and
-          Cloudflare. The resulting credentials are stored locally in your
-          operating-system keychain and API calls go directly from cfhub to
-          Cloudflare. Eliware does not receive your token, proxy your requests,
-          or choose permissions on your behalf. You can use your own OAuth
-          client at any time if you prefer to manage the client registration
-          yourself.
+          No. The default Eliware OAuth client identifies the application, but cfhub sends the
+          authorization flow directly between your browser and Cloudflare. The resulting credentials
+          are stored locally in your operating-system keychain and API calls go directly from cfhub
+          to Cloudflare. Eliware does not receive your token, proxy your requests, or choose
+          permissions on your behalf. You can use your own OAuth client at any time if you prefer to
+          manage the client registration yourself.
         </p>
       </details>
     </section>
@@ -190,12 +182,7 @@
         ><a href="https://eliware.org/cfhub/policy">Privacy policy</a
         ><a href="https://eliware.org/cfhub/tos">Terms of service</a>
       </nav>
-      <img
-        src="/oauth-web/eliware-58x58.png"
-        alt="Eliware"
-        width="58"
-        height="58"
-      />
+      <img src="/oauth-web/eliware-58x58.png" alt="Eliware" width="58" height="58" />
     </footer>
     <script>
       window.CFHUB_SCOPE_MODEL = __CFHUB_SCOPE_MODEL__;

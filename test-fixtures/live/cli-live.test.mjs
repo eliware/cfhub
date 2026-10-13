@@ -6,8 +6,7 @@ import { activeProfile } from "../../src/profiles.mjs";
 import { requiredScopes } from "../../src/scopes.mjs";
 
 const execFileAsync = promisify(execFile);
-const cli =
-  process.env.CFHUB_BIN || fileURLToPath(new URL("../../bin/cfhub.mjs", import.meta.url));
+const cli = process.env.CFHUB_BIN || fileURLToPath(new URL("../../bin/cfhub.mjs", import.meta.url));
 const liveEnabled = process.env.CFHUB_LIVE_TESTS === "1";
 const wetEnabled = process.env.CFHUB_LIVE_MUTATIONS === "1";
 const includeInventory = process.env.CFHUB_LIVE_INCLUDE_INVENTORY === "1";
@@ -59,9 +58,7 @@ function skipUnavailable(label, result) {
 function canRun(resource, action = "list") {
   if (!liveReady) return false;
   if (!grantedScopes) return true;
-  return requiredScopes(resource, action).every((scope) =>
-    grantedScopes.includes(scope),
-  );
+  return requiredScopes(resource, action).every((scope) => grantedScopes.includes(scope));
 }
 
 const basicCommands = [
@@ -94,17 +91,9 @@ const crudCommands = [
   ["origin-ca", ["list", "create", "revoke"]],
   ["load-balancer", ["list", "get", "create", "update", "delete"]],
   ["tunnel", ["list", "get", "create", "update", "delete"]],
-  ...[
-    "workers",
-    "pages",
-    "r2",
-    "d1",
-    "queues",
-    "stream",
-    "images",
-    "ai",
-    "access",
-  ].map((resource) => [resource, ["list", "get", "create", "update", "delete"]]),
+  ...["workers", "pages", "r2", "d1", "queues", "stream", "images", "ai", "access"].map(
+    (resource) => [resource, ["list", "get", "create", "update", "delete"]],
+  ),
 ];
 
 const helpCommands = [
@@ -139,13 +128,46 @@ const helpCommands = [
 const dryRunCommands = [
   ["zones", "create", "--data", JSON.stringify({ name: "dry-run.example.invalid" })],
   ["zones", "update", "--data", JSON.stringify({ name: "dry-run.example.invalid" })],
-  ["dns-records", "create", "--data", JSON.stringify({ type: "A", name: "dry-run", content: "192.0.2.1" })],
-  ["dns-records", "update", "--id", "dry-run-record", "--data", JSON.stringify({ content: "192.0.2.2" })],
-  ["zone-settings", "set", "--setting", "development_mode", "--data", JSON.stringify({ value: "off" })],
+  [
+    "dns-records",
+    "create",
+    "--data",
+    JSON.stringify({ type: "A", name: "dry-run", content: "192.0.2.1" }),
+  ],
+  [
+    "dns-records",
+    "update",
+    "--id",
+    "dry-run-record",
+    "--data",
+    JSON.stringify({ content: "192.0.2.2" }),
+  ],
+  [
+    "zone-settings",
+    "set",
+    "--setting",
+    "development_mode",
+    "--data",
+    JSON.stringify({ value: "off" }),
+  ],
   ["rulesets", "create", "--data", JSON.stringify({ name: "cfhub-dry-run" })],
-  ["rulesets", "update", "--id", "dry-run-ruleset", "--data", JSON.stringify({ name: "cfhub-dry-run" })],
+  [
+    "rulesets",
+    "update",
+    "--id",
+    "dry-run-ruleset",
+    "--data",
+    JSON.stringify({ name: "cfhub-dry-run" }),
+  ],
   ["lists", "create", "--data", JSON.stringify({ name: "cfhub-dry-run", kind: "ip" })],
-  ["lists", "update", "--id", "dry-run-list", "--data", JSON.stringify({ description: "cfhub-dry-run" })],
+  [
+    "lists",
+    "update",
+    "--id",
+    "dry-run-list",
+    "--data",
+    JSON.stringify({ description: "cfhub-dry-run" }),
+  ],
   ["list-items", "create", "--id", "dry-run-list", "--data", JSON.stringify({ ip: "192.0.2.1" })],
   ["health", "create", "--data", JSON.stringify({ name: "cfhub-dry-run" })],
   ["origin-ca", "create", "--data", JSON.stringify({ hostnames: ["dry-run.example.invalid"] })],
@@ -155,13 +177,9 @@ const dryRunCommands = [
 
 function withContext(args) {
   const resource = args[0];
-  const needsZone = [
-    "dns-records",
-    "zone-settings",
-    "ssl",
-    "health",
-    "load-balancer",
-  ].includes(resource);
+  const needsZone = ["dns-records", "zone-settings", "ssl", "health", "load-balancer"].includes(
+    resource,
+  );
   const needsAccount = [
     "lists",
     "list-items",
@@ -256,9 +274,7 @@ liveDescribe("authenticated live CLI smoke tests", () => {
       const result = await run(args);
       if (result.code !== 0 && skipUnavailable(args.join(" "), result)) continue;
       expect(result.code).not.toBe(0);
-      expect(`${result.stdout}\n${result.stderr}`).toMatch(
-        /force|required|usage|missing/i,
-      );
+      expect(`${result.stdout}\n${result.stderr}`).toMatch(/force|required|usage|missing/i);
     }
   });
 
@@ -285,30 +301,66 @@ liveDescribe("authenticated live CLI smoke tests", () => {
       expect(parseJson(before).some((record) => record.name === name)).toBe(false);
 
       const created = await run([
-        "dns-records", "create", "--zone-id", zoneId, "--data", JSON.stringify(createBody), "--json",
+        "dns-records",
+        "create",
+        "--zone-id",
+        zoneId,
+        "--data",
+        JSON.stringify(createBody),
+        "--json",
       ]);
       if (created.code !== 0 && skipUnavailable("DNS CRUD", created)) return;
       expect(created.code).toBe(0);
       recordId = parseJson(created).id;
       expect(recordId).toEqual(expect.any(String));
 
-      const readCreated = await run(["dns-records", "get", "--zone-id", zoneId, "--id", recordId, "--json"]);
+      const readCreated = await run([
+        "dns-records",
+        "get",
+        "--zone-id",
+        zoneId,
+        "--id",
+        recordId,
+        "--json",
+      ]);
       expect(readCreated.code).toBe(0);
       expect(parseJson(readCreated).content).toBe("192.0.2.1");
 
       const updated = await run([
-        "dns-records", "update", "--zone-id", zoneId, "--id", recordId,
-        "--data", JSON.stringify({ ...createBody, content: "192.0.2.2" }), "--json",
+        "dns-records",
+        "update",
+        "--zone-id",
+        zoneId,
+        "--id",
+        recordId,
+        "--data",
+        JSON.stringify({ ...createBody, content: "192.0.2.2" }),
+        "--json",
       ]);
       expect(updated.code).toBe(0);
 
-      const readUpdated = await run(["dns-records", "get", "--zone-id", zoneId, "--id", recordId, "--json"]);
+      const readUpdated = await run([
+        "dns-records",
+        "get",
+        "--zone-id",
+        zoneId,
+        "--id",
+        recordId,
+        "--json",
+      ]);
       expect(readUpdated.code).toBe(0);
       expect(parseJson(readUpdated).content).toBe("192.0.2.2");
     } finally {
       if (recordId) {
         const deleted = await run([
-          "dns-records", "delete", "--zone-id", zoneId, "--id", recordId, "--force", "--json",
+          "dns-records",
+          "delete",
+          "--zone-id",
+          zoneId,
+          "--id",
+          recordId,
+          "--force",
+          "--json",
         ]);
         expect(deleted.code).toBe(0);
         const after = await run(["dns-records", "list", "--zone-id", zoneId, "--json"]);
@@ -352,15 +404,7 @@ liveDescribe("authenticated live CLI smoke tests", () => {
       monitorId = parseJson(created).id;
       expect(monitorId).toEqual(expect.any(String));
 
-      const read = await run([
-        "health",
-        "get",
-        "--zone-id",
-        zoneId,
-        "--id",
-        monitorId,
-        "--json",
-      ]);
+      const read = await run(["health", "get", "--zone-id", zoneId, "--id", monitorId, "--json"]);
       expect(read.code).toBe(0);
       expect(parseJson(read).address).toBe("eliware.org");
     } finally {
@@ -400,8 +444,13 @@ liveDescribe("authenticated live CLI smoke tests", () => {
     if (parseJson(existingLists).length >= 1) return;
     const listName = `cflive${Date.now()}`;
     const createList = await run([
-      "lists", "create", "--account-id", accountId, "--data",
-      JSON.stringify({ name: listName, description: "Temporary cfhub live test list", kind: "ip" }), "--json",
+      "lists",
+      "create",
+      "--account-id",
+      accountId,
+      "--data",
+      JSON.stringify({ name: listName, description: "Temporary cfhub live test list", kind: "ip" }),
+      "--json",
     ]);
     if (createList.code !== 0 && skipUnavailable("list CRUD", createList)) return;
     expect(createList.code).toBe(0);
@@ -413,17 +462,40 @@ liveDescribe("authenticated live CLI smoke tests", () => {
       expect(listed.code).toBe(0);
       expect(parseJson(listed).some((list) => list.id === listId)).toBe(true);
 
-      const emptyItems = await run(["list-items", "list", "--account-id", accountId, "--id", listId, "--json"]);
+      const emptyItems = await run([
+        "list-items",
+        "list",
+        "--account-id",
+        accountId,
+        "--id",
+        listId,
+        "--json",
+      ]);
       expect(emptyItems.code).toBe(0);
       expect(parseJson(emptyItems)).toEqual([]);
 
       const createdItem = await run([
-        "list-items", "create", "--account-id", accountId, "--id", listId,
-        "--data", JSON.stringify({ ip: "192.0.2.1" }), "--json",
+        "list-items",
+        "create",
+        "--account-id",
+        accountId,
+        "--id",
+        listId,
+        "--data",
+        JSON.stringify({ ip: "192.0.2.1" }),
+        "--json",
       ]);
       expect(createdItem.code).toBe(0);
 
-      const itemsAfterCreate = await run(["list-items", "list", "--account-id", accountId, "--id", listId, "--json"]);
+      const itemsAfterCreate = await run([
+        "list-items",
+        "list",
+        "--account-id",
+        accountId,
+        "--id",
+        listId,
+        "--json",
+      ]);
       expect(itemsAfterCreate.code).toBe(0);
       const firstItem = parseJson(itemsAfterCreate)[0];
       expect(firstItem?.id).toEqual(expect.any(String));
@@ -432,30 +504,78 @@ liveDescribe("authenticated live CLI smoke tests", () => {
       // Cloudflare list items have no in-place update endpoint; replace the item
       // and verify the new value through the list read.
       const removedForUpdate = await run([
-        "list-items", "delete", "--account-id", accountId, "--id", listId,
-        "--data", JSON.stringify({ ids: [firstItem.id] }), "--force", "--json",
+        "list-items",
+        "delete",
+        "--account-id",
+        accountId,
+        "--id",
+        listId,
+        "--data",
+        JSON.stringify({ ids: [firstItem.id] }),
+        "--force",
+        "--json",
       ]);
       expect(removedForUpdate.code).toBe(0);
       const replacedItem = await run([
-        "list-items", "create", "--account-id", accountId, "--id", listId,
-        "--data", JSON.stringify({ ip: "192.0.2.2" }), "--json",
+        "list-items",
+        "create",
+        "--account-id",
+        accountId,
+        "--id",
+        listId,
+        "--data",
+        JSON.stringify({ ip: "192.0.2.2" }),
+        "--json",
       ]);
       expect(replacedItem.code).toBe(0);
-      const itemsAfterUpdate = await run(["list-items", "list", "--account-id", accountId, "--id", listId, "--json"]);
+      const itemsAfterUpdate = await run([
+        "list-items",
+        "list",
+        "--account-id",
+        accountId,
+        "--id",
+        listId,
+        "--json",
+      ]);
       expect(itemsAfterUpdate.code).toBe(0);
       const updatedItem = parseJson(itemsAfterUpdate)[0];
       expect(updatedItem.ip || updatedItem.value).toBe("192.0.2.2");
 
       const deletedItem = await run([
-        "list-items", "delete", "--account-id", accountId, "--id", listId,
-        "--data", JSON.stringify({ ids: [updatedItem.id] }), "--force", "--json",
+        "list-items",
+        "delete",
+        "--account-id",
+        accountId,
+        "--id",
+        listId,
+        "--data",
+        JSON.stringify({ ids: [updatedItem.id] }),
+        "--force",
+        "--json",
       ]);
       expect(deletedItem.code).toBe(0);
-      const emptyAgain = await run(["list-items", "list", "--account-id", accountId, "--id", listId, "--json"]);
+      const emptyAgain = await run([
+        "list-items",
+        "list",
+        "--account-id",
+        accountId,
+        "--id",
+        listId,
+        "--json",
+      ]);
       expect(emptyAgain.code).toBe(0);
       expect(parseJson(emptyAgain)).toEqual([]);
     } finally {
-      const deletedList = await run(["lists", "delete", "--account-id", accountId, "--id", listId, "--force", "--json"]);
+      const deletedList = await run([
+        "lists",
+        "delete",
+        "--account-id",
+        accountId,
+        "--id",
+        listId,
+        "--force",
+        "--json",
+      ]);
       expect(deletedList.code).toBe(0);
       const listsAfterDelete = await run(["lists", "list", "--account-id", accountId, "--json"]);
       expect(listsAfterDelete.code).toBe(0);

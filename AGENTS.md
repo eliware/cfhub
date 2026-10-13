@@ -1,54 +1,45 @@
-# Agent Instructions
+# AGENTS.md
 
-## Purpose
+## Project
 
-`cfhub` is a standalone ESM Node.js CLI for Cloudflare administration.
+Build cfhub, a Cloudflare administration CLI. Use Node.js 26 and native ESM.
 
-Current resources:
+## Scope and boundaries
 
-- zones
-- zone settings
-- DNS records
-- rulesets
-- Cloudflare lists
-- list items
+Manage Cloudflare resources through the Cloudflare API. Keep credentials private. Do not publish, tag, or push without direct user approval.
 
-## Development Rules
+## Layout
 
-- Read `README.md` before changing behavior.
-- Keep handlers small and single-purpose.
-- Preserve ESM and `.mjs` style.
-- Prefer dependency injection for clients, filesystem access, environment loading, output, and process exits.
-- Do not commit credentials, tokens, `.env` files, coverage output, or generated state.
-- Keep changes scoped.
-- Add or update tests for behavior changes.
-- Do not publish, tag, commit, or push unless explicitly requested.
+Keep implementation in `src/`. Keep launchers in `bin/`. Keep tests in `tests/`. Keep fixtures in `test-fixtures/`.
+
+## Development
+
+Read `README.md` before behavior changes. Keep handlers small. Use dependency injection for external services and process behavior. Add tests for behavior changes.
 
 ## Validation
 
-Run from the repository root:
+Run `npm test`, `npm run lint`, `npm run audit`, `npm run format`, `npm run format:check`, and `npm run pack` from the repository root.
 
-```sh
-npm test
-npm run lint
-npm run test:gaps
-npm run pack
-```
+## Security
 
-Tests should preserve 100% source coverage where practical.
+Require `--force` for destructive actions. Support `--dry-run` for writes where available. Do not expose credentials in output, errors, fixtures, or diffs.
 
-## CLI Safety
+## Changes
 
-- Require `--force` for destructive operations.
-- Support `--dry-run` for writes where available.
-- Preserve JSON output compatibility for automation.
-- Avoid leaking credentials in errors, logs, diffs, or test fixtures.
+Update `README.md` when commands or configuration change. Keep changes scoped. Check the result before you report completion.
 
-## Documentation
+## Application
 
-Update `README.md` when user-facing commands or configuration change.
-Keep `dream.md` as the product vision and `dream_sprints.md` as the roadmap.
-- Do not over-engineer simple tasks.
-- Do not guess when confused.
-- Do not make random, pointless changes.
-- Check your own work before saying you're done.
+Run cfhub as a local Node.js CLI. Use Cloudflare API tokens or OAuth profiles. The CLI has no background service.
+
+## CLI
+
+Run `cfhub --help` for commands. Run `cfhub <command> --help` for command details. Use `--dry-run` before writes. Use `--force` for destructive actions.
+
+## Web
+
+Use the local OAuth pages in `src/oauth-web/`. Run `npm run build:web` after source style or page changes. Browser checks use Puppeteer.
+
+## npm publication
+
+Run `npm run pack` before publication review. The CI workflow validates changes. A user must approve each publication.

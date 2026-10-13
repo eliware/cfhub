@@ -1,21 +1,14 @@
 import { jest } from "@jest/globals";
-import {
-  printCommandHelp,
-  printDetailedHelp,
-  printHelp,
-  printResourceHelp,
-} from "../src/help.mjs";
+import { printCommandHelp, printDetailedHelp, printHelp, printResourceHelp } from "../src/help.mjs";
 
 describe("help output", () => {
-test("prints general help", () => {
+  test("prints general help", () => {
     const spy = jest.spyOn(console, "log").mockImplementation(() => {});
 
     printHelp();
 
     expect(spy).toHaveBeenCalled();
-    expect(spy.mock.calls[0][0]).toContain(
-      "Manage Cloudflare from the command line.",
-    );
+    expect(spy.mock.calls[0][0]).toContain("Manage Cloudflare from the command line.");
     spy.mockRestore();
   });
 

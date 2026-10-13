@@ -47,13 +47,11 @@ function distance(left, right) {
   return row[right.length];
 }
 export function suggestCommand(resource, action) {
-  const candidates =
-    resource === "resource" ? resourceNames : commandNames[resource] || [];
+  const candidates = resource === "resource" ? resourceNames : commandNames[resource] || [];
   const suggestion = candidates
     .map((candidate) => ({ candidate, score: distance(action, candidate) }))
     .sort((left, right) => left.score - right.score)[0];
-  return suggestion &&
-    suggestion.score <= Math.max(1, Math.floor(action.length / 3))
+  return suggestion && suggestion.score <= Math.max(1, Math.floor(action.length / 3))
     ? suggestion.candidate
     : null;
 }
