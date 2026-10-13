@@ -1,7 +1,7 @@
 import { jest } from "@jest/globals";
 import { run } from "../../src/cli.mjs";
 
-test("covers default CLI inputs, exit handling, and web output", async () => {
+export async function fixtureCase1() {
   const oldArgv = process.argv;
   const log = jest.spyOn(console, "log").mockImplementation(() => {});
   process.argv = [oldArgv[0], oldArgv[1], "--version"];
@@ -34,4 +34,4 @@ test("covers default CLI inputs, exit handling, and web output", async () => {
     updateCheck: jest.fn().mockResolvedValue(null),
   });
   expect(printer.log).toHaveBeenCalledWith("https://dash.cloudflare.com/zones/zone");
-});
+}

@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import { handleZones } from "../../src/handlers/zones.mjs";
 import { context } from "../zones-context.mjs";
 
-test("zone deletion supports both client styles and force checks", async () => {
+export async function fixtureCase1() {
   const remove = jest.fn().mockResolvedValue({ deleted: true });
   const toJsonOutput = jest.fn();
   await handleZones(
@@ -36,10 +36,10 @@ test("zone deletion supports both client styles and force checks", async () => {
   await expect(
     handleZones(context({ action: "delete", opts: { "zone-id": "z1" }, fail })),
   ).rejects.toThrow("Refusing to delete without --force");
-});
+}
 
-test("zone handler rejects unknown actions", async () => {
+export async function fixtureCase2() {
   await expect(handleZones(context({ action: "unknown" }))).rejects.toThrow(
     "Unknown zones action: unknown",
   );
-});
+}

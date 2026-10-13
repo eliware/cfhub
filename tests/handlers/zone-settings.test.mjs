@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 import { handleZoneSettings } from "../../src/handlers/zone-settings.mjs";
-import "../../test-fixtures/unit/zone-settings-api.mjs";
 
 test("handleZoneSettings is exported", () => {
   expect(typeof handleZoneSettings).toBe("function");
@@ -91,3 +90,8 @@ test("handleZoneSettings validates missing zone, setting, and value", async () =
     }),
   ).rejects.toThrow("Missing JSON body with value");
 });
+
+import { fixtureCase1, fixtureCase2 } from "../../test-fixtures/unit/zone-settings-api.mjs";
+
+test("handleZoneSettings covers API variants, dry-run, and text output", fixtureCase1);
+test("uses direct client endpoints for settings reads and writes", fixtureCase2);

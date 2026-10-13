@@ -1,7 +1,7 @@
 import { jest } from "@jest/globals";
 import { handleZoneSettings } from "../../src/handlers/zone-settings.mjs";
 
-test("handleZoneSettings covers API variants, dry-run, and text output", async () => {
+export async function fixtureCase1() {
   const printer = { log: jest.fn() };
   const toJsonOutput = jest.fn();
   const fail = jest.fn((msg) => {
@@ -81,9 +81,9 @@ test("handleZoneSettings covers API variants, dry-run, and text output", async (
     fail,
   });
   expect(toJsonOutput).toHaveBeenCalled();
-});
+}
 
-test("uses direct client endpoints for settings reads and writes", async () => {
+export async function fixtureCase2() {
   const get = jest.fn().mockResolvedValue({ value: "on" });
   const patch = jest.fn().mockResolvedValue({ value: "off" });
   const toJsonOutput = jest.fn();
@@ -102,4 +102,4 @@ test("uses direct client endpoints for settings reads and writes", async () => {
   expect(get).toHaveBeenCalledWith("/zones/z/settings/ssl", undefined);
   expect(patch).toHaveBeenCalledWith("/zones/z/settings/ssl", { body: { value: "off" } });
   expect(toJsonOutput).toHaveBeenCalledTimes(2);
-});
+}

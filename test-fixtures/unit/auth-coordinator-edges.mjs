@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import { handleAuth } from "../../src/handlers/auth.mjs";
 import { authContext } from "../auth-context.mjs";
 
-test("auth login does not ask for an account id for a user token", async () => {
+export async function fixtureCase1() {
   const write = jest.fn();
   const promptAccountId = jest.fn();
   await handleAuth({
@@ -16,9 +16,9 @@ test("auth login does not ask for an account id for a user token", async () => {
   });
   expect(promptAccountId).not.toHaveBeenCalled();
   expect(write).toHaveBeenCalled();
-});
+}
 
-test("auth OAuth login saves and activates the returned token profile", async () => {
+export async function fixtureCase2() {
   const write = jest.fn();
   const ctx = authContext();
   await handleAuth({
@@ -37,9 +37,9 @@ test("auth OAuth login saves and activates the returned token profile", async ()
     undefined,
     undefined,
   );
-});
+}
 
-test("auth verify checks active API tokens", async () => {
+export async function fixtureCase3() {
   const oldToken = process.env.CLOUDFLARE_API_TOKEN;
   process.env.CLOUDFLARE_API_TOKEN = "token";
   const ctx = authContext();
@@ -50,9 +50,9 @@ test("auth verify checks active API tokens", async () => {
     status: "active",
   });
   process.env.CLOUDFLARE_API_TOKEN = oldToken;
-});
+}
 
-test("auth logout revokes stored OAuth credentials", async () => {
+export async function fixtureCase4() {
   const write = jest.fn();
   const revokeOAuthImpl = jest.fn();
   const deleteCredentialImpl = jest.fn();
@@ -69,9 +69,9 @@ test("auth logout revokes stored OAuth credentials", async () => {
   });
   expect(revokeOAuthImpl).toHaveBeenCalledWith({ token: "oauth-token" });
   expect(deleteCredentialImpl).toHaveBeenCalledWith("work");
-});
+}
 
-test("auth logout clears local credentials when remote revocation fails", async () => {
+export async function fixtureCase5() {
   const write = jest.fn();
   const remove = jest.fn();
   const ctx = authContext();
@@ -87,23 +87,23 @@ test("auth logout clears local credentials when remote revocation fails", async 
   });
   expect(remove).toHaveBeenCalledWith("work");
   expect(write).toHaveBeenCalledWith({ active: null, profiles: {} }, undefined, undefined);
-});
+}
 
-test("auth lists an empty profile store", async () => {
+export async function fixtureCase6() {
   const ctx = authContext();
   await handleAuth({ ...ctx, action: "list" });
   expect(ctx.toJsonOutput).toHaveBeenCalledWith([
     { name: "environment", active: true, authMethod: "not configured" },
   ]);
-});
+}
 
-test("auth uses default dependencies for a profile listing", async () => {
+export async function fixtureCase7() {
   const spy = jest.spyOn(console, "log").mockImplementation(() => {});
   await handleAuth({ action: "list", printer: console });
   expect(spy).toHaveBeenCalled();
   spy.mockRestore();
-});
+}
 
-test("auth can be called with no context object", async () => {
+export async function fixtureCase8() {
   await expect(handleAuth()).resolves.toBeUndefined();
-});
+}

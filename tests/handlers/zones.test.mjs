@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 import { handleZones } from "../../src/handlers/zones.mjs";
-import "../../test-fixtures/unit/zones-delete.mjs";
 import { context } from "../../test-fixtures/zones-context.mjs";
 
 test("zone listing supports SDK and generic clients", async () => {
@@ -156,3 +155,8 @@ test("zone updates support dry runs and both client styles", async () => {
   expect(genericPatch).toHaveBeenCalledWith("/zones/z1", { body });
   expect(textPrinter.log).toHaveBeenCalledWith('{\n  "updated": true\n}');
 });
+
+import { fixtureCase1, fixtureCase2 } from "../../test-fixtures/unit/zones-delete.mjs";
+
+test("zone deletion supports both client styles and force checks", fixtureCase1);
+test("zone handler rejects unknown actions", fixtureCase2);

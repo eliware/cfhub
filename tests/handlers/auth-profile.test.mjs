@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 import { handleAuthProfile } from "../../src/handlers/auth-profile.mjs";
-import "../../test-fixtures/unit/auth-profile-display.mjs";
 
 test("auth profile helper lists and activates saved profiles", async () => {
   const data = { active: "work", profiles: { work: { authMethod: "oauth" } } };
@@ -29,3 +28,8 @@ test("auth profile helper lists and activates saved profiles", async () => {
   expect(write).toHaveBeenCalledWith(data, "/workspace/test-home", {});
   expect(data.active).toBe("work");
 });
+
+import { fixtureCase1, fixtureCase2 } from "../../test-fixtures/unit/auth-profile-display.mjs";
+
+test("profile listing prints active and inactive methods", fixtureCase1);
+test("profile cleanup handles unknown and inactive profiles", fixtureCase2);

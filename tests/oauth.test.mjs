@@ -3,8 +3,6 @@ import { jest } from "@jest/globals";
 import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
 
-import { EventEmitter } from "node:events";
-
 test("OAuth login validates client configuration before opening a browser", async () => {
   await expect(loginOAuth({ clientId: "" })).rejects.toThrow("Missing CFHUB_OAUTH_CLIENT_ID");
 });
@@ -47,39 +45,6 @@ test("OAuth login reports a browser launcher that throws", async () => {
   expect(printed).toEqual(
     expect.arrayContaining([expect.stringContaining("Could not open a browser automatically")]),
   );
-});
-
-test("OAuth callback handles missing descriptions and browser error messages", async () => {
-  const printed = [];
-  const browser = new EventEmitter();
-  let closeServer;
-  const promise = loginOAuth({
-    clientId: "client",
-    ports: [0],
-    open: () => browser,
-    print: (value) => printed.push(value),
-    setTimeoutImpl: (callback) => (closeServer = callback),
-  });
-  const failure = promise.catch((error) => error);
-  await new Promise((resolve) => setTimeout(resolve, 10));
-  browser.emit("error", { message: "no opener" });
-  const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
-  await new Promise((resolve, reject) =>
-    http
-      .get(
-        `${authorization.searchParams.get("redirect_uri")}?state=${authorization.searchParams.get("state")}&error=access_denied`,
-        (response) => {
-          response.resume();
-          response.on("end", resolve);
-        },
-      )
-      .on("error", reject),
-  );
-  await expect(failure).resolves.toMatchObject({
-    message: "Cloudflare authorization failed: access_denied",
-  });
-  closeServer();
-  expect(printed).toEqual(expect.arrayContaining([expect.stringContaining("no opener")]));
 });
 
 test("OAuth login opens the scope picker before authorization", async () => {

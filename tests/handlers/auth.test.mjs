@@ -1,7 +1,6 @@
 import { jest } from "@jest/globals";
 import { handleAuth } from "../../src/handlers/auth.mjs";
 import { fs } from "../../src/fs.mjs";
-import "../../test-fixtures/unit/auth-coordinator-edges.mjs";
 
 const emptyProfiles = () => ({ active: null, profiles: {} });
 
@@ -147,3 +146,23 @@ test("auth API-token login uses the default stdin reader", async () => {
 test("auth coordinator uses default profile storage", async () => {
   await handleAuth();
 });
+
+import {
+  fixtureCase1,
+  fixtureCase2,
+  fixtureCase3,
+  fixtureCase4,
+  fixtureCase5,
+  fixtureCase6,
+  fixtureCase7,
+  fixtureCase8,
+} from "../../test-fixtures/unit/auth-coordinator-edges.mjs";
+
+test("auth login does not ask for an account id for a user token", fixtureCase1);
+test("auth OAuth login saves and activates the returned token profile", fixtureCase2);
+test("auth verify checks active API tokens", fixtureCase3);
+test("auth logout revokes stored OAuth credentials", fixtureCase4);
+test("auth logout clears local credentials when remote revocation fails", fixtureCase5);
+test("auth lists an empty profile store", fixtureCase6);
+test("auth uses default dependencies for a profile listing", fixtureCase7);
+test("auth can be called with no context object", fixtureCase8);

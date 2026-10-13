@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import { handleAuthProfile } from "../../src/handlers/auth-profile.mjs";
 import { profileOptions } from "../auth-profile-options.mjs";
 
-test("profile listing prints active and inactive methods", async () => {
+export async function fixtureCase1() {
   const printer = { log: jest.fn() };
   await handleAuthProfile(
     profileOptions({
@@ -24,9 +24,9 @@ test("profile listing prints active and inactive methods", async () => {
     }),
   );
   expect(oauthPrinter.log).toHaveBeenCalledWith(expect.stringContaining("work  oauth"));
-});
+}
 
-test("profile cleanup handles unknown and inactive profiles", async () => {
+export async function fixtureCase2() {
   const fail = jest.fn();
   await handleAuthProfile(profileOptions({ action: "unknown" }));
   await handleAuthProfile(profileOptions({ action: "switch", fail }));
@@ -48,4 +48,4 @@ test("profile cleanup handles unknown and inactive profiles", async () => {
   expect(data).toEqual({ active: "other", profiles: { other: {} } });
   expect(write).toHaveBeenCalled();
   expect(printer.log).toHaveBeenCalledWith("Removed profile work");
-});
+}

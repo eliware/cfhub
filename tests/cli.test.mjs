@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import { loadBody } from "../src/cli.mjs";
 
 import { run } from "../src/cli.mjs";
-import "../test-fixtures/unit/cli-defaults.mjs";
+import { fixtureCase1 } from "../test-fixtures/unit/cli-defaults.mjs";
 
 test("CLI prints its version without loading configuration", async () => {
   const printer = { log: jest.fn(), error: jest.fn() };
@@ -151,3 +151,5 @@ test("routes extension commands before Cloudflare setup", async () => {
   expect(error).not.toHaveBeenCalled();
   expect(cfFactory).not.toHaveBeenCalled();
 });
+
+test("covers default CLI inputs, exit handling, and web output", fixtureCase1);
