@@ -1,5 +1,5 @@
 import { getAccountId, getId, requireValue } from "./common.mjs";
-import { printTable } from "../output.mjs";
+import { printTable } from "../output-table.mjs";
 
 export async function handleListItems({
   cf,

@@ -8,9 +8,12 @@ import {
 test("selects terminal color modes and validates widths", () => {
   expect(terminalColorMode("always", { isTTY: false })).toBe(true);
   expect(terminalColorMode("never", { isTTY: true })).toBe(false);
+  expect(terminalColorMode("true", { isTTY: false })).toBe(true);
+  expect(terminalColorMode("false", { isTTY: true })).toBe(false);
   expect(terminalColorMode("auto", { isTTY: true, noColor: false })).toBe(true);
   expect(terminalColorMode("auto", { isTTY: true, noColor: true })).toBe(false);
   expect(typeof terminalColorMode("auto")).toBe("boolean");
+  expect(terminalColorMode(undefined, { isTTY: false, noColor: false })).toBe(false);
   expect(terminalWidth()).toBe(120);
   expect(terminalWidth("80")).toBe(80);
   expect(terminalWidth("bad", 90)).toBe(90);

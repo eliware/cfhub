@@ -5,7 +5,7 @@ import { readAliases } from "../aliases.mjs";
 import { printCommandHelp } from "../help/commands.mjs";
 import { printResourceHelp } from "../help/resources.mjs";
 import { commandNamesFor, resourceNames, suggestCommand } from "../suggestions.mjs";
-import { toJsonOutput } from "../output.mjs";
+import { toJsonOutput } from "../output-printers.mjs";
 
 export async function resolveCommand({ args, opts, printer, homeDir, fsImpl, exit, loadBody }) {
   let [resource, action] = args;

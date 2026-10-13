@@ -1,5 +1,5 @@
 import { discoverExtensions } from "../extensions.mjs";
-import { printTable } from "../output.mjs";
+import { printTable } from "../output-table.mjs";
 
 export function inspectExtension({
   action,

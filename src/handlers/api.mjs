@@ -1,4 +1,4 @@
-import { renderTemplate, selectJson } from "../output.mjs";
+import { renderTemplate, selectJson } from "../output-selection.mjs";
 import { getAllPages, requestWithBackoff, withPage } from "../request.mjs";
 import { validateApiRequest } from "./api-request-validation.mjs";
 

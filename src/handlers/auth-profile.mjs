@@ -53,4 +53,4 @@ export async function handleAuthProfile({
     });
   }
 }
-import { printTable } from "../output.mjs";
+import { printTable } from "../output-table.mjs";

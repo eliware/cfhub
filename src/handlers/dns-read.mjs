@@ -1,4 +1,4 @@
-import { printTable } from "../output.mjs";
+import { printTable } from "../output-table.mjs";
 
 export function displayDnsRecords(result, { outputJson, toJsonOutput, printer }) {
   const items = Array.isArray(result?.result) ? result.result : result;
