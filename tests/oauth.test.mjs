@@ -1,6 +1,7 @@
 import { jest } from "@jest/globals";
 import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
+import { verifyOAuthPickerIntegration } from "../test-fixtures/unit/oauth-picker-integration.mjs";
 
 test("OAuth login validates client configuration before opening a browser", async () => {
   await expect(loginOAuth({ clientId: "" })).rejects.toThrow("Missing CFHUB_OAUTH_CLIENT_ID");
@@ -143,3 +144,8 @@ test("OAuth callback renders a generic provider failure", async () => {
   });
   closeServer();
 });
+
+test(
+  "OAuth picker serves its browser assets and summarizes zones and DNS",
+  verifyOAuthPickerIntegration,
+);

@@ -21,12 +21,20 @@ test("auth profile helper lists and activates saved profiles", async () => {
     deleteCredentialImpl: jest.fn(),
   };
 
-  await handleAuthProfile({ ...base, action: "list" });
+  await handleAuthProfile({
+    ...base,
+    action: "list",
+    data: { active: "work", profiles: { work: {}, saved: { authMethod: "api-token" } } },
+    outputJson: false,
+  });
+  expect(base.printer.log).toHaveBeenCalled();
+  await handleAuthProfile({ ...base, action: "list", outputJson: true });
   await handleAuthProfile({ ...base, action: "switch" });
   expect(data.active).toBe("work");
   await handleAuthProfile({
     ...base,
     action: "logout",
+    opts: {},
     readCredentialImpl: jest.fn().mockResolvedValue({}),
   });
 
@@ -35,10 +43,6 @@ test("auth profile helper lists and activates saved profiles", async () => {
   expect(data.active).toBeNull();
   expect(data.profiles.work).toBeUndefined();
 });
-
-import { fixtureCase1 } from "../../test-fixtures/unit/auth-profile-display.mjs";
-
-test("profile listing prints active and inactive methods", fixtureCase1);
 
 test("ignores actions outside list, switch, and logout", async () => {
   const fail = jest.fn();
