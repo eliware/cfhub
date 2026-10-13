@@ -1,4 +1,13 @@
-import { API_TOKEN_TUTORIAL } from "./auth-prompts.mjs";
+export const API_TOKEN_TUTORIAL = `Create an Account API Token in Cloudflare:
+  1. Log in to Cloudflare.
+  2. Open Manage account > Account API tokens.
+  3. Click Create Token.
+  4. Set a name, such as eliware/cfhub.
+  5. Choose a permission policy, such as Read all resources, Write all resources, Edit Cloudflare Workers, Edit zone DNS, or Start from scratch. Grant only what you need.
+  6. Set token expiration and optional client IP filtering.
+  7. Click Review Token, scroll down, and click Create Token.
+  8. Copy Your API Token and paste it below.
+  9. Copy the Account ID from Cloudflare when cfhub asks for it.`;
 
 export async function readLoginToken({ opts, readToken, promptToken, printer }) {
   const interactive = !opts?.["token-stdin"];
@@ -9,13 +18,4 @@ export async function readLoginToken({ opts, readToken, promptToken, printer }) 
       ),
       await promptToken());
   return { interactive, suppliedToken };
-}
-
-export async function resolveTokenAccount({ opts, interactive, token, promptAccountId }) {
-  const detectedAccountToken = token.startsWith("cfat_");
-  const accountId =
-    opts?.["account-id"] ||
-    process.env.CLOUDFLARE_ACCOUNT_ID ||
-    (interactive && detectedAccountToken ? await promptAccountId() : undefined);
-  return { accountId, detectedAccountToken };
 }

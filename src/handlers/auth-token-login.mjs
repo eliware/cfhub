@@ -1,5 +1,6 @@
 import { saveTokenProfile } from "./auth-token-profile-save.mjs";
-import { readLoginToken, resolveTokenAccount } from "./auth-token-input.mjs";
+import { readLoginToken } from "./auth-token-input.mjs";
+import { resolveTokenAccount } from "./auth-token-account.mjs";
 import { reportTokenLogin } from "./auth-token-login-result.mjs";
 
 export async function saveApiTokenLogin({

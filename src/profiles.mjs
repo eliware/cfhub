@@ -1,7 +1,7 @@
 import os from "node:os";
 import * as fs from "node:fs";
 import { deleteCredential, readCredential, writeCredential } from "./credential-store.mjs";
-import { refreshOAuth } from "./oauth.mjs";
+import { refreshOAuth } from "./oauth-api.mjs";
 import { activeProfile } from "./profile-store.mjs";
 import { removeExpiredProfile } from "./profile-expiry.mjs";
 import { applyProfileEnvironment } from "./profile-environment.mjs";

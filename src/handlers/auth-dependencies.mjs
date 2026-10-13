@@ -2,8 +2,10 @@ import { readProfiles, writeProfiles } from "../profiles.mjs";
 import { deleteCredential, readCredential, writeCredential } from "../credential-store.mjs";
 import { fs } from "../fs.mjs";
 import { inspectApiToken } from "../token-permissions.mjs";
-import { loginOAuth, revokeOAuth } from "../oauth.mjs";
-import { defaultPromptAccountId, promptHidden } from "./auth-prompts.mjs";
+import { loginOAuth } from "../oauth.mjs";
+import { revokeOAuth } from "../oauth-api.mjs";
+import { defaultPromptAccountId } from "./auth-prompts.mjs";
+import { promptHidden } from "./auth-token-prompt.mjs";
 
 export function createAuthDependencies(overrides = {}) {
   return {

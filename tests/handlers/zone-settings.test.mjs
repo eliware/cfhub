@@ -14,6 +14,7 @@ beforeEach(() => {
 afterEach(() => log.mockRestore());
 
 test("handleZoneSettings get/set/unknown", async () => {
+  const printer = { log: jest.fn() };
   const cf = {
     zones: {
       settings: {
@@ -36,6 +37,26 @@ test("handleZoneSettings get/set/unknown", async () => {
     opts: { "zone-id": "z1", setting: "dev" },
     body: { value: "off" },
     outputJson: false,
+    printer,
+    toJsonOutput,
+    fail,
+  });
+  await handleZoneSettings({
+    cf,
+    action: "get",
+    opts: { "zone-id": "z1", setting: "dev" },
+    outputJson: false,
+    printer,
+    toJsonOutput,
+    fail,
+  });
+  await handleZoneSettings({
+    cf,
+    action: "set",
+    opts: { "zone-id": "z1", setting: "dev" },
+    body: { value: "off" },
+    outputJson: true,
+    printer,
     toJsonOutput,
     fail,
   });
@@ -49,8 +70,21 @@ test("handleZoneSettings get/set/unknown", async () => {
       fail,
     }),
   ).rejects.toThrow("Unknown zone-settings action: noop");
-  expect(cf.zones.settings.get).toHaveBeenCalledTimes(1);
-  expect(cf.zones.settings.update).toHaveBeenCalledTimes(1);
+  expect(cf.zones.settings.get).toHaveBeenCalledTimes(2);
+  expect(cf.zones.settings.update).toHaveBeenCalledTimes(2);
+  expect(printer.log).toHaveBeenCalledWith('{\n  "value": "off"\n}');
+  await handleZoneSettings({
+    cf,
+    action: "set",
+    opts: { "zone-id": "z1", setting: "dev", "dry-run": true },
+    body: { value: "on" },
+    outputJson: false,
+    printer,
+    toJsonOutput,
+    fail,
+  });
+  expect(cf.zones.settings.update).toHaveBeenCalledTimes(2);
+  expect(printer.log).toHaveBeenLastCalledWith(expect.stringContaining('"dryRun": true'));
 });
 
 test("handleZoneSettings validates missing zone, setting, and value", async () => {
@@ -87,7 +121,3 @@ test("handleZoneSettings validates missing zone, setting, and value", async () =
     }),
   ).rejects.toThrow("Missing JSON body with value");
 });
-
-import { fixtureCase1 } from "../../test-fixtures/unit/zone-settings-api.mjs";
-
-test("handleZoneSettings covers API variants, dry-run, and text output", fixtureCase1);

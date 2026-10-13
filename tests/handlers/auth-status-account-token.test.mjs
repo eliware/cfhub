@@ -31,7 +31,7 @@ test("account token status uses account ID and text output", async () => {
   expect(printer.log).toHaveBeenCalledWith("work authenticated with account API token");
 });
 
-test("account token status resolves saved and environment IDs and empty account lists", async () => {
+test("account token status resolves saved IDs and empty account lists", async () => {
   const cf = { get: jest.fn().mockResolvedValue({}) };
   const printer = { log: jest.fn() };
   await showAccountTokenStatus({
@@ -43,23 +43,6 @@ test("account token status resolves saved and environment IDs and empty account 
     printer,
   });
   expect(cf.get).toHaveBeenCalledWith("/accounts/saved");
-
-  const prior = process.env.CLOUDFLARE_ACCOUNT_ID;
-  process.env.CLOUDFLARE_ACCOUNT_ID = "environment";
-  try {
-    await showAccountTokenStatus({
-      statusProfile: "work",
-      opts: {},
-      data: { profiles: {} },
-      cf,
-      outputJson: true,
-      toJsonOutput: jest.fn(),
-    });
-    expect(cf.get).toHaveBeenLastCalledWith("/accounts/environment");
-  } finally {
-    if (prior === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID;
-    else process.env.CLOUDFLARE_ACCOUNT_ID = prior;
-  }
 
   const toJsonOutput = jest.fn();
   await showAccountTokenStatus({

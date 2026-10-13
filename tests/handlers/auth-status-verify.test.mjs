@@ -1,5 +1,6 @@
 import { jest } from "@jest/globals";
 import { verifyAuthStatus } from "../../src/handlers/auth-status-verify.mjs";
+import { showAccountTokenStatus } from "../../src/handlers/auth-status-account-token.mjs";
 
 test("token verification uses the matching endpoint", async () => {
   const previous = process.env.CLOUDFLARE_API_TOKEN;
@@ -64,6 +65,59 @@ test("token verification reports a missing account ID", async () => {
   } finally {
     if (previous === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
     else process.env.CLOUDFLARE_API_TOKEN = previous;
+  }
+});
+
+test("account ID resolution follows option, saved profile, and environment order", async () => {
+  const oldToken = process.env.CLOUDFLARE_API_TOKEN;
+  const oldAccount = process.env.CLOUDFLARE_ACCOUNT_ID;
+  process.env.CLOUDFLARE_API_TOKEN = "cfat_account-token";
+  process.env.CLOUDFLARE_ACCOUNT_ID = "environment";
+  const cf = { get: jest.fn().mockResolvedValue({ result: { status: "active" } }) };
+  const args = {
+    cf,
+    data: { active: "work", profiles: { work: { accountId: "saved" } } },
+    outputJson: true,
+    toJsonOutput: jest.fn(),
+    printer: { log: jest.fn() },
+    fail: (message) => {
+      throw new Error(message);
+    },
+  };
+  try {
+    await verifyAuthStatus({ ...args, opts: { "account-id": "option" } });
+    expect(cf.get).toHaveBeenLastCalledWith("/accounts/option/tokens/verify");
+    await verifyAuthStatus({ ...args, opts: {} });
+    expect(cf.get).toHaveBeenLastCalledWith("/accounts/saved/tokens/verify");
+    await verifyAuthStatus({ ...args, data: { active: null, profiles: {} }, opts: {} });
+    expect(cf.get).toHaveBeenLastCalledWith("/accounts/environment/tokens/verify");
+    await showAccountTokenStatus({
+      statusProfile: "work",
+      opts: {},
+      data: { profiles: {} },
+      cf,
+      outputJson: true,
+      toJsonOutput: jest.fn(),
+    });
+    expect(cf.get).toHaveBeenLastCalledWith("/accounts/environment");
+  } finally {
+    if (oldToken === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
+    else process.env.CLOUDFLARE_API_TOKEN = oldToken;
+    if (oldAccount === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID;
+    else process.env.CLOUDFLARE_ACCOUNT_ID = oldAccount;
+  }
+  delete process.env.CLOUDFLARE_ACCOUNT_ID;
+  process.env.CLOUDFLARE_API_TOKEN = "cfat_account-token";
+  try {
+    await expect(
+      verifyAuthStatus({ ...args, opts: {}, data: { active: null, profiles: {} } }),
+    ).rejects.toThrow(
+      "Account API token verification requires --account-id or CLOUDFLARE_ACCOUNT_ID",
+    );
+  } finally {
+    if (oldToken === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
+    else process.env.CLOUDFLARE_API_TOKEN = oldToken;
+    if (oldAccount !== undefined) process.env.CLOUDFLARE_ACCOUNT_ID = oldAccount;
   }
 });
 

@@ -1,5 +1,5 @@
 import { DEFAULT_OAUTH_CLIENT_ID } from "../oauth-tokens.mjs";
-import { DEFAULT_OAUTH_SCOPES } from "../oauth.mjs";
+import { DEFAULT_OAUTH_SCOPES } from "../oauth-api.mjs";
 
 export function authOAuthOptions(opts = {}, env = process.env) {
   const configuredScopes = (env.CFHUB_OAUTH_SCOPES || "")
