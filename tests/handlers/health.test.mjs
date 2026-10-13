@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 import { handleHealth } from "../../src/handlers/health.mjs";
-import { handleAudit } from "../../src/handlers/audit.mjs";
 
 const base = () => ({
   cf: {
@@ -36,17 +35,4 @@ test("health dry-run and unknown action are safe", async () => {
   await handleHealth({ ...ctx, action: "nope" });
   expect(ctx.cf.post).not.toHaveBeenCalled();
   expect(ctx.fail).toHaveBeenCalledWith("Unknown health action: nope");
-});
-
-test("audit lists account logs", async () => {
-  const ctx = base();
-  await handleAudit({ ...ctx, action: "list" });
-  expect(ctx.cf.get).toHaveBeenCalledWith("/accounts/a1/audit_logs");
-  const unknown = base();
-  await handleAudit({ ...unknown, action: "get" });
-  expect(unknown.fail).toHaveBeenCalledWith("Unknown audit action: get");
-  const text = base();
-  text.outputJson = false;
-  await handleAudit({ ...text, action: "list" });
-  expect(text.printer.log).toHaveBeenCalled();
 });

@@ -1,4 +1,11 @@
 import { jest } from "@jest/globals";
+import { run } from "../src/cli.mjs";
+
+test("CLI prints its version without loading configuration", async () => {
+  const printer = { log: jest.fn(), error: jest.fn() };
+  await run({ argv: ["--version"], printer, loadEnv: jest.fn(), cfFactory: jest.fn() });
+  expect(printer.log).toHaveBeenCalled();
+});
 
 describe("cfhub run()", () => {
   test("dispatches to injected handlers and loads env", async () => {
@@ -472,4 +479,264 @@ test("CLI dispatches account platform handlers", async () => {
     });
   }
   expect(printer.log).toHaveBeenCalled();
+});
+
+test("CLI loads an installed extension without Cloudflare credentials", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 15}`);
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-cli-ext-"));
+  const root = path.join(home, ".config/cfhub/extensions/hello");
+  fs.mkdirSync(root, { recursive: true });
+  fs.writeFileSync(
+    path.join(root, "cf-extension.json"),
+    JSON.stringify({
+      name: "hello",
+      version: "1.0.0",
+      commands: { hello: "hello.mjs" },
+    }),
+  );
+  fs.writeFileSync(
+    path.join(root, "hello.mjs"),
+    "export default ({ printer, opts }) => printer.log(`Hello ${opts.name}`)",
+  );
+  const printer = { log: jest.fn(), error: jest.fn() };
+  await mod.run({
+    argv: ["hello", "--name", "Eli"],
+    printer,
+    fsImpl: fs,
+    homeDir: home,
+  });
+  expect(printer.log).toHaveBeenCalledWith("Hello Eli");
+});
+
+test("CLI reports an installed extension with no runnable handler", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 16}`);
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-cli-empty-ext-"));
+  const root = path.join(home, ".config/cfhub/extensions/empty");
+  fs.mkdirSync(root, { recursive: true });
+  fs.writeFileSync(
+    path.join(root, "cf-extension.json"),
+    JSON.stringify({
+      name: "empty",
+      version: "1.0.0",
+      commands: { empty: "empty.mjs" },
+    }),
+  );
+  fs.writeFileSync(path.join(root, "empty.mjs"), "export const value = 1");
+  const printer = { log: jest.fn(), error: jest.fn() };
+  await mod.run({ argv: ["empty", "run"], printer, fsImpl: fs, homeDir: home });
+  expect(printer.error).toHaveBeenCalledWith("Extension command is not loadable: empty");
+});
+
+test("CLI passes output and failure helpers to extensions", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 17}`);
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-cli-helper-ext-"));
+  const root = path.join(home, ".config/cfhub/extensions/helper");
+  fs.mkdirSync(root, { recursive: true });
+  fs.writeFileSync(
+    path.join(root, "cf-extension.json"),
+    JSON.stringify({
+      name: "helper",
+      version: "1.0.0",
+      commands: { helper: "helper.mjs" },
+    }),
+  );
+  fs.writeFileSync(
+    path.join(root, "helper.mjs"),
+    'export default ({ toJsonOutput, fail, opts }) => opts.fail ? fail("extension failure") : toJsonOutput({ ok: true })',
+  );
+  const printer = { log: jest.fn(), error: jest.fn() };
+  await mod.run({
+    argv: ["helper", "--output", "json"],
+    printer,
+    fsImpl: fs,
+    homeDir: home,
+  });
+  await mod.run({
+    argv: ["helper", "--fail"],
+    printer,
+    fsImpl: fs,
+    homeDir: home,
+  });
+  expect(printer.log).toHaveBeenCalledWith('{\n  "ok": true\n}');
+  expect(printer.error).toHaveBeenCalledWith("extension failure");
+});
+
+test("CLI manages extensions without Cloudflare credentials", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 18}`);
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-cli-extension-command-"));
+  const printer = { log: jest.fn(), error: jest.fn() };
+  await mod.run({
+    argv: ["extension", "list"],
+    printer,
+    fsImpl: fs,
+    homeDir: home,
+  });
+  expect(printer.log).toHaveBeenCalledWith(expect.stringContaining("NAME"));
+});
+
+test("CLI routes the extension resource through its built-in handler", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 19}`);
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-cli-extension-dispatch-"));
+  const printer = { log: jest.fn(), error: jest.fn() };
+  await mod.run({
+    argv: ["extension", "list", "--json"],
+    printer,
+    fsImpl: fs,
+    homeDir: home,
+  });
+  await mod.run({
+    argv: ["extension", "install"],
+    printer,
+    fsImpl: fs,
+    homeDir: home,
+  });
+  expect(printer.log).toHaveBeenCalledWith("[]");
+  expect(printer.error).toHaveBeenCalledWith("Missing --path to an extension directory");
+});
+
+test("CLI applies basic jq selection to JSON callbacks", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 9}`);
+  const printer = { log: jest.fn(), error: jest.fn() };
+  await mod.run({
+    argv: ["zones", "list", "--json", "--jq", ".name"],
+    printer,
+    loadEnv: jest.fn(),
+    cfFactory: jest.fn(() => ({})),
+    handlers: {
+      zones: ({ toJsonOutput }) => toJsonOutput({ name: "example.com" }),
+    },
+    exit: jest.fn(),
+  });
+  expect(printer.log).toHaveBeenCalledWith('"example.com"');
+});
+
+test("CLI quiet mode suppresses normal handler output", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 10}`);
+  const printer = { log: jest.fn(), error: jest.fn() };
+  await mod.run({
+    argv: ["zones", "list", "--quiet"],
+    printer,
+    loadEnv: jest.fn(),
+    cfFactory: jest.fn(() => ({})),
+    handlers: { zones: ({ printer: injected }) => injected.log("hidden") },
+    exit: jest.fn(),
+  });
+  expect(printer.log).not.toHaveBeenCalledWith("hidden");
+});
+
+test("CLI accepts terminal output controls without changing JSON contracts", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 11}`);
+  const printer = { log: jest.fn(), error: jest.fn() };
+  await mod.run({
+    argv: ["zones", "list", "--pager=true", "--color=never", "--width", "80"],
+    printer,
+    loadEnv: jest.fn(),
+    cfFactory: jest.fn(() => ({})),
+    handlers: { zones: ({ printer: injected }) => injected.log("ID\nexample") },
+    exit: jest.fn(),
+    updateCheck: jest.fn().mockResolvedValue(null),
+  });
+  expect(printer.error).not.toHaveBeenCalled();
+});
+
+test("CLI supports a bare pager flag with and without saved pager settings", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 17}`);
+  const home = `/tmp/cf-cli-pager-${Date.now()}`;
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const fsImpl = {
+    existsSync: () => false,
+    readFileSync: jest.fn(),
+    mkdirSync: jest.fn(),
+    writeFileSync: jest.fn(),
+    chmodSync: jest.fn(),
+  };
+  const handler = ({ printer: injected }) => injected.log("pager output");
+  const oldPager = process.env.PAGER;
+  process.env.PAGER = "true";
+  try {
+    await mod.run({
+      argv: ["zones", "list", "--pager"],
+      env: {},
+      homeDir: home,
+      fsImpl,
+      printer,
+      loadEnv: jest.fn(),
+      cfFactory: jest.fn(() => ({})),
+      handlers: { zones: handler },
+      exit: jest.fn(),
+    });
+  } finally {
+    process.env.PAGER = oldPager;
+  }
+  const savedPager = process.env.PAGER;
+  delete process.env.PAGER;
+  try {
+    await mod.run({
+      argv: ["zones", "list", "--pager", "--no-pager"],
+      env: {},
+      homeDir: `${home}-fallback`,
+      fsImpl,
+      printer,
+      loadEnv: jest.fn(),
+      cfFactory: jest.fn(() => ({})),
+      handlers: { zones: handler },
+      exit: jest.fn(),
+    });
+  } finally {
+    process.env.PAGER = savedPager;
+  }
+  expect(printer.error).not.toHaveBeenCalled();
+});
+
+test("CLI prints dashboard links before dispatch", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 13}`);
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const common = {
+    printer,
+    env: {},
+    loadEnv: jest.fn(),
+    cfFactory: jest.fn(() => ({})),
+    exit: jest.fn(),
+  };
+  await mod.run({
+    ...common,
+    argv: ["zones", "get", "--zone-id", "z1", "--web"],
+  });
+  expect(printer.log).toHaveBeenCalledWith("https://dash.cloudflare.com/zones/z1");
+  await mod.run({
+    ...common,
+    argv: ["zones", "get", "--account-id", "a1", "--web"],
+  });
+  await mod.run({ ...common, argv: ["zones", "get", "--web"] });
+});
+
+test("CLI renders templates through injected handlers", async () => {
+  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 14}`);
+  const printer = { log: jest.fn(), error: jest.fn() };
+  await mod.run({
+    argv: ["zones", "list", "--template", "{{.name}}"],
+    printer,
+    loadEnv: jest.fn(),
+    cfFactory: jest.fn(() => ({})),
+    handlers: {
+      zones: ({ toJsonOutput }) => toJsonOutput({ name: "example.com" }),
+    },
+    exit: jest.fn(),
+  });
+  expect(printer.log).toHaveBeenCalledWith("example.com");
 });

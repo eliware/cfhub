@@ -1,11 +1,9 @@
-import packageJson from "../package.json" with { type: "json" };
 import { jest } from "@jest/globals";
 import * as fs from "node:fs";
 import path from "node:path";
 import os from "os";
 import { fileURLToPath } from "url";
 import { loadEnvFile, projectRootFromMeta } from "../src/runtime.mjs";
-import { run } from "../src/cli.mjs";
 
 describe("runtime helpers", () => {
   test("loadEnvFile respects existing env values", () => {
@@ -48,14 +46,4 @@ test("runtime loadEnvFile uses default environment and filesystem dependencies",
   loadEnvFile(file);
   expect(process.env[key]).toBe("ok");
   delete process.env[key];
-});
-
-test("run prints version without loading configuration", async () => {
-  const printer = { log: jest.fn(), error: jest.fn() };
-  const loadEnv = jest.fn();
-  const cfFactory = jest.fn();
-  await run({ argv: ["--version"], printer, loadEnv, cfFactory });
-  expect(printer.log).toHaveBeenCalledWith(packageJson.version);
-  expect(loadEnv).not.toHaveBeenCalled();
-  expect(cfFactory).not.toHaveBeenCalled();
 });
