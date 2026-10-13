@@ -1,4 +1,5 @@
-import { getAccountId, getZoneId, getId, requireAnyValue, requireValue } from "./common.mjs";
+import { getAccountId, getZoneId, getId } from "./identifiers.mjs";
+import { requireAnyValue, requireValue } from "./argument-validation.mjs";
 
 export async function handleRulesets({
   cf,

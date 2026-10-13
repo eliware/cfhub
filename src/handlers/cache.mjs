@@ -1,4 +1,5 @@
-import { getZoneId, requireValue } from "./common.mjs";
+import { getZoneId } from "./identifiers.mjs";
+import { requireValue } from "./argument-validation.mjs";
 
 export async function handleCache({
   cf,

@@ -10,13 +10,3 @@ export function selectJson(value, expression) {
     return current?.[part];
   }, value);
 }
-
-export function renderTemplate(value, template) {
-  return template.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_, expression) => {
-    const selected = selectJson(
-      value,
-      expression.trim().startsWith(".") ? expression.trim() : `.${expression.trim()}`,
-    );
-    return selected === undefined || selected === null ? "" : String(selected);
-  });
-}

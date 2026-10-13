@@ -1,4 +1,4 @@
-import { renderTemplate, selectJson } from "../src/output-selection.mjs";
+import { selectJson } from "../src/json-selection.mjs";
 
 test("selects nested values and array properties", () => {
   const value = { result: [{ name: "a" }, { name: "b" }], meta: { count: 2 } };
@@ -7,11 +7,4 @@ test("selects nested values and array properties", () => {
   expect(selectJson(value, ".result[].name")).toEqual(["a", "b"]);
   expect(selectJson(value, ".missing[]")).toEqual([]);
   expect(selectJson(value, ".")).toBe(value);
-});
-
-test("renders selected values and empty text for null values", () => {
-  expect(renderTemplate({ name: "example.com", count: 2 }, "{{.name}} ({{count}})")).toBe(
-    "example.com (2)",
-  );
-  expect(renderTemplate({ name: null }, "{{.name}}")).toBe("");
 });

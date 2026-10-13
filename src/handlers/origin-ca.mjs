@@ -1,4 +1,5 @@
-import { getId, requireValue } from "./common.mjs";
+import { getId } from "./identifiers.mjs";
+import { requireValue } from "./argument-validation.mjs";
 
 export async function handleOriginCa({
   cf,

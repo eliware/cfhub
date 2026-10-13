@@ -1,4 +1,4 @@
-import { requireValue } from "./common.mjs";
+import { requireValue } from "./argument-validation.mjs";
 
 export async function handleDnsMutation({
   action,

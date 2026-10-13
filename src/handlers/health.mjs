@@ -1,4 +1,5 @@
-import { getZoneId, getId, requireValue } from "./common.mjs";
+import { getZoneId, getId } from "./identifiers.mjs";
+import { requireValue } from "./argument-validation.mjs";
 
 export async function handleHealth({
   cf,

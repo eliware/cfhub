@@ -4,6 +4,7 @@ import { deleteCredential, readCredential, writeCredential } from "./credential-
 import { refreshOAuth } from "./oauth.mjs";
 import { activeProfile } from "./profile-store.mjs";
 import { removeExpiredProfile } from "./profile-expiry.mjs";
+import { applyProfileEnvironment } from "./profile-environment.mjs";
 
 export { activeProfile, profilesPath, readProfiles, writeProfiles } from "./profile-store.mjs";
 
@@ -62,15 +63,6 @@ export async function applyActiveProfile(
     }
   }
   const values = { ...profile, ...activeCredential };
-  for (const [key, value] of Object.entries({
-    CLOUDFLARE_API_TOKEN: values.oauthAccessToken || values.apiToken,
-    CLOUDFLARE_ACCOUNT_ID: values.accountId,
-    CLOUDFLARE_ZONE_ID: values.zoneId,
-    CFHUB_OAUTH_SCOPES: values.scopes?.join(","),
-    CFHUB_API_PERMISSIONS: values.apiPermissions?.join(","),
-
-    CFHUB_API_PERMISSIONS_KNOWN: values.apiPermissionsKnown ? "1" : undefined,
-  }))
-    if (value && !env[key]) env[key] = value;
+  applyProfileEnvironment(values, env);
   return { ...profile, ...credential };
 }

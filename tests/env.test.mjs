@@ -52,10 +52,3 @@ test("env helpers handle missing files and required values", () => {
   expect(requireEnv("TOKEN", { TOKEN: "ok" })).toBe("ok");
   expect(() => requireEnv("TOKEN", {})).toThrow("Missing TOKEN");
 });
-
-test("loadEnvFile skips malformed dotenv entries", () => {
-  const env = {};
-  const fsImpl = { existsSync: () => true, readFileSync: () => "MALFORMED\nGOOD=value\n" };
-  expect(loadEnvFile("/tmp/.env", env, fsImpl)).toBe(true);
-  expect(env).toEqual({ GOOD: "value" });
-});

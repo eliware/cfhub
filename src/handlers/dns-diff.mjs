@@ -1,4 +1,4 @@
-import { requireValue } from "./common.mjs";
+import { requireValue } from "./argument-validation.mjs";
 import { buildDnsPlan } from "./dns-plan.mjs";
 import { applyDnsPlan } from "./dns-apply-plan.mjs";
 

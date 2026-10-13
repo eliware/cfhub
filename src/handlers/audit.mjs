@@ -1,4 +1,5 @@
-import { getAccountId, requireValue } from "./common.mjs";
+import { getAccountId } from "./identifiers.mjs";
+import { requireValue } from "./argument-validation.mjs";
 
 export async function handleAudit({ cf, action, opts, outputJson, printer, toJsonOutput, fail }) {
   const accountId = getAccountId(opts);

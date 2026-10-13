@@ -1,4 +1,5 @@
-import { getZoneId, requireValue } from "./common.mjs";
+import { getZoneId } from "./identifiers.mjs";
+import { requireValue } from "./argument-validation.mjs";
 import { getZoneSetting, setZoneSetting } from "./zone-settings-api.mjs";
 
 export async function handleZoneSettings({

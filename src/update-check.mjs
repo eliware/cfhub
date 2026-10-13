@@ -1,25 +1,9 @@
 import * as fs from "node:fs";
-import { configRoot } from "./config.mjs";
+import { newerVersion } from "./version-comparison.mjs";
+import { readUpdateCache, updateCachePath, writeUpdateCache } from "./update-cache.mjs";
 
 const PACKAGE_URL = "https://registry.npmjs.org/cfhub/latest";
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-function cachePath(homeDir) {
-  return `${configRoot(homeDir)}/update-check.json`;
-}
-
-function newerVersion(latest, current) {
-  const parse = (value) =>
-    String(value)
-      .split(".")
-      .map((part) => Number.parseInt(part, 10) || 0);
-  const a = parse(latest);
-  const b = parse(current);
-  for (const index of [0, 1, 2]) {
-    if (a[index] !== b[index]) return a[index] > b[index];
-  }
-  return false;
-}
 
 export async function checkForUpdate({
   currentVersion,
@@ -31,13 +15,8 @@ export async function checkForUpdate({
   interval = DAY_MS,
 } = {}) {
   if (!currentVersion || env.CFHUB_NO_UPDATE_CHECK === "1") return null;
-  const path = cachePath(homeDir);
-  let cache = {};
-  try {
-    if (fsImpl.existsSync(path)) cache = JSON.parse(fsImpl.readFileSync(path, "utf8"));
-  } catch {
-    cache = {};
-  }
+  const path = updateCachePath(homeDir);
+  const cache = readUpdateCache(path, fsImpl);
   if (now - Number(cache.checkedAt || 0) < interval) {
     return newerVersion(cache.latestVersion, currentVersion) ? cache.latestVersion : null;
   }
@@ -50,11 +29,7 @@ export async function checkForUpdate({
     const response = await fetchImpl(PACKAGE_URL, signal ? { signal } : {});
     if (!response.ok) return null;
     const latestVersion = (await response.json()).version;
-    fsImpl.mkdirSync(configRoot(homeDir), { recursive: true });
-    fsImpl.writeFileSync(path, `${JSON.stringify({ checkedAt: now, latestVersion })}\n`, {
-      mode: 0o600,
-    });
-    if (typeof fsImpl.chmodSync === "function") fsImpl.chmodSync(path, 0o600);
+    writeUpdateCache(path, homeDir, fsImpl, { checkedAt: now, latestVersion });
     return newerVersion(latestVersion, currentVersion) ? latestVersion : null;
   } catch {
     return null;

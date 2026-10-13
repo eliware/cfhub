@@ -1,4 +1,6 @@
-import { getAccountId, requireValue } from "./common.mjs";
+import { getAccountId } from "./identifiers.mjs";
+import { requireValue } from "./argument-validation.mjs";
+import { collectZoneInventory } from "./inventory-zone.mjs";
 
 export async function handleInventory({
   cf,
@@ -21,25 +23,7 @@ export async function handleInventory({
       ? await cf.get(`/zones?account.id=${accountId}`, undefined)
       : await cf.zones.list({ account: { id: accountId } });
   const zones = Array.isArray(zonesResponse?.result) ? zonesResponse.result : [];
-  const inventory = await Promise.all(
-    zones.map(async (zone) => {
-      const [records, ssl] = await Promise.all([
-        typeof cf.get === "function"
-          ? cf.get(`/zones/${zone.id}/dns_records`, undefined)
-          : cf.dns.records.list({ zone_id: zone.id }),
-        typeof cf.get === "function"
-          ? cf.get(`/zones/${zone.id}/settings/ssl`, undefined)
-          : cf.zones.settings.get(zone.id, "ssl"),
-      ]);
-      return {
-        id: zone.id,
-        name: zone.name,
-        status: zone.status,
-        records: Array.isArray(records?.result) ? records.result : [],
-        ssl,
-      };
-    }),
-  );
+  const inventory = await Promise.all(zones.map((zone) => collectZoneInventory(cf, zone)));
   const result = { accountId, zones: inventory };
   return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
 }

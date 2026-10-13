@@ -1,4 +1,5 @@
-import { getAccountId, getId, getZoneId, requireValue } from "./common.mjs";
+import { getAccountId, getId, getZoneId } from "./identifiers.mjs";
+import { requireValue } from "./argument-validation.mjs";
 
 export function makeSimpleResource({ name, scope, path }) {
   return async function handleSimpleResource({

@@ -1,4 +1,5 @@
-import { getAccountId, getId, requireValue } from "./common.mjs";
+import { getAccountId, getId } from "./identifiers.mjs";
+import { requireValue } from "./argument-validation.mjs";
 import { printTable } from "../output-table.mjs";
 
 export async function handleLists({

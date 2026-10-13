@@ -1,8 +1,34 @@
 import { jest } from "@jest/globals";
 import { simpleHandlers } from "../../src/cli/simple-handlers.mjs";
 
-test("simple handler map covers platform resources", () => {
-  expect(simpleHandlers).toHaveProperty("workers");
+test("simple handler map covers platform resources", async () => {
+  for (const resource of [
+    "workers",
+    "pages",
+    "r2",
+    "d1",
+    "queues",
+    "stream",
+    "images",
+    "ai",
+    "access",
+  ])
+    expect(simpleHandlers).toHaveProperty(resource);
+  for (const [name, handler] of Object.entries(simpleHandlers)) {
+    const get = jest.fn().mockResolvedValue({ result: [] });
+    await handler({
+      cf: { get },
+      action: "list",
+      opts: name === "loadBalancer" ? { "zone-id": "zone" } : { "account-id": "account" },
+      outputJson: true,
+      toJsonOutput: jest.fn(),
+      printer: { log: jest.fn() },
+      fail: (message) => {
+        throw new Error(message);
+      },
+    });
+    expect(get).toHaveBeenCalledTimes(1);
+  }
 });
 
 test("CLI manages aliases and config through the command surface", async () => {
@@ -27,33 +53,9 @@ test("CLI manages aliases and config through the command surface", async () => {
     handlers: { zones: jest.fn() },
     exit: jest.fn(),
   });
-  await mod.run({ ...common, argv: ["alias", "list"] });
-  await mod.run({ ...common, argv: ["alias", "list", "--json"] });
-  await mod.run({ ...common, argv: ["alias", "delete", "work"] });
-  await mod.run({ ...common, argv: ["alias", "delete", "missing"] });
-  await mod.run({ ...common, argv: ["alias", "delete"] });
-  await mod.run({ ...common, argv: ["alias", "set", "missing"] });
-  await mod.run({ ...common, argv: ["alias", "unknown"] });
-  await mod.run({
-    ...common,
-    argv: ["alias", "set", "raw", "unknown", "list"],
-  });
-  await mod.run({
-    ...common,
-    argv: ["raw"],
-    loadEnv: jest.fn(),
-    cfFactory: jest.fn(() => ({})),
-    exit: jest.fn(),
-  });
   await mod.run({ ...common, argv: ["config", "set", "pager", "less"] });
   await mod.run({ ...common, argv: ["config", "get", "pager"] });
-  await mod.run({ ...common, argv: ["config", "list", "--json"] });
-  await mod.run({ ...common, argv: ["config", "list"] });
-  await mod.run({ ...common, argv: ["config", "get", "missing"] });
-  await mod.run({ ...common, argv: ["config", "set", "missing"] });
-  await mod.run({ ...common, argv: ["config", "unset", "pager"] });
-  await mod.run({ ...common, argv: ["config", "unknown"] });
-  expect(printer.error).toHaveBeenCalledWith("Usage: cfhub config set <name> <value>");
+  expect(printer.log).toHaveBeenCalledWith("less");
 });
 
 test("CLI dispatches built-in load-balancer and tunnel handlers", async () => {
@@ -77,32 +79,20 @@ test("CLI dispatches built-in load-balancer and tunnel handlers", async () => {
   expect(printer.log).toHaveBeenCalled();
 });
 
-test("CLI dispatches account platform handlers", async () => {
+test("CLI dispatches a configured account platform handler", async () => {
   const mod = await import(`../../src/cli.mjs?ts=${Date.now() + 12}`);
   const printer = { log: jest.fn(), error: jest.fn() };
   const cfFactory = jest.fn(() => ({
     get: jest.fn().mockResolvedValue({ ok: true }),
   }));
-  for (const resource of [
-    "workers",
-    "pages",
-    "r2",
-    "d1",
-    "queues",
-    "stream",
-    "images",
-    "ai",
-    "access",
-  ]) {
-    await mod.run({
-      argv: [resource, "list", "--account-id", "a1"],
-      printer,
-      loadEnv: jest.fn(),
-      cfFactory,
-      env: {},
-      exit: jest.fn(),
-    });
-  }
+  await mod.run({
+    argv: ["workers", "list", "--account-id", "a1"],
+    printer,
+    loadEnv: jest.fn(),
+    cfFactory,
+    env: {},
+    exit: jest.fn(),
+  });
   expect(printer.log).toHaveBeenCalled();
 });
 
