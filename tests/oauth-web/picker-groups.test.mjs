@@ -6,7 +6,23 @@ test("picker group renderer creates module tiers and scope categories", () => {
   const elements = [];
   globalThis.document = {
     createElement: jest.fn((tag) => {
-      const element = { tag, querySelectorAll: () => checkboxes };
+      const list = {
+        children: [],
+        append(item) {
+          this.children.push(item);
+        },
+      };
+      const element = {
+        tag,
+        dataset: {},
+        children: [],
+        list,
+        querySelector: () => list,
+        querySelectorAll: () => checkboxes,
+        append(...items) {
+          this.children.push(...items);
+        },
+      };
       elements.push(element);
       return element;
     }),
@@ -28,11 +44,12 @@ test("picker group renderer creates module tiers and scope categories", () => {
     boxes,
   });
   expect(moduleGroups.append).toHaveBeenCalledTimes(2);
-  expect(elements[0].innerHTML).toContain("Core access");
-  expect(elements[0].innerHTML).not.toContain("Extra access");
-  expect(elements[1].innerHTML).toContain("Extra access");
+  const tiers = moduleGroups.append.mock.calls.map(([group]) => group);
+  expect(tiers[0].list.children[0].children[1].textContent).toBe("Core access");
+  expect(tiers[0].list.children[0].children[1].textContent).not.toBe("Extra access");
+  expect(tiers[1].list.children[0].children[1].textContent).toBe("Extra access");
   expect(scopeGroups.append).toHaveBeenCalledTimes(2);
-  expect(elements[2].innerHTML).toContain("Zone");
-  expect(elements[3].innerHTML).toContain("DNS");
+  expect(scopeGroups.append.mock.calls[0][0].innerHTML).toContain("Zone");
+  expect(scopeGroups.append.mock.calls[1][0].innerHTML).toContain("DNS");
   expect(boxes).toEqual(checkboxes.concat(checkboxes));
 });

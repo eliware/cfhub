@@ -1,25 +1,49 @@
 import { jest } from "@jest/globals";
 import { renderPickerModuleGroups } from "../../src/oauth-web/picker-module-groups.mjs";
 
-test("renders each module tier and its modules", () => {
+test("renders module tiers and inserts catalog text as text", () => {
   const elements = [];
   globalThis.document = {
-    createElement: jest.fn(() => {
-      const item = {};
-      elements.push(item);
-      return item;
+    createElement: jest.fn((tag) => {
+      const list = {
+        children: [],
+        append(item) {
+          this.children.push(item);
+        },
+      };
+      const element = {
+        tag,
+        dataset: {},
+        children: [],
+        append(...items) {
+          this.children.push(...items);
+        },
+        querySelector: () => list,
+        list,
+      };
+      elements.push(element);
+      return element;
     }),
   };
   const append = jest.fn();
+  const unsafeName = '<img src="x" onerror="run()">';
+  const unsafeDescription = "<script>run()</script>";
   renderPickerModuleGroups(
     [
-      { id: "core", tier: "basic", name: "Core", description: "Base" },
+      { id: '" onfocus="run()', tier: "basic", name: unsafeName, description: unsafeDescription },
       { id: "extra", tier: "advanced", name: "Extra", description: "More" },
     ],
     { append },
   );
   expect(append).toHaveBeenCalledTimes(2);
-  expect(elements[0].innerHTML).toContain("Base");
-  expect(elements[0].innerHTML).not.toContain("More");
-  expect(elements[1].innerHTML).toContain("Extra");
+  const [basic, advanced] = append.mock.calls.map(([group]) => group);
+  expect(basic.innerHTML).toContain("Basic modules");
+  expect(basic.innerHTML).not.toContain(unsafeName);
+  expect(basic.innerHTML).not.toContain(unsafeDescription);
+  expect(basic.list.children[0].dataset.module).toBe('" onfocus="run()');
+  expect(basic.list.children[0].children[0].textContent).toBe(unsafeName);
+  expect(basic.list.children[0].children[1].textContent).toBe(unsafeDescription);
+  expect(advanced.innerHTML).toContain("Advanced modules");
+  expect(advanced.list.children[0].children[0].textContent).toBe("Extra");
+  expect(elements).toHaveLength(8);
 });

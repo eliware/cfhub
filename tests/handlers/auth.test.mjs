@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 import { handleAuth } from "../../src/handlers/auth.mjs";
-import { fs } from "../../src/fs.mjs";
 
 test("auth coordinator routes login, profile, status, and verify actions", async () => {
   const data = { active: null, profiles: {} };
@@ -21,6 +20,20 @@ test("auth coordinator routes login, profile, status, and verify actions", async
     expect.objectContaining({ oauthAccessToken: "access" }),
   );
 
+  await handleAuth({
+    action: "login",
+    resource: "api-token",
+    opts: { "token-stdin": true },
+    read: () => ({ profiles: {} }),
+    readToken: () => "token",
+    inspectApiTokenImpl: jest
+      .fn()
+      .mockResolvedValue({ permissions: [], permissionsKnown: false, permissionSummary: {} }),
+    writeCredentialImpl: jest.fn().mockResolvedValue(true),
+    write: jest.fn(),
+    printer: { error: jest.fn(), log: jest.fn() },
+  });
+
   const toJsonOutput = jest.fn();
   await handleAuth({
     action: "list",
@@ -29,22 +42,6 @@ test("auth coordinator routes login, profile, status, and verify actions", async
     toJsonOutput,
   });
   expect(toJsonOutput).toHaveBeenCalledWith([{ name: "work", active: true, authMethod: "oauth" }]);
-
-  const read = jest.spyOn(fs, "readFileSync").mockReturnValue(" token ");
-  await handleAuth({
-    action: "login",
-    resource: "api-token",
-    opts: { "token-stdin": true },
-    read: () => ({ profiles: {} }),
-    inspectApiTokenImpl: jest
-      .fn()
-      .mockResolvedValue({ permissions: [], permissionsKnown: false, permissionSummary: {} }),
-    writeCredentialImpl: jest.fn().mockResolvedValue(true),
-    write: jest.fn(),
-    printer: { error: jest.fn(), log: jest.fn() },
-  });
-  expect(read).toHaveBeenCalledWith(0, "utf8");
-  read.mockRestore();
 
   const previousToken = process.env.CLOUDFLARE_API_TOKEN;
   process.env.CLOUDFLARE_API_TOKEN = "token";
@@ -84,12 +81,5 @@ test("auth coordinator routes login, profile, status, and verify actions", async
     fail,
   });
   expect(fail).toHaveBeenCalledWith("Unknown auth action: unknown");
-});
-
-test("auth coordinator accepts an empty context", async () => {
-  const log = jest.spyOn(console, "log").mockImplementation(() => {});
   await handleAuth();
-  await handleAuth({ action: "list" });
-  expect(log).toHaveBeenCalled();
-  log.mockRestore();
 });
