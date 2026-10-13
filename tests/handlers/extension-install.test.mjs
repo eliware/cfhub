@@ -5,12 +5,11 @@ test("validates and installs an extension directory", () => {
   const fsImpl = {
     readFileSync: jest.fn(() => JSON.stringify({ name: "demo", version: "1.0.0", commands: {} })),
     mkdirSync: jest.fn(),
-    rmSync: jest.fn(),
+    existsSync: jest.fn(() => false),
     cpSync: jest.fn(),
   };
   const printer = { log: jest.fn() };
   installExtension({
-    action: "install",
     opts: { path: "/source" },
     printer,
     fail: jest.fn(),
@@ -26,7 +25,6 @@ test("validates and installs an extension directory", () => {
 test("reports missing or invalid extension manifests", () => {
   const fail = jest.fn();
   const base = {
-    action: "upgrade",
     printer: { log: jest.fn() },
     fail,
     fsImpl: {},
@@ -40,4 +38,23 @@ test("reports missing or invalid extension manifests", () => {
     fsImpl: { readFileSync: () => JSON.stringify({ name: "bad name" }) },
   });
   expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
+});
+
+test("refuses to replace an installed extension", () => {
+  const fail = jest.fn();
+  const fsImpl = {
+    readFileSync: () => JSON.stringify({ name: "demo", version: "1", commands: {} }),
+    mkdirSync: jest.fn(),
+    existsSync: jest.fn(() => true),
+    cpSync: jest.fn(),
+  };
+  installExtension({
+    opts: { path: "/source" },
+    printer: { log: jest.fn() },
+    fail,
+    fsImpl,
+    homeDir: "/home",
+  });
+  expect(fail).toHaveBeenCalledWith("Extension demo is already installed. Use upgrade instead.");
+  expect(fsImpl.cpSync).not.toHaveBeenCalled();
 });

@@ -31,4 +31,4 @@ export function renderPickerState({
   });
   moduleCount.textContent = `${state.enabledModules.size}/${modules.length} modules enabled`;
 }
-import { syncPickerModuleState } from "./picker-module-state.mjs";
+import { syncPickerModuleState } from "./picker-module-sync.mjs";

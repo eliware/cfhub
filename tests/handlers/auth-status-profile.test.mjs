@@ -1,6 +1,19 @@
 import { jest } from "@jest/globals";
 import { showAuthStatus } from "../../src/handlers/auth-status-profile.mjs";
 
+test("status stops when credentials are absent", async () => {
+  const prior = process.env.CLOUDFLARE_API_TOKEN;
+  delete process.env.CLOUDFLARE_API_TOKEN;
+  const fail = jest.fn();
+  try {
+    await showAuthStatus({ fail });
+  } finally {
+    if (prior === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
+    else process.env.CLOUDFLARE_API_TOKEN = prior;
+  }
+  expect(fail).toHaveBeenCalledWith("You are not logged into Cloudflare. Run: cfhub auth login");
+});
+
 test("status reports user token identity", async () => {
   const previous = process.env.CLOUDFLARE_API_TOKEN;
   process.env.CLOUDFLARE_API_TOKEN = "user-token";
@@ -25,19 +38,6 @@ test("status reports user token identity", async () => {
     if (previous === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
     else process.env.CLOUDFLARE_API_TOKEN = previous;
   }
-});
-
-test("status stops when credentials are absent", async () => {
-  const prior = process.env.CLOUDFLARE_API_TOKEN;
-  delete process.env.CLOUDFLARE_API_TOKEN;
-  const fail = jest.fn();
-  try {
-    await showAuthStatus({ fail });
-  } finally {
-    if (prior === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
-    else process.env.CLOUDFLARE_API_TOKEN = prior;
-  }
-  expect(fail).toHaveBeenCalledWith("You are not logged into Cloudflare. Run: cfhub auth login");
 });
 
 test("status routes account tokens to account details", async () => {

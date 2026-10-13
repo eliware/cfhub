@@ -1,6 +1,6 @@
 import { extensionRoot, validateExtensionManifest } from "../extensions.mjs";
 
-export function installExtension({ action, opts, printer, fail, fsImpl, homeDir }) {
+export function installExtension({ opts, printer, fail, fsImpl, homeDir }) {
   if (!opts.path) {
     fail("Missing --path to an extension directory");
     return;
@@ -13,9 +13,11 @@ export function installExtension({ action, opts, printer, fail, fsImpl, homeDir 
   }
   const root = extensionRoot(homeDir);
   fsImpl.mkdirSync(root, { recursive: true });
-  fsImpl.rmSync(`${root}/${manifest.name}`, { recursive: true, force: true });
-  fsImpl.cpSync(source, `${root}/${manifest.name}`, { recursive: true });
-  return printer.log(
-    `${action === "install" ? "Installed" : "Upgraded"} extension ${manifest.name}`,
-  );
+  const destination = `${root}/${manifest.name}`;
+  if (typeof fsImpl.existsSync === "function" && fsImpl.existsSync(destination)) {
+    fail(`Extension ${manifest.name} is already installed. Use upgrade instead.`);
+    return;
+  }
+  fsImpl.cpSync(source, destination, { recursive: true });
+  return printer.log(`Installed extension ${manifest.name}`);
 }

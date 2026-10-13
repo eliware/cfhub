@@ -1,5 +1,6 @@
 import { saveTokenProfile } from "./auth-token-profile-save.mjs";
 import { readLoginToken, resolveTokenAccount } from "./auth-token-input.mjs";
+import { reportTokenLogin } from "./auth-token-login-result.mjs";
 
 export async function saveApiTokenLogin({
   data,
@@ -56,9 +57,5 @@ export async function saveApiTokenLogin({
     profileHome,
     profileFs,
   });
-  const summary = tokenInfo.permissionSummary;
-  const discovered = tokenInfo.permissionsKnown
-    ? `\nPermissions discovered: ${summary.total} (Read: ${summary.read}, Write/Edit: ${summary.write}, Other: ${summary.other})`
-    : "";
-  return printer.log(`Saved and activated profile ${name}${discovered}`);
+  return reportTokenLogin({ name, tokenInfo, printer });
 }

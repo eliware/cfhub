@@ -1,7 +1,4 @@
-import {
-  createPickerModuleState,
-  syncPickerModuleState,
-} from "../../src/oauth-web/picker-module-state.mjs";
+import { createPickerModuleState } from "../../src/oauth-web/picker-module-state.mjs";
 
 test("module policy preserves shared and required scopes", () => {
   const modules = [
@@ -40,16 +37,4 @@ test("module policy preserves shared and required scopes", () => {
   policy.moduleTier("unknown", false);
   expect(state.enabledModules).toEqual(new Set());
   expect(state.selected).toEqual(new Set(["required"]));
-});
-
-test("syncs module state from selected scopes", () => {
-  const enabled = new Set();
-  const modules = [
-    { id: "zones", scopes: ["zone.read", "zone.write"] },
-    { id: "dns", scopes: ["dns.read"] },
-  ];
-  syncPickerModuleState(modules, new Set(["zone.read", "zone.write"]), enabled);
-  expect(enabled).toEqual(new Set(["zones"]));
-  syncPickerModuleState(modules, new Set(["dns.read"]), enabled);
-  expect(enabled).toEqual(new Set(["dns"]));
 });

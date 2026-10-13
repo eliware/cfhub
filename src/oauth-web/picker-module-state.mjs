@@ -24,11 +24,3 @@ export function createPickerModuleState(modules, state) {
       .forEach((module) => (enable ? enableModule(module.id) : disableModule(module.id)));
   return { enableModule, disableModule, moduleTier };
 }
-
-export function syncPickerModuleState(modules, selected, enabledModules) {
-  modules.forEach((module) => {
-    const satisfied = module.scopes.every((scope) => selected.has(scope));
-    if (satisfied) enabledModules.add(module.id);
-    else enabledModules.delete(module.id);
-  });
-}

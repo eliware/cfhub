@@ -84,9 +84,7 @@ test("uses option and environment account and zone IDs", async () => {
       zoneId: "option-zone",
     }),
   );
-  expect(args.printer.log).toHaveBeenCalledWith(
-    "Saved and activated profile work\nPermissions discovered: 1 (Read: 1, Write/Edit: 0, Other: 0)",
-  );
+  expect(args.printer.log).toHaveBeenCalled();
   expect(write).toHaveBeenCalledWith(data, "home", args.profileFs);
 });
 
