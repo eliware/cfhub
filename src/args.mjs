@@ -1,3 +1,5 @@
+import { readOptionValue } from "./args-option-value.mjs";
+
 export function parseArgs(argv) {
   const args = [];
   const opts = {};
@@ -13,13 +15,9 @@ export function parseArgs(argv) {
       continue;
     }
     const key = arg.slice(2);
-    const next = argv[i + 1];
-    if (next && !next.startsWith("--")) {
-      opts[key] = next;
-      i++;
-    } else {
-      opts[key] = true;
-    }
+    const option = readOptionValue(argv[i + 1]);
+    opts[key] = option.value;
+    if (option.consumesNext) i++;
   }
   return { args, opts };
 }

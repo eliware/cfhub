@@ -1,4 +1,5 @@
 import { bindPickerCategoryEvents } from "./picker-category-events.mjs";
+import { bindPickerBulkEvents } from "./picker-bulk-events.mjs";
 
 export function bindPickerScopeEvents({
   categories,
@@ -18,13 +19,5 @@ export function bindPickerScopeEvents({
     }),
   );
   bindPickerCategoryEvents({ categories, required, selected, render });
-  document.querySelector("[data-all-enable]").addEventListener("click", () => {
-    boxes.forEach((box) => selected.add(box.value));
-    render();
-  });
-  document.querySelector("[data-all-disable]").addEventListener("click", () => {
-    selected.clear();
-    required.forEach((scope) => selected.add(scope));
-    render(false);
-  });
+  bindPickerBulkEvents({ required, selected, boxes, render });
 }

@@ -8,14 +8,11 @@ const control = () => ({
   },
 });
 
-test("binds individual scope and all-scope controls", () => {
+test("binds individual scope changes", () => {
   const read = Object.assign(control(), { value: "zone.read", checked: true });
   const write = Object.assign(control(), { value: "zone.write", checked: false });
-  const enable = control();
-  const disable = control();
   globalThis.document = {
-    querySelector: (selector) =>
-      ({ "[data-all-enable]": enable, "[data-all-disable]": disable })[selector],
+    querySelector: () => control(),
     querySelectorAll: () => [],
   };
   const selected = new Set(["zone.read", "required"]);
@@ -36,8 +33,6 @@ test("binds individual scope and all-scope controls", () => {
   expect(enabledModules.has("zones")).toBe(false);
   write.checked = true;
   write.handlers.change();
-  enable.handlers.click();
-  disable.handlers.click();
-  expect(selected).toEqual(required);
-  expect(render).toHaveBeenLastCalledWith(false);
+  expect(selected).toEqual(new Set(["required", "zone.write"]));
+  expect(render).toHaveBeenCalledTimes(2);
 });
