@@ -7,7 +7,7 @@ import {
   deleteCredential,
   readCredential,
   writeCredential,
-} from "../src/credentials.mjs";
+} from "../src/credential-store.mjs";
 
 test("credential adapter reads, writes, and deletes keychain entries", async () => {
   const store = {

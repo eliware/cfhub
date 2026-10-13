@@ -1,6 +1,6 @@
 import os from "node:os";
 import * as fs from "node:fs";
-import { deleteCredential, readCredential, writeCredential } from "./credentials.mjs";
+import { deleteCredential, readCredential, writeCredential } from "./credential-store.mjs";
 import { refreshOAuth } from "./oauth.mjs";
 import { activeProfile, readProfiles, writeProfiles } from "./profile-store.mjs";
 

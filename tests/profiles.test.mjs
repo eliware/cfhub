@@ -9,7 +9,7 @@ import {
   readProfiles,
   writeProfiles,
 } from "../src/profiles.mjs";
-import { deleteCredential, readCredential, writeCredential } from "../src/credentials.mjs";
+import { deleteCredential, readCredential, writeCredential } from "../src/credential-store.mjs";
 
 test("profile application exports known API permissions", async () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-permissions-"));

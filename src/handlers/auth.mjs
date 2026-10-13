@@ -3,7 +3,7 @@ import { handleAuthStatus } from "./auth-status.mjs";
 import { handleAuthLogin } from "./auth-login.mjs";
 import { defaultPromptAccountId, promptHidden } from "./auth-prompts.mjs";
 import { readProfiles, writeProfiles } from "../profiles.mjs";
-import { deleteCredential, readCredential, writeCredential } from "../credentials.mjs";
+import { deleteCredential, readCredential, writeCredential } from "../credential-store.mjs";
 import { fs } from "../fs.mjs";
 import { inspectApiToken } from "../token-permissions.mjs";
 import { loginOAuth, revokeOAuth } from "../oauth.mjs";
