@@ -1,5 +1,5 @@
-import { ALLOWED_OAUTH_SCOPES } from "./oauth-scope-model.mjs";
 import { readRequestBody } from "./oauth-form.mjs";
+import { selectOAuthPickerScopes } from "./oauth-picker-scope-selection.mjs";
 
 export function serveOAuthPickerSubmitRoute({
   request,
@@ -13,10 +13,7 @@ export function serveOAuthPickerSubmitRoute({
 }) {
   if (!scopePicker || url.pathname !== "/oauth/start" || request.method !== "POST") return false;
   readRequestBody(request).then((form) => {
-    const requested = form.getAll("scope").filter((scope) => ALLOWED_OAUTH_SCOPES.has(scope));
-    const nextScopes = [
-      ...new Set([...requiredScopes, ...(requested.length ? requested : scopes)]),
-    ];
+    const nextScopes = selectOAuthPickerScopes({ form, scopes, requiredScopes });
     setSelectedScopes(nextScopes);
     response.writeHead(302, {
       location: makeAuthorization(nextScopes, form.get("keep-signed-in") === "on").toString(),
