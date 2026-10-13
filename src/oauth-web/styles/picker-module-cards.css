@@ -1,0 +1,73 @@
+.modules {
+  margin-bottom: 30px;
+}
+#module-groups {
+  min-height: 560px;
+}
+.module-tier {
+  margin-top: 12px;
+}
+.module-tier h3 {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+  margin: 0;
+}
+.module-tier-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+.module-actions button {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--text);
+  padding: 7px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.module-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.module {
+  background: var(--soft);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 9px;
+  text-align: left;
+  cursor: pointer;
+}
+.module.active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.module small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 2px;
+}
+.module-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 8px;
+}
+.module-list .module {
+  width: 100%;
+  min-width: 0;
+}
+section .module-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 8px;
+}
+section .module-list .module {
+  width: 100%;
+  min-width: 0;
+}

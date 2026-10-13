@@ -1,4 +1,5 @@
 import { API_TOKEN_TUTORIAL } from "./auth-prompts.mjs";
+import { saveTokenProfile } from "./auth-token-profile-save.mjs";
 
 export async function saveApiTokenLogin({
   data,
@@ -44,16 +45,17 @@ export async function saveApiTokenLogin({
     fail("Could not save the API token to the OS keychain or private credential file");
     return;
   }
-  data.profiles[name] = {
-    authMethod: detectedAccountToken ? "account-api-token" : "api-token",
+  saveTokenProfile({
+    data,
+    name,
+    opts,
+    tokenInfo,
+    detectedAccountToken,
     accountId,
-    zoneId: opts?.["zone-id"] || process.env.CLOUDFLARE_ZONE_ID,
-    apiPermissions: tokenInfo.permissions,
-    apiPermissionsKnown: tokenInfo.permissionsKnown,
-    apiPermissionSummary: tokenInfo.permissionSummary,
-  };
-  data.active = name;
-  write(data, profileHome, profileFs);
+    write,
+    profileHome,
+    profileFs,
+  });
   const summary = tokenInfo.permissionSummary;
   const discovered = tokenInfo.permissionsKnown
     ? `\nPermissions discovered: ${summary.total} (Read: ${summary.read}, Write/Edit: ${summary.write}, Other: ${summary.other})`

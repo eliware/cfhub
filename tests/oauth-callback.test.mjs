@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals";
-import { loginOAuth } from "./../src/oauth.mjs";
+import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
 
 import { createOAuthCallback } from "../src/oauth-callback.mjs";

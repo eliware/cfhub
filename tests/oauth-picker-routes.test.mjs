@@ -4,7 +4,6 @@ import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
 
 import { serveOAuthPickerRoute } from "../src/oauth-picker-routes.mjs";
-import "../test-fixtures/unit/oauth-login-success.mjs";
 
 test("OAuth picker serves its landing page and filters requested scopes", async () => {
   const response = { writeHead: jest.fn(), end: jest.fn() };

@@ -1,0 +1,84 @@
+.required-scopes {
+  margin: -16px 0 24px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.required-scopes strong {
+  color: var(--text);
+}
+.session-option {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 18px 0 24px;
+  padding: 13px 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft);
+  cursor: pointer;
+}
+.session-option small {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.module-heading,
+.scope-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.module-heading span,
+.scope-heading span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.module-actions,
+.scope-selection-tools,
+.scope-view-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.scope-heading {
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+#scope-search {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #777;
+  border-radius: 8px;
+  background: #0e0e0e;
+  color: var(--text);
+  padding: 0 13px;
+  outline: none;
+  margin: 7px 0 12px;
+}
+#scope-search:focus {
+  border-color: #bbb;
+}
+.scope-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+.scope-tools {
+  gap: 7px;
+}
+.scope-tools button,
+.category-actions button {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--text);
+  padding: 7px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}

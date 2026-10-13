@@ -1,13 +1,8 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { VERSION } from "./version.mjs";
-import {
-  ALLOWED_OAUTH_SCOPES,
-  pickerAsset,
-  pickerHtml,
-  readRequestBody,
-  sendAsset,
-} from "./oauth-picker-assets.mjs";
+import { pickerAsset, pickerHtml, readRequestBody, sendAsset } from "./oauth-picker-assets.mjs";
+import { ALLOWED_OAUTH_SCOPES } from "./oauth-scope-model.mjs";
 
 export function serveOAuthPickerRoute({
   request,

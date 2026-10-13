@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 import {
-  ALLOWED_OAUTH_SCOPES,
   pickerAsset,
   pickerHtml,
   readRequestBody,
@@ -8,7 +7,6 @@ import {
 } from "../src/oauth-picker-assets.mjs";
 
 test("picker asset helpers load browser data and respond with content", async () => {
-  expect(ALLOWED_OAUTH_SCOPES.has("zone.read")).toBe(true);
   expect(pickerAsset("oauth-web/cf-logo.svg")).toContain("svg");
   expect(pickerAsset("oauth-web/oauth-picker.html")).toContain("<!doctype html>");
   expect(pickerHtml()).toContain("zone.read");

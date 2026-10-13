@@ -1,0 +1,54 @@
+.brand {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+}
+.brand {
+  width: 115px;
+  height: 53px;
+  background: #fff;
+  padding: 5px;
+}
+.brand img {
+  display: block;
+  width: 115px;
+  height: 53px;
+  object-fit: contain;
+}
+header .brand {
+  width: 115px;
+  height: 53px;
+  background: #fff;
+  padding: 5px;
+}
+header .brand img {
+  display: block;
+  width: 115px;
+  height: 53px;
+  object-fit: contain;
+}
+.cf-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+}
+.cf-logo {
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+.cf-mark {
+  color: #111;
+}

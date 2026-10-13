@@ -1,0 +1,20 @@
+.login {
+  width: 100%;
+  border: 1px solid #1f65c1;
+  border-radius: 7px;
+  background: #1f65c1;
+  color: #fff;
+  font-weight: 700;
+  padding: 12px 16px;
+  cursor: pointer;
+  margin: 10px 0;
+}
+.login:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+.login:not(:disabled) {
+  box-shadow:
+    0 0 0 2px #67a8ff,
+    0 0 18px #1f65c199;
+}

@@ -1,0 +1,44 @@
+.quick-setup > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  cursor: pointer;
+}
+.quick-setup > summary #module-count {
+  margin-left: auto;
+  text-align: right;
+}
+.quick-setup > summary::-webkit-details-marker {
+  display: none;
+}
+.quick-setup > summary:after {
+  content: "⌄";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 18px;
+  width: 18px;
+  margin-left: 0;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  transform-origin: center;
+  transition: transform 0.15s;
+}
+.quick-setup:not([open]) > summary:after {
+  transform: rotate(-90deg);
+}
+.login-hint {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin: -13px 0 18px;
+}
+.bottom-hint {
+  margin-top: -13px;
+}
+.login-hint[hidden] {
+  display: none;
+}

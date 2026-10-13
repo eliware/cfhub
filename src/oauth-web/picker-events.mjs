@@ -1,4 +1,5 @@
 import { bindPickerNavigation } from "./picker-navigation.mjs";
+import { bindPickerCategoryEvents } from "./picker-category-events.mjs";
 
 export function bindPickerEvents({
   categories,
@@ -47,24 +48,7 @@ export function bindPickerEvents({
       render();
     }),
   );
-  document.querySelectorAll("[data-category-enable]").forEach((button) =>
-    button.addEventListener("click", () => {
-      categories[button.dataset.categoryEnable].forEach((feature) =>
-        feature.scopes.forEach((scope) => selected.add(scope.scope)),
-      );
-      render();
-    }),
-  );
-  document.querySelectorAll("[data-category-disable]").forEach((button) =>
-    button.addEventListener("click", () => {
-      categories[button.dataset.categoryDisable].forEach((feature) =>
-        feature.scopes.forEach((scope) => {
-          if (!required.has(scope.scope)) selected.delete(scope.scope);
-        }),
-      );
-      render();
-    }),
-  );
+  bindPickerCategoryEvents({ categories, required, selected, render });
   document.querySelector("[data-all-enable]").addEventListener("click", () => {
     boxes.forEach((box) => selected.add(box.value));
     render();

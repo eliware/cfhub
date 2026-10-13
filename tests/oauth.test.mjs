@@ -1,7 +1,6 @@
 import { jest } from "@jest/globals";
 
 import { loginOAuth } from "../src/oauth.mjs";
-
 import http from "node:http";
 
 import { EventEmitter } from "node:events";
@@ -83,36 +82,6 @@ test("OAuth callback handles missing descriptions and browser error messages", a
   expect(printed).toEqual(expect.arrayContaining([expect.stringContaining("no opener")]));
 });
 
-test("OAuth callback renders a generic provider failure", async () => {
-  const printed = [];
-  let closeServer;
-  const promise = loginOAuth({
-    clientId: "client",
-    ports: [0],
-    open: jest.fn(),
-    print: (value) => printed.push(value),
-    setTimeoutImpl: (callback) => (closeServer = callback),
-  });
-  const failure = promise.catch((error) => error);
-  await new Promise((resolve) => setTimeout(resolve, 10));
-  const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
-  await new Promise((resolve, reject) =>
-    http
-      .get(
-        `${authorization.searchParams.get("redirect_uri")}?state=${authorization.searchParams.get("state")}&error=server_error`,
-        (response) => {
-          response.resume();
-          response.on("end", resolve);
-        },
-      )
-      .on("error", reject),
-  );
-  await expect(failure).resolves.toMatchObject({
-    message: "Cloudflare authorization failed: server_error",
-  });
-  closeServer();
-});
-
 test("OAuth login opens the scope picker before authorization", async () => {
   const printed = [];
   let closeServer;
@@ -144,5 +113,69 @@ test("OAuth login opens the scope picker before authorization", async () => {
   await fetch(callbackUrl);
   await expect(promise).resolves.toMatchObject({ accessToken: "access" });
   expect(printed[0]).toContain("set up cfhub");
+  closeServer();
+});
+
+test("OAuth login falls back when the first callback port is busy", async () => {
+  const occupied = http.createServer();
+  await new Promise((resolve) => occupied.listen(8765, "127.0.0.1", resolve));
+  try {
+    const printed = [];
+    const promise = loginOAuth({
+      clientId: "client",
+      ports: [8765, 0],
+      open: jest.fn(),
+      print: (value) => printed.push(value),
+      fetchImpl: jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ access_token: "access" }),
+      }),
+    });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
+    await new Promise((resolve, reject) =>
+      http
+        .get(
+          `${authorization.searchParams.get("redirect_uri")}?state=${authorization.searchParams.get("state")}&code=code`,
+          (response) => {
+            response.resume();
+            response.on("end", resolve);
+          },
+        )
+        .on("error", reject),
+    );
+    await expect(promise).resolves.toMatchObject({ accessToken: "access" });
+  } finally {
+    await new Promise((resolve) => occupied.close(resolve));
+  }
+});
+
+test("OAuth callback renders a generic provider failure", async () => {
+  const printed = [];
+  let closeServer;
+  const promise = loginOAuth({
+    clientId: "client",
+    ports: [0],
+    open: jest.fn(),
+    print: (value) => printed.push(value),
+    setTimeoutImpl: (callback) => (closeServer = callback),
+  });
+  const failure = promise.catch((error) => error);
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
+  await new Promise((resolve, reject) =>
+    http
+      .get(
+        `${authorization.searchParams.get("redirect_uri")}?state=${authorization.searchParams.get("state")}&error=server_error`,
+        (response) => {
+          response.resume();
+          response.on("end", resolve);
+        },
+      )
+      .on("error", reject),
+  );
+  await expect(failure).resolves.toMatchObject({
+    message: "Cloudflare authorization failed: server_error",
+  });
   closeServer();
 });

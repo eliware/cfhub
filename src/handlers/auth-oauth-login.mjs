@@ -1,5 +1,6 @@
 import { DEFAULT_OAUTH_CLIENT_ID } from "../oauth-tokens.mjs";
 import { DEFAULT_OAUTH_SCOPES } from "../oauth.mjs";
+import { saveOAuthProfile } from "./auth-oauth-profile-save.mjs";
 
 export async function saveOAuthLogin({
   data,
@@ -28,18 +29,15 @@ export async function saveOAuthLogin({
     bindHost: process.env.CFHUB_OAUTH_BIND_HOST || "0.0.0.0",
     redirectHost: process.env.CFHUB_OAUTH_REDIRECT_HOST || "127.0.0.1",
   });
-  await writeCredentialImpl(name, {
-    oauthAccessToken: oauth.accessToken,
-    oauthRefreshToken: oauth.refreshToken,
-    expiresIn: oauth.expiresIn,
-    expiresAt: oauth.expiresAt,
+  await saveOAuthProfile({
+    data,
+    name,
+    opts,
+    scopes,
+    oauth,
+    writeCredentialImpl,
+    write,
+    profileHome,
+    profileFs,
   });
-  data.profiles[name] = {
-    authMethod: "oauth",
-    scopes: oauth.scopes || scopes,
-    accountId: opts?.["account-id"] || process.env.CLOUDFLARE_ACCOUNT_ID,
-    zoneId: opts?.["zone-id"] || process.env.CLOUDFLARE_ZONE_ID,
-  };
-  data.active = name;
-  write(data, profileHome, profileFs);
 }

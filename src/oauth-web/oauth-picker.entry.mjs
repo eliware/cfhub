@@ -1,3 +1,13 @@
-import "./oauth-picker.css";
+import "./styles/picker-layout.css";
+import "./styles/picker-module-controls.css";
+import "./styles/picker-module-cards.css";
+import "./styles/picker-scope-controls.css";
+import "./styles/picker-scope-categories.css";
+import "./styles/picker-scope-features.css";
+import "./styles/picker-brand.css";
+import "./styles/picker-brand-lockup.css";
+import "./styles/picker-footer.css";
+import "./styles/picker-quick-setup.css";
+import "./styles/picker-faq.css";
 
 export const cssOnlyEntry = true;

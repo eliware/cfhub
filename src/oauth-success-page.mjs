@@ -1,23 +1,11 @@
 import { VERSION } from "./version.mjs";
 import { copyrightYear } from "./oauth-pages.mjs";
 import { pickerAsset } from "./oauth-picker-assets.mjs";
-import moduleCatalog from "../data/cloudflare-oauth-modules.json" with { type: "json" };
-
-const MODULE_CATALOG = moduleCatalog.modules;
-function escapeHtml(value) {
-  return String(value ?? "").replace(
-    /[&<>"']/g,
-    (character) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character],
-  );
-}
-function moduleCard(module, enabled) {
-  return `<div class="module"><strong>${escapeHtml(module.name)}</strong><small>${enabled ? "Enabled · ready for its selected scopes." : `Requires: ${escapeHtml(module.scopes.join(", "))}`}</small></div>`;
-}
+import { successModuleCards } from "./oauth-success-modules.mjs";
 
 export function successPage({ account, scopes, summary }) {
   const enabled = summary.enabled;
-  const disabled = MODULE_CATALOG.filter((module) => !enabled.includes(module));
+  const moduleCards = successModuleCards(enabled);
   const zone = summary.zones[0]?.name || "example.com";
   const examples = [
     enabled.some((module) => module.id === "zones") && "cfhub zone list",
@@ -41,11 +29,8 @@ export function successPage({ account, scopes, summary }) {
     .replaceAll("__ENABLED_COUNT__", String(enabled.length))
     .replaceAll("__ZONE_COUNT__", String(summary.zones.length))
     .replaceAll("__DNS_COUNT__", String(summary.dns.length))
-    .replaceAll("__ENABLED_MODULES__", enabled.map((module) => moduleCard(module, true)).join(""))
-    .replaceAll(
-      "__DISABLED_MODULES__",
-      disabled.map((module) => moduleCard(module, false)).join(""),
-    )
+    .replaceAll("__ENABLED_MODULES__", moduleCards.enabled)
+    .replaceAll("__DISABLED_MODULES__", moduleCards.disabled)
     .replaceAll("__EXAMPLES__", examples || "<p>Select a module to see command examples.</p>")
     .replaceAll("__COPYRIGHT__", copyrightYear())
     .replaceAll("__VERSION__", VERSION);
