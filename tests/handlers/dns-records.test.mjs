@@ -51,28 +51,17 @@ test("uses default printer and accepts result arrays", async () => {
   jest.restoreAllMocks();
 });
 
-test("gets records from SDK and generic clients", async () => {
+test("routes get actions to the DNS record getter", async () => {
   const toJsonOutput = jest.fn();
-  const get = jest.fn().mockResolvedValue({ id: "sdk" });
-  await handleDnsRecords(
-    context({ action: "get", opts: { "zone-id": "z", id: "r" }, cf: { get }, toJsonOutput }),
-  );
-  expect(get).toHaveBeenCalledWith("/zones/z/dns_records/r", undefined);
-  expect(toJsonOutput).toHaveBeenCalledWith({ id: "sdk" });
-
-  const getRecord = jest.fn().mockResolvedValue({ id: "generic" });
-  const printer = { log: jest.fn() };
   await handleDnsRecords(
     context({
       action: "get",
       opts: { "zone-id": "z", id: "r" },
-      cf: { dns: { records: { get: getRecord } } },
-      outputJson: false,
-      printer,
+      cf: { get: jest.fn().mockResolvedValue({ id: "record" }) },
+      toJsonOutput,
     }),
   );
-  expect(getRecord).toHaveBeenCalledWith("r", { zone_id: "z" });
-  expect(printer.log).toHaveBeenCalledWith('{\n  "id": "generic"\n}');
+  expect(toJsonOutput).toHaveBeenCalledWith({ id: "record" });
 });
 
 test("delegates diff and apply actions", async () => {

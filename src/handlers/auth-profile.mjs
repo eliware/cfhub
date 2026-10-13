@@ -1,5 +1,6 @@
 import { projectAuthProfiles } from "./auth-profile-view.mjs";
 import { logoutAuthProfile } from "./auth-profile-logout.mjs";
+import { switchAuthProfile } from "./auth-profile-switch.mjs";
 
 export async function handleAuthProfile({
   action,
@@ -27,16 +28,8 @@ export async function handleAuthProfile({
           printer.log,
         );
   }
-  if (action === "switch") {
-    const name = opts?.profile;
-    if (!name || !data.profiles[name]) {
-      fail(`Unknown profile: ${name || "(missing --profile)"}`);
-      return;
-    }
-    data.active = name;
-    write(data, profileHome, profileFs);
-    return printer.log(`Activated profile ${name}`);
-  }
+  if (action === "switch")
+    return switchAuthProfile({ opts, data, write, profileHome, profileFs, printer, fail });
   if (action === "logout") {
     const name = opts?.profile || data.active;
     return logoutAuthProfile({
