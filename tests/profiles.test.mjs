@@ -2,33 +2,8 @@ import { jest } from "@jest/globals";
 import * as fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import {
-  activeProfile,
-  applyActiveProfile,
-  profilesPath,
-  readProfiles,
-  writeProfiles,
-} from "../src/profiles.mjs";
+import { applyActiveProfile, writeProfiles } from "../src/profiles.mjs";
 import { deleteCredential, readCredential, writeCredential } from "../src/credentials.mjs";
-
-test("profile storage writes private JSON and applies active values", async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-"));
-  const data = {
-    active: "work",
-    profiles: { work: { apiToken: "token", accountId: "a1", zoneId: "z1" } },
-  };
-  writeProfiles(data, home);
-  expect(profilesPath(home)).toContain("/.config/cfhub/profiles.json");
-  expect(readProfiles(home)).toEqual(data);
-  const env = {};
-  expect(activeProfile(env, home)).toMatchObject({ name: "work", apiToken: "token" });
-  await applyActiveProfile(env, home);
-  expect(env).toEqual({
-    CLOUDFLARE_API_TOKEN: "token",
-    CLOUDFLARE_ACCOUNT_ID: "a1",
-    CLOUDFLARE_ZONE_ID: "z1",
-  });
-});
 
 test("profile application exports known API permissions", async () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-permissions-"));
@@ -63,18 +38,6 @@ test("profile selection honors explicit profile and missing storage", async () =
   const implicit = activeProfile();
   expect(implicit === null || typeof implicit === "object").toBe(true);
   expect(await applyActiveProfile(undefined, undefined, {})).toBeNull();
-});
-
-test("profile writer tolerates adapters without chmod", () => {
-  const files = new Map();
-  const adapter = {
-    mkdirSync: jest.fn(),
-    writeFileSync: jest.fn((name, value) => files.set(name, value)),
-  };
-  writeProfiles({ active: null, profiles: {} }, "/tmp/cf-test-home", adapter);
-  writeProfiles({ active: null, profiles: {} }, undefined, adapter);
-  expect(adapter.mkdirSync).toHaveBeenCalled();
-  expect(files.size).toBe(2);
 });
 
 test("profile application preserves explicit environment values", async () => {

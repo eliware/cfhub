@@ -4,17 +4,15 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { VERSION } from "./version.mjs";
 import { openBrowser } from "./oauth-browser.mjs";
+import { collectOAuthSummary, REQUIRED_OAUTH_SCOPES } from "./oauth-pages.mjs";
 import {
   ALLOWED_OAUTH_SCOPES,
-  collectOAuthSummary,
-  failurePage,
   pickerAsset,
   pickerHtml,
   readRequestBody,
-  REQUIRED_OAUTH_SCOPES,
   sendAsset,
-  successPage,
-} from "./oauth-pages.mjs";
+} from "./oauth-picker-assets.mjs";
+import { failurePage, successPage } from "./oauth-result-pages.mjs";
 export { collectOAuthSummary, copyrightYear, REQUIRED_OAUTH_SCOPES } from "./oauth-pages.mjs";
 
 export { openBrowser } from "./oauth-browser.mjs";

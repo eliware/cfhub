@@ -1,58 +1,13 @@
 import os from "node:os";
 import * as fs from "node:fs";
-import { configRoot } from "./config.mjs";
+import {
+  deleteCredentialFile,
+  readCredentialFile,
+  writeCredentialFile,
+} from "./credential-files.mjs";
 
 const SERVICE = "cfhub";
-export function credentialsPath(homeDir = os.homedir()) {
-  return `${configRoot(homeDir)}/credentials.json`;
-}
-
-function readDisk(profile, fsImpl, homeDir) {
-  try {
-    const path = credentialsPath(homeDir);
-    if (!fsImpl.existsSync(path)) return null;
-    const data = JSON.parse(fsImpl.readFileSync(path, "utf8"));
-    return data?.[profile] || null;
-  } catch {
-    return null;
-  }
-}
-
-function writeDisk(profile, value, fsImpl, homeDir) {
-  try {
-    const path = credentialsPath(homeDir);
-    const dir = path.slice(0, path.lastIndexOf("/"));
-    fsImpl.mkdirSync(dir, { recursive: true, mode: 0o700 });
-    let data = {};
-    if (fsImpl.existsSync(path)) data = JSON.parse(fsImpl.readFileSync(path, "utf8"));
-    data[profile] = value;
-    const temporary = `${path}.${process.pid}.tmp`;
-    fsImpl.writeFileSync(temporary, `${JSON.stringify(data, null, 2)}\n`, { mode: 0o600 });
-    if (typeof fsImpl.chmodSync === "function") fsImpl.chmodSync(temporary, 0o600);
-    fsImpl.renameSync(temporary, path);
-    if (typeof fsImpl.chmodSync === "function") fsImpl.chmodSync(path, 0o600);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function deleteDisk(profile, fsImpl, homeDir) {
-  try {
-    const path = credentialsPath(homeDir);
-    if (!fsImpl.existsSync(path)) return false;
-    const data = JSON.parse(fsImpl.readFileSync(path, "utf8"));
-    if (!data || !Object.hasOwn(data, profile)) return false;
-    delete data[profile];
-    const temporary = `${path}.${process.pid}.tmp`;
-    fsImpl.writeFileSync(temporary, `${JSON.stringify(data, null, 2)}\n`, { mode: 0o600 });
-    if (typeof fsImpl.chmodSync === "function") fsImpl.chmodSync(temporary, 0o600);
-    fsImpl.renameSync(temporary, path);
-    return true;
-  } catch {
-    return false;
-  }
-}
+export { credentialsPath } from "./credential-files.mjs";
 
 /* istanbul ignore next */
 async function keychain() {
@@ -76,7 +31,7 @@ export async function readCredential(
       if (value) return JSON.parse(value);
     }
   } catch {}
-  return readDisk(profile, fsImpl, homeDir);
+  return readCredentialFile(profile, fsImpl, homeDir);
 }
 
 export async function writeCredential(
@@ -93,7 +48,7 @@ export async function writeCredential(
       return true;
     }
   } catch {}
-  return writeDisk(profile, value, fsImpl, homeDir);
+  return writeCredentialFile(profile, value, fsImpl, homeDir);
 }
 
 export async function deleteCredential(
@@ -107,5 +62,5 @@ export async function deleteCredential(
     const store = await load();
     if (store) deleted = await store.deletePassword(SERVICE, profile);
   } catch {}
-  return deleteDisk(profile, fsImpl, homeDir) || deleted;
+  return deleteCredentialFile(profile, fsImpl, homeDir) || deleted;
 }

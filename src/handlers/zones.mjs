@@ -1,5 +1,6 @@
 import { getAccountId, getZoneId, requireValue } from "./common.mjs";
 import { printTable } from "../output.mjs";
+import { handleZoneReport } from "./zone-reports.mjs";
 
 export async function handleZones({
   cf,
@@ -40,34 +41,8 @@ export async function handleZones({
     return outputJson ? toJsonOutput(zone) : printer.log(JSON.stringify(zone, null, 2));
   }
 
-  if (action === "audit") {
-    requireValue(zoneId, "Missing --zone-id", fail);
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
-    const [zone, ssl, dns] = await Promise.all([
-      typeof cf.get === "function"
-        ? cf.get(`/zones/${zoneId}`, undefined)
-        : cf.zones.get({ zone_id: zoneId }),
-      cf.get(`/zones/${zoneId}/settings/ssl`, undefined),
-      cf.get(`/zones/${zoneId}/dns_records`, undefined),
-    ]);
-    /* istanbul ignore next -- API responses are normalized defensively */
-    const report = { zone, ssl, dns: Array.isArray(dns?.result) ? dns.result : dns };
-    return outputJson ? toJsonOutput(report) : printer.log(JSON.stringify(report, null, 2));
-  }
-
-  if (action === "security") {
-    requireValue(zoneId, "Missing --zone-id", fail);
-    const result = await cf.get(`/zones/${zoneId}/settings`);
-    const settings = Array.isArray(result?.result) ? result.result : [];
-    const names = new Set(["ssl", "min_tls_version", "always_use_https", "tls_1_3"]);
-    const baseline = settings.filter((setting) => names.has(setting.id));
-    const report = {
-      zoneId,
-      settings: baseline,
-      missing: [...names].filter((name) => !baseline.some((setting) => setting.id === name)),
-    };
-    return outputJson ? toJsonOutput(report) : printer.log(JSON.stringify(report, null, 2));
-  }
+  if (action === "audit" || action === "security")
+    return handleZoneReport({ cf, action, opts, outputJson, toJsonOutput, printer, fail });
 
   if (action === "create") {
     requireValue(body, "Missing --data or --file", fail);
