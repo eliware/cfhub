@@ -1,4 +1,4 @@
-import { extensionRoot } from "../extensions.mjs";
+import { extensionRoot, validateExtensionManifest } from "../extensions.mjs";
 
 export function mutateExtension({ action, opts, printer, fail, fsImpl, homeDir }) {
   if (action === "install" || action === "upgrade") {
@@ -8,7 +8,7 @@ export function mutateExtension({ action, opts, printer, fail, fsImpl, homeDir }
     }
     const source = opts.path;
     const manifest = JSON.parse(fsImpl.readFileSync(`${source}/cf-extension.json`, "utf8"));
-    if (!manifest.name || !manifest.version || !manifest.commands) {
+    if (!validateExtensionManifest(manifest)) {
       fail("Invalid cfhub extension manifest");
       return;
     }

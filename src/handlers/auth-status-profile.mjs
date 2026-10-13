@@ -1,5 +1,6 @@
 import { showAccountTokenStatus } from "./auth-status-account-token.mjs";
 import { showUserTokenStatus } from "./auth-status-user.mjs";
+import { selectAuthStatusIdentity } from "./auth-status-identity.mjs";
 
 export async function showAuthStatus(context) {
   const { resource, opts, data, cf, outputJson, toJsonOutput, printer, fail } = context;
@@ -7,11 +8,11 @@ export async function showAuthStatus(context) {
     fail("You are not logged into Cloudflare. Run: cfhub auth login");
     return;
   }
-  const statusProfile = process.env.CLOUDFLARE_PROFILE || data.active || "environment";
   const token = process.env.CLOUDFLARE_API_TOKEN;
-  if (token.startsWith("cfat_")) {
+  const identity = selectAuthStatusIdentity({ token, resource, data, opts });
+  if (identity.kind === "account") {
     return showAccountTokenStatus({
-      statusProfile,
+      statusProfile: identity.profile,
       opts,
       data,
       cf,
@@ -22,7 +23,7 @@ export async function showAuthStatus(context) {
   }
   return showUserTokenStatus({
     resource,
-    statusProfile,
+    statusProfile: identity.profile,
     data,
     cf,
     outputJson,

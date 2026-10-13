@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { showAccountTokenStatus } from "../../src/handlers/auth-status-account-token.mjs";
 
 test("account token status returns account details", async () => {

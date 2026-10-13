@@ -1,4 +1,5 @@
 import { getZoneId, requireValue } from "./common.mjs";
+import { buildZoneSecurityBaseline } from "./zone-security-baseline.mjs";
 
 export async function handleZoneReport({
   cf,
@@ -27,13 +28,6 @@ export async function handleZoneReport({
     return outputJson ? toJsonOutput(report) : printer.log(JSON.stringify(report, null, 2));
   }
   const result = await cf.get(`/zones/${zoneId}/settings`);
-  const settings = Array.isArray(result?.result) ? result.result : [];
-  const names = new Set(["ssl", "min_tls_version", "always_use_https", "tls_1_3"]);
-  const baseline = settings.filter((setting) => names.has(setting.id));
-  const report = {
-    zoneId,
-    settings: baseline,
-    missing: [...names].filter((name) => !baseline.some((setting) => setting.id === name)),
-  };
+  const report = buildZoneSecurityBaseline(zoneId, result);
   return outputJson ? toJsonOutput(report) : printer.log(JSON.stringify(report, null, 2));
 }

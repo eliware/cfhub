@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { saveOAuthProfile } from "../../src/handlers/auth-oauth-profile-save.mjs";
 
 test("saves OAuth tokens and activates the scoped profile", async () => {

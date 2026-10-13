@@ -1,6 +1,6 @@
+import { jest } from "@jest/globals";
 import { EventEmitter } from "node:events";
 import { PassThrough, Writable } from "node:stream";
-import { jest } from "@jest/globals";
 import {
   API_TOKEN_TUTORIAL,
   defaultPromptAccountId,

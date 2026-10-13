@@ -1,5 +1,5 @@
 import { getZoneId, getId, requireValue } from "./common.mjs";
-import { printTable } from "../output.mjs";
+import { displayDnsRecord, displayDnsRecords } from "./dns-read.mjs";
 import { handleDnsDiff } from "./dns-diff.mjs";
 import { handleDnsMutation } from "./dns-mutations.mjs";
 
@@ -24,14 +24,7 @@ export async function handleDnsRecords({
 
   if (action === "list") {
     const res = await listRecords();
-    const items = Array.isArray(res?.result) ? res.result : res;
-    return outputJson
-      ? toJsonOutput(items)
-      : printTable(
-          ["ID", "TYPE", "NAME", "CONTENT"],
-          items.map((r) => [r.id, r.type, r.name, r.content]),
-          printer.log,
-        );
+    return displayDnsRecords(res, { outputJson, toJsonOutput, printer });
   }
 
   if (action === "diff" || action === "apply")
@@ -55,7 +48,7 @@ export async function handleDnsRecords({
       typeof cf.get === "function"
         ? await cf.get(`/zones/${zoneId}/dns_records/${id}`, undefined)
         : await cf.dns.records.get(id, { zone_id: zoneId });
-    return outputJson ? toJsonOutput(res) : printer.log(JSON.stringify(res, null, 2));
+    return displayDnsRecord(res, { outputJson, toJsonOutput, printer });
   }
 
   if (["create", "update", "delete"].includes(action))

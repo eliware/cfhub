@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { bindPickerCategoryEvents } from "../../src/oauth-web/picker-category-events.mjs";
 
 test("category controls add scopes and preserve required scopes on removal", () => {

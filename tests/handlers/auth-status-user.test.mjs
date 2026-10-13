@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { showUserTokenStatus } from "../../src/handlers/auth-status-user.mjs";
 
 test("user status returns identity or a text message", async () => {

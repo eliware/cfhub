@@ -1,36 +1,11 @@
 import { renderTemplate, selectJson } from "../output.mjs";
 import { getAllPages, requestWithBackoff, withPage } from "../request.mjs";
-
-const METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
-
-function apiPath(value, fail) {
-  if (!value) {
-    fail("cfhub api requires a path");
-    return null;
-  }
-  if (/^[a-z][a-z\d+.-]*:/i.test(value) || value.startsWith("//")) {
-    fail("cfhub api accepts only relative API paths");
-    return null;
-  }
-  return value.startsWith("/") ? value : `/${value}`;
-}
+import { validateApiRequest } from "./api-request-validation.mjs";
 
 export async function handleApi({ cf, action, opts, body, printer, fail }) {
-  const path = apiPath(action, fail);
-  if (!path) return;
-  const method = String(opts.method || "GET").toUpperCase();
-  if (!METHODS.has(method)) {
-    fail(`Unsupported API method: ${method}`);
-    return;
-  }
-  if (method === "GET" && body !== null) {
-    fail("GET requests cannot include --data or --file");
-    return;
-  }
-  if (method === "DELETE" && !opts.force && !opts.dryRun) {
-    fail("Refusing DELETE without --force (or use --dry-run)");
-    return;
-  }
+  const requestOptions = validateApiRequest({ action, opts, body, fail });
+  if (!requestOptions) return;
+  const { path, method } = requestOptions;
   if (opts.dryRun) {
     printer.log(JSON.stringify({ dryRun: true, method, path, body }, null, 2));
     return;

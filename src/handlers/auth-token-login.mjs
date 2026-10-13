@@ -1,5 +1,5 @@
-import { API_TOKEN_TUTORIAL } from "./auth-prompts.mjs";
 import { saveTokenProfile } from "./auth-token-profile-save.mjs";
+import { readLoginToken, resolveTokenAccount } from "./auth-token-input.mjs";
 
 export async function saveApiTokenLogin({
   data,
@@ -16,23 +16,23 @@ export async function saveApiTokenLogin({
   profileHome,
   profileFs,
 }) {
-  const interactive = !opts?.["token-stdin"];
-  const suppliedToken = opts?.["token-stdin"]
-    ? readToken()
-    : (printer.error?.(
-        `${API_TOKEN_TUTORIAL}\n\nThe token is stored securely and is not displayed.`,
-      ),
-      await promptToken());
+  const { interactive, suppliedToken } = await readLoginToken({
+    opts,
+    readToken,
+    promptToken,
+    printer,
+  });
   if (!suppliedToken?.trim()) {
     fail("No API token supplied. Run cfhub auth login again.");
     return;
   }
   const credential = { apiToken: suppliedToken.trim() };
-  const detectedAccountToken = credential.apiToken.startsWith("cfat_");
-  const accountId =
-    opts?.["account-id"] ||
-    process.env.CLOUDFLARE_ACCOUNT_ID ||
-    (interactive && detectedAccountToken ? await promptAccountId() : undefined);
+  const { accountId, detectedAccountToken } = await resolveTokenAccount({
+    opts,
+    interactive,
+    token: credential.apiToken,
+    promptAccountId,
+  });
   let tokenInfo;
   try {
     tokenInfo = await inspectApiTokenImpl({ token: credential.apiToken, accountId });

@@ -1,5 +1,5 @@
-import { EventEmitter } from "node:events";
 import { jest } from "@jest/globals";
+import { EventEmitter } from "node:events";
 import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
 

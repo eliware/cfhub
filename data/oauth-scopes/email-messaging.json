@@ -1,0 +1,91 @@
+{
+  "Email & Messaging": [
+    {
+      "name": "Cloud Email Security:",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "cloud-email-security.read"
+        },
+        {
+          "label": "Write",
+          "scope": "cloud-email-security.write"
+        }
+      ]
+    },
+    {
+      "name": "Email Routing Account Rules",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "email-routing-account-rule.read"
+        }
+      ]
+    },
+    {
+      "name": "Email Routing Addresses",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "email-routing-address.read"
+        },
+        {
+          "label": "Write",
+          "scope": "email-routing-address.write"
+        }
+      ]
+    },
+    {
+      "name": "Email Routing Rules",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "email-routing-rule.read"
+        },
+        {
+          "label": "Write",
+          "scope": "email-routing-rule.write"
+        }
+      ]
+    },
+    {
+      "name": "Email Routing Suppressions",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "email-routing-suppression.read"
+        },
+        {
+          "label": "Write",
+          "scope": "email-routing-suppression.write"
+        }
+      ]
+    },
+    {
+      "name": "Email Security DMARC Reports",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "email-security-dmarcreports.read"
+        },
+        {
+          "label": "Write",
+          "scope": "email-security-dmarcreports.write"
+        }
+      ]
+    },
+    {
+      "name": "Email Sending",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "email-sending.read"
+        },
+        {
+          "label": "Write",
+          "scope": "email-sending.write"
+        }
+      ]
+    }
+  ]
+}

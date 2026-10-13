@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { callbackProviderError, callbackStateError } from "../src/oauth-callback-response.mjs";
 
 const response = () => ({ writeHead: jest.fn(), end: jest.fn() });

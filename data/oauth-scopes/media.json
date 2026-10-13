@@ -1,0 +1,56 @@
+{
+  "Media": [
+    {
+      "name": "Calls",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "calls.read"
+        },
+        {
+          "label": "Write",
+          "scope": "calls.write"
+        }
+      ]
+    },
+    {
+      "name": "Images",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "images.read"
+        },
+        {
+          "label": "Write",
+          "scope": "images.write"
+        }
+      ]
+    },
+    {
+      "name": "MoQ",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "moq.read"
+        },
+        {
+          "label": "Write",
+          "scope": "moq.write"
+        }
+      ]
+    },
+    {
+      "name": "Stream",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "stream.read"
+        },
+        {
+          "label": "Write",
+          "scope": "stream.write"
+        }
+      ]
+    }
+  ]
+}

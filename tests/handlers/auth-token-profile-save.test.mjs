@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { saveTokenProfile } from "../../src/handlers/auth-token-profile-save.mjs";
 
 test("saves token permissions and activates the profile", () => {

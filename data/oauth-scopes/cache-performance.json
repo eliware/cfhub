@@ -1,0 +1,73 @@
+{
+  "Cache & Performance": [
+    {
+      "name": "Account: SSL and Certificates",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-ssl-and-certificates.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-ssl-and-certificates.write"
+        }
+      ]
+    },
+    {
+      "name": "Cache Purge",
+      "scopes": [
+        {
+          "label": "Purge",
+          "scope": "cache.purge"
+        }
+      ]
+    },
+    {
+      "name": "Cache Settings",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "cache-settings.read"
+        },
+        {
+          "label": "Write",
+          "scope": "cache-settings.write"
+        }
+      ]
+    },
+    {
+      "name": "Disable ESC",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-disable-esc.read"
+        },
+        {
+          "label": "Read",
+          "scope": "zone-disable-esc.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-disable-esc.write"
+        },
+        {
+          "label": "Write",
+          "scope": "zone-disable-esc.write"
+        }
+      ]
+    },
+    {
+      "name": "SSL and Certificates",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "ssl-and-certificates.read"
+        },
+        {
+          "label": "Write",
+          "scope": "ssl-and-certificates.write"
+        }
+      ]
+    }
+  ]
+}

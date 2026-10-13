@@ -26,6 +26,15 @@ test("atomic JSON replacement works without chmod support", () => {
   expect(fsImpl.writeFileSync).toHaveBeenCalledWith(expect.any(String), "{}\n", { mode: 0o640 });
 });
 
+test("JSON replacement supports simple file adapters", () => {
+  const fsImpl = { writeFileSync: jest.fn(), chmodSync: jest.fn() };
+  replaceJsonFile("data.json", { ok: true }, fsImpl);
+  expect(fsImpl.writeFileSync).toHaveBeenCalledWith("data.json", '{\n  "ok": true\n}\n', {
+    mode: 0o600,
+  });
+  expect(fsImpl.chmodSync).toHaveBeenCalledWith("data.json", 0o600);
+});
+
 test("private directory helper sets restrictive mode", () => {
   const mkdirSync = jest.fn();
   ensurePrivateDirectory("/workspace/cfhub", { mkdirSync });

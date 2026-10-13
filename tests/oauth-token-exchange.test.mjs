@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { exchangeOAuthToken } from "../src/oauth-token-exchange.mjs";
 
 test("exchanges an authorization code and returns tokens", async () => {
@@ -7,16 +8,16 @@ test("exchanges an authorization code and returns tokens", async () => {
   await expect(
     exchangeOAuthToken({ clientId: "c", code: "x", redirectUri: "u", verifier: "v", fetchImpl }),
   ).resolves.toEqual({ access_token: "a" });
-  expect(fetchImpl.mock.calls[0][1].body).toContain("code_verifier=v");
+  expect(String(fetchImpl.mock.calls[0][1].body)).toContain("code_verifier=v");
 });
 
 test("rejects failed token responses and empty tokens", async () => {
   await expect(
     exchangeOAuthToken({ fetchImpl: jest.fn().mockResolvedValue({ ok: false }) }),
-  ).rejects.toThrow("Token exchange failed");
+  ).rejects.toThrow("OAuth token exchange failed");
   await expect(
     exchangeOAuthToken({
       fetchImpl: jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) }),
     }),
-  ).rejects.toThrow("No access token");
+  ).rejects.toThrow("OAuth token response did not include access_token");
 });

@@ -1,4 +1,4 @@
-import { callbackProviderError, callbackStateError } from "./oauth-callback-response.mjs";
+import { routeOAuthCallback } from "./oauth-callback-routes.mjs";
 import { serveOAuthPickerRoute } from "./oauth-picker-routes.mjs";
 
 export function createOAuthCallback({
@@ -29,21 +29,9 @@ export function createOAuthCallback({
         })
       )
         return;
-      if (url.pathname !== "/oauth/callback") {
-        response.writeHead(404);
-        response.end();
-        return;
-      }
-      if (url.searchParams.get("state") !== state) {
-        reject(callbackStateError(response));
-        return;
-      }
-      const error = url.searchParams.get("error");
-      if (error) {
-        reject(callbackProviderError(response, error, url.searchParams.get("error_description")));
-        return;
-      }
-      resolve({ code: url.searchParams.get("code"), response });
+      const result = routeOAuthCallback({ url, state, response });
+      if (result.error) reject(result.error);
+      else if (!result.handled) resolve({ code: result.code, response });
     }),
   );
   return { callback, getSelectedScopes: () => selectedScopes };

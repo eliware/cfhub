@@ -14,9 +14,15 @@ function manifestPath(root, name) {
 
 export function readExtensionManifest(root, name, fsImpl = fs) {
   const manifest = JSON.parse(fsImpl.readFileSync(manifestPath(root, name), "utf8"));
-  if (!manifest.name || manifest.name !== name || !manifest.version || !manifest.commands)
+  if (!validateExtensionManifest(manifest, name))
     throw new Error(`Invalid cfhub extension manifest: ${name}`);
   return manifest;
+}
+
+export function validateExtensionManifest(manifest, name) {
+  return Boolean(
+    manifest?.name && (!name || manifest.name === name) && manifest.version && manifest.commands,
+  );
 }
 
 export function discoverExtensions(homeDir = os.homedir(), fsImpl = fs) {

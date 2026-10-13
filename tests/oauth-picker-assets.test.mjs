@@ -1,6 +1,7 @@
 import { jest } from "@jest/globals";
 import {
   pickerAsset,
+  pickerAssetBuffer,
   pickerHtml,
   readRequestBody,
   sendAsset,
@@ -8,6 +9,8 @@ import {
 
 test("picker asset helpers load browser data and respond with content", async () => {
   expect(pickerAsset("oauth-web/cf-logo.svg")).toContain("svg");
+  expect(pickerAssetBuffer("oauth-web/cloudflare-115x53.png")).toBeInstanceOf(Buffer);
+  expect(pickerAssetBuffer("oauth-web/oauth-picker.html")).toBeInstanceOf(Buffer);
   expect(pickerAsset("oauth-web/oauth-picker.html")).toContain("<!doctype html>");
   expect(pickerHtml()).toContain("zone.read");
   const request = {

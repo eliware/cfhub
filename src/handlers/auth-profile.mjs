@@ -1,3 +1,5 @@
+import { projectAuthProfiles } from "./auth-profile-view.mjs";
+
 export async function handleAuthProfile({
   action,
   resource,
@@ -15,17 +17,7 @@ export async function handleAuthProfile({
   deleteCredentialImpl,
 }) {
   if (action === "list") {
-    const profiles = Object.entries(data.profiles).map(([name, value]) => ({
-      name,
-      active: name === data.active,
-      authMethod: value.authMethod || (resource === "auth" ? "api-token" : "oauth"),
-    }));
-    if (!profiles.length)
-      profiles.push({
-        name: "environment",
-        active: true,
-        authMethod: "not configured",
-      });
+    const profiles = projectAuthProfiles(data, resource);
     return outputJson
       ? toJsonOutput(profiles)
       : printTable(

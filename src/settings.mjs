@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import { configRoot } from "./config.mjs";
+import { ensurePrivateDirectory, replaceJsonFile } from "./atomic-json-file.mjs";
 
 function settingsPath(homeDir) {
   return `${configRoot(homeDir)}/config.json`;
@@ -11,7 +12,6 @@ export function readSettings(homeDir, fsImpl = fs) {
 }
 export function writeSettings(settings, homeDir, fsImpl = fs) {
   const path = settingsPath(homeDir);
-  fsImpl.mkdirSync(configRoot(homeDir), { recursive: true });
-  fsImpl.writeFileSync(path, `${JSON.stringify(settings, null, 2)}\n`, { mode: 0o600 });
-  if (typeof fsImpl.chmodSync === "function") fsImpl.chmodSync(path, 0o600);
+  ensurePrivateDirectory(configRoot(homeDir), fsImpl);
+  replaceJsonFile(path, settings, fsImpl);
 }

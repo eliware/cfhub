@@ -1,4 +1,4 @@
-import { afterEach, jest } from "@jest/globals";
+import { jest } from "@jest/globals";
 import { handleAuthStatus } from "../../src/handlers/auth-status.mjs";
 import { authStatusContext } from "../../test-fixtures/auth-status-context.mjs";
 

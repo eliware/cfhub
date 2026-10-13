@@ -1,0 +1,65 @@
+{
+  "Analytics & Logs": [
+    {
+      "name": "Account Analytics",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-analytics.read"
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "analytics.read"
+        }
+      ]
+    },
+    {
+      "name": "Intel",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "intel.read"
+        },
+        {
+          "label": "Write",
+          "scope": "intel.write"
+        }
+      ]
+    },
+    {
+      "name": "Logs",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-logs.read"
+        },
+        {
+          "label": "Read",
+          "scope": "logs.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-logs.write"
+        },
+        {
+          "label": "Write",
+          "scope": "logs.write"
+        }
+      ]
+    },
+    {
+      "name": "Radar",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "radar.read"
+        }
+      ]
+    }
+  ]
+}

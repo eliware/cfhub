@@ -1,14 +1,12 @@
 import moduleCatalog from "../data/cloudflare-oauth-modules.json" with { type: "json" };
+import { selectOAuthModules } from "./oauth-module-selection.mjs";
 
 export const REQUIRED_OAUTH_SCOPES = ["user-details.read", "zone.read"];
-const MODULE_CATALOG = moduleCatalog.modules;
 export function copyrightYear(year = new Date().getUTCFullYear()) {
   return year > 2026 ? `2026-${year}` : "2026";
 }
 export async function collectOAuthSummary({ accessToken, account, scopes, fetchImpl }) {
-  const enabled = MODULE_CATALOG.filter((module) =>
-    module.scopes.every((scope) => scopes.includes(scope)),
-  );
+  const enabled = selectOAuthModules(moduleCatalog.modules, scopes);
   const summary = { zones: [], dns: [], errors: [] };
   const get = async (url) => {
     try {

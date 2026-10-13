@@ -1,0 +1,109 @@
+{
+  "Account & Billing": [
+    {
+      "name": "Account API Gateway",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "account-api-gateway.write"
+        },
+        {
+          "label": "Read",
+          "scope": "account-api-gateway.read"
+        }
+      ]
+    },
+    {
+      "name": "Account Custom Asset",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-custom-asset.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-custom-asset.write"
+        }
+      ]
+    },
+    {
+      "name": "Account Settings",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-settings.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-settings.write"
+        }
+      ]
+    },
+    {
+      "name": "Apps",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "apps.write"
+        }
+      ]
+    },
+    {
+      "name": "Integration",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "integration.write"
+        }
+      ]
+    },
+    {
+      "name": "Memberships",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "memberships.read"
+        },
+        {
+          "label": "Write",
+          "scope": "memberships.write"
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "notifications.read"
+        },
+        {
+          "label": "Write",
+          "scope": "notifications.write"
+        }
+      ]
+    },
+    {
+      "name": "SCIM Provisioning",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "scim-provisioning.write"
+        }
+      ]
+    },
+    {
+      "name": "User Details",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "user-details.read"
+        },
+        {
+          "label": "Write",
+          "scope": "user-details.write"
+        }
+      ]
+    }
+  ]
+}

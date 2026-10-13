@@ -1,5 +1,4 @@
 import { jest } from "@jest/globals";
-
 for (const stylesheet of [
   "picker-layout",
   "picker-module-controls",

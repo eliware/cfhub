@@ -1,6 +1,7 @@
 import os from "node:os";
 import * as fs from "node:fs";
 import { configRoot } from "./config.mjs";
+import { ensurePrivateDirectory, parentDirectory, replaceJsonFile } from "./atomic-json-file.mjs";
 
 export const profilesPath = (homeDir = os.homedir()) => `${configRoot(homeDir)}/profiles.json`;
 
@@ -13,10 +14,8 @@ export function readProfiles(homeDir = os.homedir(), fsImpl = fs) {
 
 export function writeProfiles(data, homeDir = os.homedir(), fsImpl = fs) {
   const path = profilesPath(homeDir);
-  const dir = path.slice(0, path.lastIndexOf("/"));
-  fsImpl.mkdirSync(dir, { recursive: true });
-  fsImpl.writeFileSync(path, `${JSON.stringify(data, null, 2)}\n`, { mode: 0o600 });
-  if (typeof fsImpl.chmodSync === "function") fsImpl.chmodSync(path, 0o600);
+  ensurePrivateDirectory(parentDirectory(path), fsImpl);
+  replaceJsonFile(path, data, fsImpl);
 }
 
 export function activeProfile(env = process.env, homeDir = os.homedir(), fsImpl = fs) {

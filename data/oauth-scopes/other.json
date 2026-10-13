@@ -1,0 +1,39 @@
+{
+  "Other": [
+    {
+      "name": "Artifacts",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "artifacts.read"
+        },
+        {
+          "label": "Write",
+          "scope": "artifacts.write"
+        }
+      ]
+    },
+    {
+      "name": "Resource Library",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "resource-library.read"
+        },
+        {
+          "label": "Write",
+          "scope": "resource-library.write"
+        }
+      ]
+    },
+    {
+      "name": "Resource Sharing",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "resource-sharing.read"
+        }
+      ]
+    }
+  ]
+}

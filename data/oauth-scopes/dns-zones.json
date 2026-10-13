@@ -1,0 +1,147 @@
+{
+  "DNS & Zones": [
+    {
+      "name": "Account DNS Settings",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-dns-settings.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-dns-settings.write"
+        }
+      ]
+    },
+    {
+      "name": "DNS Firewall",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "dns-firewall.read"
+        },
+        {
+          "label": "Write",
+          "scope": "dns-firewall.write"
+        }
+      ]
+    },
+    {
+      "name": "DNS",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "dns.read"
+        },
+        {
+          "label": "Write",
+          "scope": "dns.write"
+        }
+      ]
+    },
+    {
+      "name": "DNS View",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "dns-view.read"
+        },
+        {
+          "label": "Write",
+          "scope": "dns-view.write"
+        }
+      ]
+    },
+    {
+      "name": "Registrar Domains",
+      "scopes": [
+        {
+          "label": "Admin",
+          "scope": "registrar-domains.admin"
+        },
+        {
+          "label": "Read",
+          "scope": "registrar-domains.read"
+        }
+      ]
+    },
+    {
+      "name": "Registrar Sandbox Domains",
+      "scopes": [
+        {
+          "label": "Admin",
+          "scope": "registrar-sandbox-domains.admin"
+        },
+        {
+          "label": "Read",
+          "scope": "registrar-sandbox-domains.read"
+        }
+      ]
+    },
+    {
+      "name": "Zone Custom Asset",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "zone-custom-asset.read"
+        },
+        {
+          "label": "Write",
+          "scope": "zone-custom-asset.write"
+        }
+      ]
+    },
+    {
+      "name": "Zone DNS Settings",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "zone-dns-settings.read"
+        },
+        {
+          "label": "Write",
+          "scope": "zone-dns-settings.write"
+        }
+      ]
+    },
+    {
+      "name": "Zone",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "zone.read"
+        },
+        {
+          "label": "Write",
+          "scope": "zone.write"
+        }
+      ]
+    },
+    {
+      "name": "Zone Settings",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "zone-settings.read"
+        },
+        {
+          "label": "Write",
+          "scope": "zone-settings.write"
+        }
+      ]
+    },
+    {
+      "name": "Zone Versioning",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "zone-versioning.read"
+        },
+        {
+          "label": "Write",
+          "scope": "zone-versioning.write"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,239 @@
+{
+  "Network Services": [
+    {
+      "name": "Account Waiting Rooms",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-waiting-rooms.read"
+        }
+      ]
+    },
+    {
+      "name": "Address Maps",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "address-maps.read"
+        },
+        {
+          "label": "Write",
+          "scope": "address-maps.write"
+        }
+      ]
+    },
+    {
+      "name": "China Network Steering",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "chinanetwork-steering.read"
+        },
+        {
+          "label": "Write",
+          "scope": "chinanetwork-steering.write"
+        }
+      ]
+    },
+    {
+      "name": "Connectivity Directory",
+      "scopes": [
+        {
+          "label": "Admin",
+          "scope": "connectivity-directory.admin"
+        },
+        {
+          "label": "Bind",
+          "scope": "connectivity-directory.bind"
+        },
+        {
+          "label": "Read",
+          "scope": "connectivity-directory.read"
+        }
+      ]
+    },
+    {
+      "name": "Health Checks",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "healthcheck.read"
+        },
+        {
+          "label": "Write",
+          "scope": "healthcheck.write"
+        }
+      ]
+    },
+    {
+      "name": "IP Prefixes: BGP On Demand",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "ip-prefix-bgp-on-demand.read"
+        },
+        {
+          "label": "Write",
+          "scope": "ip-prefix-bgp-on-demand.write"
+        }
+      ]
+    },
+    {
+      "name": "IP Prefixes:",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "ip-prefix.read"
+        },
+        {
+          "label": "Write",
+          "scope": "ip-prefix.write"
+        }
+      ]
+    },
+    {
+      "name": "Load Balancers Account",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "load-balancers-account.read"
+        },
+        {
+          "label": "Write",
+          "scope": "load-balancers-account.write"
+        }
+      ]
+    },
+    {
+      "name": "Load Balancers",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "load-balancers.read"
+        },
+        {
+          "label": "Write",
+          "scope": "load-balancers.write"
+        }
+      ]
+    },
+    {
+      "name": "Load Balancing: Monitors and Pools",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "load-balancing-monitors-and-pools.read"
+        },
+        {
+          "label": "Write",
+          "scope": "load-balancing-monitors-and-pools.write"
+        }
+      ]
+    },
+    {
+      "name": "Magic Firewall Packet Captures - Read PCAPs API",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "pcaps-api.read"
+        }
+      ]
+    },
+    {
+      "name": "Magic Firewall Packet Captures - Write PCAPs API",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "pcaps-api.write"
+        }
+      ]
+    },
+    {
+      "name": "Magic Firewall",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "magic-firewall.read"
+        },
+        {
+          "label": "Write",
+          "scope": "magic-firewall.write"
+        }
+      ]
+    },
+    {
+      "name": "Magic Network Monitoring",
+      "scopes": [
+        {
+          "label": "Admin",
+          "scope": "fbm.admin"
+        }
+      ]
+    },
+    {
+      "name": "Magic Network Monitoring Config",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "fbm.read"
+        },
+        {
+          "label": "Write",
+          "scope": "fbm.write"
+        }
+      ]
+    },
+    {
+      "name": "Magic Transit",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "magic-transit.read"
+        },
+        {
+          "label": "Write",
+          "scope": "magic-transit.write"
+        }
+      ]
+    },
+    {
+      "name": "Magic WAN",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "magic-wan.read"
+        },
+        {
+          "label": "Write",
+          "scope": "magic-wan.write"
+        }
+      ]
+    },
+    {
+      "name": "Waiting Rooms",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "waiting-rooms.read"
+        },
+        {
+          "label": "Write",
+          "scope": "waiting-rooms.write"
+        }
+      ]
+    },
+    {
+      "name": "Web3 Hostnames",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "web3-hostnames.read"
+        },
+        {
+          "label": "Write",
+          "scope": "web3-hostnames.write"
+        }
+      ]
+    }
+  ]
+}

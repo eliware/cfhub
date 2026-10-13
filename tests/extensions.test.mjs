@@ -6,7 +6,16 @@ import {
   extensionRoot,
   loadExtensionCommand,
   readExtensionManifest,
+  validateExtensionManifest,
 } from "../src/extensions.mjs";
+
+test("validates extension manifest fields and optional name", () => {
+  const manifest = { name: "hello", version: "1.0.0", commands: {} };
+  expect(validateExtensionManifest(manifest)).toBe(true);
+  expect(validateExtensionManifest(manifest, "hello")).toBe(true);
+  expect(validateExtensionManifest(manifest, "other")).toBe(false);
+  expect(validateExtensionManifest({ name: "hello" })).toBe(false);
+});
 
 test("extension discovery and module loading use the manifest contract", async () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-ext-load-"));

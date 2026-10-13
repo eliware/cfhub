@@ -2,7 +2,8 @@ import os from "node:os";
 import * as fs from "node:fs";
 import { deleteCredential, readCredential, writeCredential } from "./credential-store.mjs";
 import { refreshOAuth } from "./oauth.mjs";
-import { activeProfile, readProfiles, writeProfiles } from "./profile-store.mjs";
+import { activeProfile } from "./profile-store.mjs";
+import { removeExpiredProfile } from "./profile-expiry.mjs";
 
 export { activeProfile, profilesPath, readProfiles, writeProfiles } from "./profile-store.mjs";
 
@@ -31,12 +32,7 @@ export async function applyActiveProfile(
     credential.expiresAt <= now() + 60_000 &&
     !credential.oauthRefreshToken
   ) {
-    await credentialDeleter(profile.name);
-    const data = readProfiles(homeDir, fsImpl);
-    delete data.profiles[profile.name];
-    data.active =
-      data.active === profile.name ? Object.keys(data.profiles)[0] || null : data.active;
-    writeProfiles(data, homeDir, fsImpl);
+    await removeExpiredProfile(profile.name, homeDir, fsImpl, credentialDeleter);
     return null;
   }
   let activeCredential = credential;
@@ -61,12 +57,7 @@ export async function applyActiveProfile(
     } catch {
       // A rejected refresh token cannot recover the old access token. Remove
       // the unusable local credential so the next login starts cleanly.
-      await credentialDeleter(profile.name);
-      const data = readProfiles(homeDir, fsImpl);
-      delete data.profiles[profile.name];
-      data.active =
-        data.active === profile.name ? Object.keys(data.profiles)[0] || null : data.active;
-      writeProfiles(data, homeDir, fsImpl);
+      await removeExpiredProfile(profile.name, homeDir, fsImpl, credentialDeleter);
       return null;
     }
   }

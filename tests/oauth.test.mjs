@@ -1,5 +1,4 @@
 import { jest } from "@jest/globals";
-
 import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
 

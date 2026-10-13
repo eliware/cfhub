@@ -1,5 +1,4 @@
 import { jest } from "@jest/globals";
-
 jest.unstable_mockModule("../../src/oauth-web/oauth-result.css", () => ({}));
 const { cssOnlyEntry } = await import("../../src/oauth-web/oauth-result.entry.mjs");
 

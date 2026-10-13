@@ -1,0 +1,225 @@
+{
+  "Rules & Configuration": [
+    {
+      "name": "Account Custom Error Rules",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-custom-error-rules.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-custom-error-rules.write"
+        }
+      ]
+    },
+    {
+      "name": "Account Custom Pages",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-custom-pages.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-custom-pages.write"
+        }
+      ]
+    },
+    {
+      "name": "Account Rule Lists",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-rule-lists.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-rule-lists.write"
+        }
+      ]
+    },
+    {
+      "name": "Account Rulesets",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-rulesets.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-rulesets.write"
+        }
+      ]
+    },
+    {
+      "name": "Config Settings",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "config-settings.read"
+        },
+        {
+          "label": "Write",
+          "scope": "config-settings.write"
+        }
+      ]
+    },
+    {
+      "name": "Custom Errors",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "custom-errors.read"
+        },
+        {
+          "label": "Write",
+          "scope": "custom-errors.write"
+        }
+      ]
+    },
+    {
+      "name": "Custom Pages",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "custom-pages.read"
+        },
+        {
+          "label": "Write",
+          "scope": "custom-pages.write"
+        }
+      ]
+    },
+    {
+      "name": "Dynamic URL Redirects",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "dynamic-redirect.read"
+        },
+        {
+          "label": "Write",
+          "scope": "dynamic-redirect.write"
+        }
+      ]
+    },
+    {
+      "name": "Managed headers",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "managed-headers.read"
+        },
+        {
+          "label": "Write",
+          "scope": "managed-headers.write"
+        }
+      ]
+    },
+    {
+      "name": "Mass URL Redirects",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "mass-url-redirects.read"
+        },
+        {
+          "label": "Write",
+          "scope": "mass-url-redirects.write"
+        }
+      ]
+    },
+    {
+      "name": "Origin",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "origin.read"
+        },
+        {
+          "label": "Write",
+          "scope": "origin.write"
+        }
+      ]
+    },
+    {
+      "name": "Payments Gateway",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "payments-gateway.read"
+        },
+        {
+          "label": "Write",
+          "scope": "payments-gateway.write"
+        }
+      ]
+    },
+    {
+      "name": "Response Compression",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "response-compression.read"
+        },
+        {
+          "label": "Write",
+          "scope": "response-compression.write"
+        }
+      ]
+    },
+    {
+      "name": "Select Configuration",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "select-configuration.read"
+        },
+        {
+          "label": "Write",
+          "scope": "select-configuration.write"
+        }
+      ]
+    },
+    {
+      "name": "Snippets",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "snippets.read"
+        },
+        {
+          "label": "Write",
+          "scope": "snippets.write"
+        }
+      ]
+    },
+    {
+      "name": "Transform Rules",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "transform-rules.read"
+        },
+        {
+          "label": "Write",
+          "scope": "transform-rules.write"
+        }
+      ]
+    },
+    {
+      "name": "Zone Transform Rules",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "zone-transform-rules.read"
+        },
+        {
+          "label": "Write",
+          "scope": "zone-transform-rules.write"
+        }
+      ]
+    }
+  ]
+}

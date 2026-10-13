@@ -1,0 +1,421 @@
+{
+  "App Security": [
+    {
+      "name": "Account Abuse Protection PII",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "fraud-detection-pii.read"
+        }
+      ]
+    },
+    {
+      "name": "Account Firewall Access Rules",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-firewall-access-rules.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-firewall-access-rules.write"
+        }
+      ]
+    },
+    {
+      "name": "Account Security Center Insights",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-security-center-insights.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-security-center-insights.write"
+        }
+      ]
+    },
+    {
+      "name": "Account WAF",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "account-waf.read"
+        },
+        {
+          "label": "Write",
+          "scope": "account-waf.write"
+        }
+      ]
+    },
+    {
+      "name": "Allow Request Tracer",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "request-tracer.read"
+        }
+      ]
+    },
+    {
+      "name": "Application Security Reports",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "reports-application-security-report.read"
+        }
+      ]
+    },
+    {
+      "name": "Bot Management Feedback Report",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "bot-management-feedback.read"
+        },
+        {
+          "label": "Write",
+          "scope": "bot-management-feedback.write"
+        }
+      ]
+    },
+    {
+      "name": "Bot Management",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "bot-management.read"
+        },
+        {
+          "label": "Write",
+          "scope": "bot-management.write"
+        }
+      ]
+    },
+    {
+      "name": "Cloudforce One",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "cloudforce-one.read"
+        },
+        {
+          "label": "Write",
+          "scope": "cloudforce-one.write"
+        }
+      ]
+    },
+    {
+      "name": "DDoS Botnet Feed",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "ddos-botnet-feed.read"
+        },
+        {
+          "label": "Write",
+          "scope": "ddos-botnet-feed.write"
+        }
+      ]
+    },
+    {
+      "name": "DDoS Protection",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "ddos-protection.read"
+        },
+        {
+          "label": "Write",
+          "scope": "ddos-protection.write"
+        }
+      ]
+    },
+    {
+      "name": "Domain API Gateway",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "api-gateway.write"
+        },
+        {
+          "label": "Read",
+          "scope": "api-gateway.read"
+        }
+      ]
+    },
+    {
+      "name": "Domain Page Shield",
+      "scopes": [
+        {
+          "label": "Shield",
+          "scope": "domain-page.shield"
+        },
+        {
+          "label": "Read",
+          "scope": "domain-page-shield.read"
+        }
+      ]
+    },
+    {
+      "name": "Field Extractors",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "field-extractor.read"
+        },
+        {
+          "label": "Write",
+          "scope": "field-extractor.write"
+        }
+      ]
+    },
+    {
+      "name": "Firewall Services",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "firewall-services.read"
+        },
+        {
+          "label": "Write",
+          "scope": "firewall-services.write"
+        }
+      ]
+    },
+    {
+      "name": "Fraud Detection",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "fraud-detection.read"
+        },
+        {
+          "label": "Write",
+          "scope": "fraud-detection.write"
+        }
+      ]
+    },
+    {
+      "name": "Fraud Events",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "fraud-events.write"
+        }
+      ]
+    },
+    {
+      "name": "Fraud Feedback",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "fraud-feedback.read"
+        },
+        {
+          "label": "Write",
+          "scope": "fraud-feedback.write"
+        }
+      ]
+    },
+    {
+      "name": "HTTP Applications",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "http-applications.read"
+        },
+        {
+          "label": "Write",
+          "scope": "http-applications.write"
+        }
+      ]
+    },
+    {
+      "name": "HTTP DDoS Managed Ruleset",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "http-ddos-managed-ruleset.read"
+        },
+        {
+          "label": "Write",
+          "scope": "http-ddos-managed-ruleset.write"
+        }
+      ]
+    },
+    {
+      "name": "IOT",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "iot.read"
+        },
+        {
+          "label": "Write",
+          "scope": "iot.write"
+        }
+      ]
+    },
+    {
+      "name": "L4 DDoS Managed Ruleset",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "l4-ddos-managed-ruleset.read"
+        },
+        {
+          "label": "Write",
+          "scope": "l4-ddos-managed-ruleset.write"
+        }
+      ]
+    },
+    {
+      "name": "Page Rules",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "page-rules.read"
+        },
+        {
+          "label": "Write",
+          "scope": "page-rules.write"
+        }
+      ]
+    },
+    {
+      "name": "Page Shield",
+      "scopes": [
+        {
+          "label": "Shield",
+          "scope": "page.shield"
+        },
+        {
+          "label": "Read",
+          "scope": "page-shield.read"
+        }
+      ]
+    },
+    {
+      "name": "Precursor",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "precursor.read"
+        },
+        {
+          "label": "Write",
+          "scope": "precursor.write"
+        }
+      ]
+    },
+    {
+      "name": "Sanitize",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "sanitize.read"
+        },
+        {
+          "label": "Write",
+          "scope": "sanitize.write"
+        }
+      ]
+    },
+    {
+      "name": "Tag",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "tag.read"
+        },
+        {
+          "label": "Write",
+          "scope": "tag.write"
+        }
+      ]
+    },
+    {
+      "name": "Trust and Safety",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "trust-and-safety.read"
+        },
+        {
+          "label": "Write",
+          "scope": "trust-and-safety.write"
+        }
+      ]
+    },
+    {
+      "name": "Turnstile Sites",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "challenge-widgets.read"
+        },
+        {
+          "label": "Write",
+          "scope": "challenge-widgets.write"
+        }
+      ]
+    },
+    {
+      "name": "URL Scanner",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "url-scanner.read"
+        },
+        {
+          "label": "Write",
+          "scope": "url-scanner.write"
+        }
+      ]
+    },
+    {
+      "name": "Zaraz",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "zaraz.write"
+        },
+        {
+          "label": "Edit",
+          "scope": "zaraz.edit"
+        },
+        {
+          "label": "Read",
+          "scope": "zaraz.read"
+        }
+      ]
+    },
+    {
+      "name": "Zone Security Center Insights",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "zone-security-center-insights.read"
+        },
+        {
+          "label": "Write",
+          "scope": "zone-security-center-insights.write"
+        }
+      ]
+    },
+    {
+      "name": "Zone WAF",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "zone-waf.read"
+        },
+        {
+          "label": "Write",
+          "scope": "zone-waf.write"
+        }
+      ]
+    }
+  ]
+}

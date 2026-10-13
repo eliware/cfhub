@@ -1,0 +1,403 @@
+{
+  "Developer Platform": [
+    {
+      "name": "Agent Memory",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "agent-memory.write"
+        }
+      ]
+    },
+    {
+      "name": "Browser Run",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "browser-rendering.read"
+        },
+        {
+          "label": "Write",
+          "scope": "browser-rendering.write"
+        }
+      ]
+    },
+    {
+      "name": "CF Agents",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "cf-agents.read"
+        },
+        {
+          "label": "Write",
+          "scope": "cf-agents.write"
+        }
+      ]
+    },
+    {
+      "name": "Cloud Connector",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "cloud-connector.read"
+        },
+        {
+          "label": "Write",
+          "scope": "cloud-connector.write"
+        }
+      ]
+    },
+    {
+      "name": "Cloudchamber",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "cloudchamber.read"
+        },
+        {
+          "label": "Write",
+          "scope": "cloudchamber.write"
+        }
+      ]
+    },
+    {
+      "name": "Constellation",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "constellation.read"
+        },
+        {
+          "label": "Write",
+          "scope": "constellation.write"
+        }
+      ]
+    },
+    {
+      "name": "D1",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "d1.read"
+        },
+        {
+          "label": "Write",
+          "scope": "d1.write"
+        }
+      ]
+    },
+    {
+      "name": "Flagship",
+      "scopes": [
+        {
+          "label": "Evaluate",
+          "scope": "flagship.evaluate"
+        },
+        {
+          "label": "Read",
+          "scope": "flagship.read"
+        },
+        {
+          "label": "Write",
+          "scope": "flagship.write"
+        }
+      ]
+    },
+    {
+      "name": "Hyperdrive",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "query-cache.read"
+        },
+        {
+          "label": "Write",
+          "scope": "query-cache.write"
+        }
+      ]
+    },
+    {
+      "name": "MCP Portals",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "mcp-portals.read"
+        },
+        {
+          "label": "Write",
+          "scope": "mcp-portals.write"
+        }
+      ]
+    },
+    {
+      "name": "Messaging",
+      "scopes": [
+        {
+          "label": "Edit",
+          "scope": "messaging.edit"
+        },
+        {
+          "label": "Read",
+          "scope": "messaging.read"
+        }
+      ]
+    },
+    {
+      "name": "Pages",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "page.read"
+        },
+        {
+          "label": "Write",
+          "scope": "page.write"
+        }
+      ]
+    },
+    {
+      "name": "Pipelines",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "pipelines.read"
+        },
+        {
+          "label": "Send",
+          "scope": "pipelines.send"
+        },
+        {
+          "label": "Write",
+          "scope": "pipelines.write"
+        }
+      ]
+    },
+    {
+      "name": "Pubsub Configuration",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "pubsub.read"
+        },
+        {
+          "label": "Write",
+          "scope": "pubsub.write"
+        }
+      ]
+    },
+    {
+      "name": "Queues",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "queues.read"
+        },
+        {
+          "label": "Write",
+          "scope": "queues.write"
+        }
+      ]
+    },
+    {
+      "name": "Realtime",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "realtime.write"
+        },
+        {
+          "label": "Admin",
+          "scope": "realtime.admin"
+        },
+        {
+          "label": "Read",
+          "scope": "realtime.read"
+        }
+      ]
+    },
+    {
+      "name": "Secrets Store",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "secrets-store.read"
+        },
+        {
+          "label": "Write",
+          "scope": "secrets-store.write"
+        }
+      ]
+    },
+    {
+      "name": "Vectorize",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "vectorize.read"
+        },
+        {
+          "label": "Write",
+          "scope": "vectorize.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers CI",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "workers-ci.read"
+        },
+        {
+          "label": "Write",
+          "scope": "workers-ci.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers Containers",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "containers.read"
+        },
+        {
+          "label": "Write",
+          "scope": "containers.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers Editor",
+      "scopes": [
+        {
+          "label": "Edit",
+          "scope": "workers-scripts.edit"
+        }
+      ]
+    },
+    {
+      "name": "Workers KV Storage",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "workers-kv-storage.read"
+        },
+        {
+          "label": "Write",
+          "scope": "workers-kv-storage.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers Observability",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "workers-observability.read"
+        },
+        {
+          "label": "Write",
+          "scope": "workers-observability.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers Observability Telemetry",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "workers-observability-telemetry.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers R2 Data Catalog",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "r2-catalog.read"
+        },
+        {
+          "label": "Write",
+          "scope": "r2-catalog.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers R2 SQL",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "r2-catalog-sql.read"
+        }
+      ]
+    },
+    {
+      "name": "Workers R2 Storage Bucket Item",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "workers-r2-bucket-item.read"
+        },
+        {
+          "label": "Write",
+          "scope": "workers-r2-bucket-item.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers R2 Storage",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "workers-r2.read"
+        },
+        {
+          "label": "Write",
+          "scope": "workers-r2.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers Routes",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "workers-routes.read"
+        },
+        {
+          "label": "Write",
+          "scope": "workers-routes.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers Scripts",
+      "scopes": [
+        {
+          "label": "Bind",
+          "scope": "workers-scripts.bind"
+        },
+        {
+          "label": "Read",
+          "scope": "workers-scripts.read"
+        },
+        {
+          "label": "Write",
+          "scope": "workers-scripts.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers Tail",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "workers-tail.read"
+        }
+      ]
+    }
+  ]
+}

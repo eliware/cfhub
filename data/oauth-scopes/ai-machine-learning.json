@@ -1,0 +1,142 @@
+{
+  "AI & Machine Learning": [
+    {
+      "name": "AI Audit",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "aiaudit.read"
+        },
+        {
+          "label": "Write",
+          "scope": "aiaudit.write"
+        }
+      ]
+    },
+    {
+      "name": "AI Gateway",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "aig.read"
+        },
+        {
+          "label": "Run",
+          "scope": "aig.run"
+        },
+        {
+          "label": "Write",
+          "scope": "aig.write"
+        }
+      ]
+    },
+    {
+      "name": "AI Search Index Engine",
+      "scopes": [
+        {
+          "label": "Index",
+          "scope": "ai-search.index"
+        }
+      ]
+    },
+    {
+      "name": "AI Search",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "ai-search.read"
+        },
+        {
+          "label": "Run",
+          "scope": "ai-search.run"
+        },
+        {
+          "label": "Write",
+          "scope": "ai-search.write"
+        }
+      ]
+    },
+    {
+      "name": "Agents Gateway",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "agw.read"
+        },
+        {
+          "label": "Run",
+          "scope": "agw.run"
+        },
+        {
+          "label": "Write",
+          "scope": "agw.write"
+        }
+      ]
+    },
+    {
+      "name": "Auto Rag",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "rag.read"
+        },
+        {
+          "label": "Write",
+          "scope": "rag.write"
+        }
+      ]
+    },
+    {
+      "name": "Auto Rag ",
+      "scopes": [
+        {
+          "label": "Run",
+          "scope": "rag.run"
+        }
+      ]
+    },
+    {
+      "name": "Firewall for AI",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "firewall-for-ai.read"
+        },
+        {
+          "label": "Write",
+          "scope": "firewall-for-ai.write"
+        }
+      ]
+    },
+    {
+      "name": "Websearch",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "websearch.read"
+        },
+        {
+          "label": "Run",
+          "scope": "websearch.run"
+        },
+        {
+          "label": "Write",
+          "scope": "websearch.write"
+        }
+      ]
+    },
+    {
+      "name": "Workers AI",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "ai.read"
+        },
+        {
+          "label": "Write",
+          "scope": "ai.write"
+        }
+      ]
+    }
+  ]
+}

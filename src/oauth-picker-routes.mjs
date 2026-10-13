@@ -1,7 +1,11 @@
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { VERSION } from "./version.mjs";
-import { pickerAsset, pickerHtml, readRequestBody, sendAsset } from "./oauth-picker-assets.mjs";
+import {
+  pickerAsset,
+  pickerAssetBuffer,
+  pickerHtml,
+  readRequestBody,
+  sendAsset,
+} from "./oauth-picker-assets.mjs";
 import { ALLOWED_OAUTH_SCOPES } from "./oauth-scope-model.mjs";
 
 export function serveOAuthPickerRoute({
@@ -51,11 +55,10 @@ export function serveOAuthPickerRoute({
     "/oauth-web/eliware-58x58.png": "eliware-58x58.png",
   };
   if (scopePicker && request.method === "GET" && images[url.pathname]) {
-    const path = `../public/oauth-web/${images[url.pathname]}`;
     sendAsset(
       request,
       response,
-      readFileSync(fileURLToPath(new URL(path, import.meta.url))),
+      pickerAssetBuffer(`oauth-web/${images[url.pathname]}`),
       "image/png",
     );
     return true;

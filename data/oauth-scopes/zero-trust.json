@@ -1,0 +1,472 @@
+{
+  "Cloudflare One / Zero Trust": [
+    {
+      "name": "Access: Apps",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-app.read"
+        },
+        {
+          "label": "Revoke",
+          "scope": "access-app.revoke"
+        },
+        {
+          "label": "Write",
+          "scope": "access-app.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Apps and Policies",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access.read"
+        },
+        {
+          "label": "Read",
+          "scope": "zone-access.read"
+        },
+        {
+          "label": "Revoke",
+          "scope": "access.revoke"
+        },
+        {
+          "label": "Revoke",
+          "scope": "zone-access.revoke"
+        },
+        {
+          "label": "Write",
+          "scope": "access.write"
+        },
+        {
+          "label": "Write",
+          "scope": "zone-access.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Audit Logs",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-audit-log.read"
+        }
+      ]
+    },
+    {
+      "name": "Access: Custom Pages",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-custom-page.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-custom-page.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Device Posture",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-device-posture.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-device-posture.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Groups",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-group.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-group.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Identity Providers",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-idp.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-idp.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Keys",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-key.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-key.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Mutual TLS Certificates",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-certificate.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-certificate.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Organizations",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-org.read"
+        },
+        {
+          "label": "Revoke",
+          "scope": "access-org.revoke"
+        },
+        {
+          "label": "Write",
+          "scope": "access-org.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Organizations, Identity Providers, and Groups",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-acct.read"
+        },
+        {
+          "label": "Revoke",
+          "scope": "access-acct.revoke"
+        },
+        {
+          "label": "Write",
+          "scope": "access-acct.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Policies",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-policy.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-policy.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Policy Test",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-policy-test.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-policy-test.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Population",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-population.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-population.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: SAML Certificates",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-saml-certificate.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-saml-certificate.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: SCIM Logs",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-scim-log.read"
+        }
+      ]
+    },
+    {
+      "name": "Access: SSH Auditing",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-ssh-auditing.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-ssh-auditing.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Service Tokens",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-service-token.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-service-token.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Tags",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-tag.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-tag.write"
+        }
+      ]
+    },
+    {
+      "name": "Access: Users",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "access-users.read"
+        },
+        {
+          "label": "Write",
+          "scope": "access-users.write"
+        }
+      ]
+    },
+    {
+      "name": "CASB",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "casb.read"
+        },
+        {
+          "label": "Write",
+          "scope": "casb.write"
+        }
+      ]
+    },
+    {
+      "name": "Cloudflare CDS Compute Account",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "teams-cds-compute-account.read"
+        },
+        {
+          "label": "Write",
+          "scope": "teams-cds-compute-account.write"
+        }
+      ]
+    },
+    {
+      "name": "Cloudflare DEX",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "teams-dex.read"
+        },
+        {
+          "label": "Write",
+          "scope": "teams-dex.write"
+        }
+      ]
+    },
+    {
+      "name": "Cloudflare One Connector Monitoring: cloudflared",
+      "scopes": [
+        {
+          "label": "Monitoring",
+          "scope": "teams-connector-cloudflared.monitoring"
+        }
+      ]
+    },
+    {
+      "name": "Cloudflare One Connector: WARP",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "teams-connector-warp.read"
+        },
+        {
+          "label": "Write",
+          "scope": "teams-connector-warp.write"
+        }
+      ]
+    },
+    {
+      "name": "Cloudflare One Connector: cloudflared",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "teams-connector-cloudflared.read"
+        },
+        {
+          "label": "Write",
+          "scope": "teams-connector-cloudflared.write"
+        }
+      ]
+    },
+    {
+      "name": "Cloudflare One Connectors",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "teams-connectors.read"
+        },
+        {
+          "label": "Write",
+          "scope": "teams-connectors.write"
+        }
+      ]
+    },
+    {
+      "name": "Cloudflare One Networks",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "teams-networks.read"
+        },
+        {
+          "label": "Write",
+          "scope": "teams-networks.write"
+        }
+      ]
+    },
+    {
+      "name": "Cloudflare Tunnel",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "argotunnel.read"
+        },
+        {
+          "label": "Write",
+          "scope": "argotunnel.write"
+        }
+      ]
+    },
+    {
+      "name": "Cloudflare Zero Trust Secure DNS Locations",
+      "scopes": [
+        {
+          "label": "Location",
+          "scope": "teams-secure.location"
+        }
+      ]
+    },
+    {
+      "name": "DLS:",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "dls.read"
+        },
+        {
+          "label": "Write",
+          "scope": "dls.write"
+        }
+      ]
+    },
+    {
+      "name": "Zero Trust",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "teams.read"
+        },
+        {
+          "label": "Write",
+          "scope": "teams.write"
+        }
+      ]
+    },
+    {
+      "name": "Zero Trust Report",
+      "scopes": [
+        {
+          "label": "Report",
+          "scope": "teams.report"
+        }
+      ]
+    },
+    {
+      "name": "Zero Trust Resilience",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "teams-resilience.read"
+        },
+        {
+          "label": "Write",
+          "scope": "teams-resilience.write"
+        }
+      ]
+    },
+    {
+      "name": "Zero Trust: PII",
+      "scopes": [
+        {
+          "label": "Read",
+          "scope": "teams-pii.read"
+        }
+      ]
+    },
+    {
+      "name": "Zero Trust: Seats",
+      "scopes": [
+        {
+          "label": "Write",
+          "scope": "access-seats.write"
+        }
+      ]
+    }
+  ]
+}

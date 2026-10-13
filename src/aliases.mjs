@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import { configRoot } from "./config.mjs";
+import { ensurePrivateDirectory, replaceJsonFile } from "./atomic-json-file.mjs";
 
 function aliasesPath(homeDir) {
   return `${configRoot(homeDir)}/aliases.json`;
@@ -11,7 +12,6 @@ export function readAliases(homeDir, fsImpl = fs) {
 }
 export function writeAliases(aliases, homeDir, fsImpl = fs) {
   const path = aliasesPath(homeDir);
-  fsImpl.mkdirSync(configRoot(homeDir), { recursive: true });
-  fsImpl.writeFileSync(path, `${JSON.stringify(aliases, null, 2)}\n`, { mode: 0o600 });
-  if (typeof fsImpl.chmodSync === "function") fsImpl.chmodSync(path, 0o600);
+  ensurePrivateDirectory(configRoot(homeDir), fsImpl);
+  replaceJsonFile(path, aliases, fsImpl);
 }

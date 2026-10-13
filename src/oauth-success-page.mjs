@@ -2,6 +2,7 @@ import { VERSION } from "./version.mjs";
 import { copyrightYear } from "./oauth-pages.mjs";
 import { pickerAsset } from "./oauth-picker-assets.mjs";
 import { successModuleCards } from "./oauth-success-modules.mjs";
+import { escapeOAuthHtml } from "./oauth-html.mjs";
 
 export function successPage({ account, scopes, summary }) {
   const enabled = summary.enabled;
@@ -15,7 +16,7 @@ export function successPage({ account, scopes, summary }) {
     enabled.some((module) => module.id === "workers") && "cfhub workers list",
   ]
     .filter(Boolean)
-    .map((example) => `<div class="example"><code>${escapeHtml(example)}</code></div>`)
+    .map((example) => `<div class="example"><code>${escapeOAuthHtml(example)}</code></div>`)
     .join("");
   const logoData = encodeURIComponent(pickerAsset("oauth-web/cf-logo.svg")).replace(/'/g, "%27");
   return pickerAsset("oauth-web/oauth-success.html")
@@ -23,7 +24,7 @@ export function successPage({ account, scopes, summary }) {
     .replaceAll("__CFHUB_LOGO_DATA__", logoData)
     .replaceAll(
       "__ACCOUNT__",
-      escapeHtml(account?.name || account?.email || "your Cloudflare account"),
+      escapeOAuthHtml(account?.name || account?.email || "your Cloudflare account"),
     )
     .replaceAll("__SCOPE_COUNT__", String(scopes.length))
     .replaceAll("__ENABLED_COUNT__", String(enabled.length))
