@@ -156,7 +156,44 @@ test("zone updates support dry runs and both client styles", async () => {
   expect(textPrinter.log).toHaveBeenCalledWith('{\n  "updated": true\n}');
 });
 
-import { fixtureCase1, fixtureCase2 } from "../../test-fixtures/unit/zones-delete.mjs";
+test("zone deletion supports both client styles and force checks", async () => {
+  const remove = jest.fn().mockResolvedValue({ deleted: true });
+  const toJsonOutput = jest.fn();
+  await handleZones(
+    context({
+      action: "delete",
+      cf: { delete: remove },
+      opts: { "zone-id": "z1", force: true },
+      toJsonOutput,
+    }),
+  );
+  expect(remove).toHaveBeenCalledWith("/zones/z1");
+  expect(toJsonOutput).toHaveBeenCalledWith({ deleted: true });
 
-test("zone deletion supports both client styles and force checks", fixtureCase1);
-test("zone handler rejects unknown actions", fixtureCase2);
+  const sdkDelete = jest.fn().mockResolvedValue({ deleted: true });
+  const printer = { log: jest.fn() };
+  await handleZones(
+    context({
+      action: "delete",
+      cf: { zones: { delete: sdkDelete } },
+      opts: { "zone-id": "z2", force: true },
+      outputJson: false,
+      printer,
+    }),
+  );
+  expect(sdkDelete).toHaveBeenCalledWith({ zone_id: "z2" });
+  expect(printer.log).toHaveBeenCalledWith('{\n  "deleted": true\n}');
+
+  const fail = jest.fn((message) => {
+    throw new Error(message);
+  });
+  await expect(
+    handleZones(context({ action: "delete", opts: { "zone-id": "z1" }, fail })),
+  ).rejects.toThrow("Refusing to delete without --force");
+});
+
+test("zone handler rejects unknown actions", async () => {
+  await expect(handleZones(context({ action: "unknown" }))).rejects.toThrow(
+    "Unknown zones action: unknown",
+  );
+});

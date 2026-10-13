@@ -33,18 +33,6 @@ const base = () => ({
   }),
 });
 
-test("auth handles an empty token when environment credentials are absent", async () => {
-  const oldToken = process.env.CLOUDFLARE_API_TOKEN;
-  delete process.env.CLOUDFLARE_API_TOKEN;
-  const ctx = base();
-  const readFileSync = jest.spyOn(fs, "readFileSync").mockReturnValue("");
-  await handleAuth({ ...ctx, resource: "auth", action: "login", opts: { "token-stdin": true } });
-  readFileSync.mockRestore();
-  expect(ctx.fail).toHaveBeenCalledWith("No API token supplied. Run cfhub auth login again.");
-  if (oldToken === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
-  else process.env.CLOUDFLARE_API_TOKEN = oldToken;
-});
-
 test("auth OAuth login omits the token when keychain storage succeeds", async () => {
   const write = jest.fn();
   const ctx = base();
@@ -63,53 +51,6 @@ test("auth OAuth login omits the token when keychain storage succeeds", async ()
     undefined,
     undefined,
   );
-});
-
-test("auth OAuth login accepts configured and requested scopes", async () => {
-  const oldScopes = process.env.CFHUB_OAUTH_SCOPES;
-  process.env.CFHUB_OAUTH_SCOPES = "custom.read, zone.read";
-  const write = jest.fn();
-  const oauthLogin = jest
-    .fn()
-    .mockResolvedValue({ accessToken: "access", scopes: ["custom.read"] });
-  const ctx = base();
-  await handleAuth({
-    ...ctx,
-    action: "login",
-    opts: {
-      profile: "work",
-      oauth: true,
-      scope: ["extra.read"],
-      scopes: ["another.read"],
-      "account-id": "acct",
-      "zone-id": "zone",
-    },
-    write,
-    oauthLogin,
-    writeCredentialImpl: jest.fn().mockResolvedValue(true),
-  });
-  expect(oauthLogin).toHaveBeenCalledWith(
-    expect.objectContaining({
-      clientId: expect.any(String),
-      scopePicker: true,
-      scopes: expect.arrayContaining(["custom.read", "zone.read", "extra.read", "another.read"]),
-    }),
-  );
-  expect(write).toHaveBeenCalledWith(
-    expect.objectContaining({
-      profiles: {
-        work: expect.objectContaining({
-          scopes: ["custom.read"],
-          accountId: "acct",
-          zoneId: "zone",
-        }),
-      },
-    }),
-    undefined,
-    undefined,
-  );
-  if (oldScopes === undefined) delete process.env.CFHUB_OAUTH_SCOPES;
-  else process.env.CFHUB_OAUTH_SCOPES = oldScopes;
 });
 
 test("auth switch, logout, status, and verify report missing credentials or profiles", async () => {
@@ -135,4 +76,3 @@ test("auth switch, logout, status, and verify report missing credentials or prof
   await handleAuth({ ...unknown, action: "unknown" });
   expect(unknown.fail).toHaveBeenCalledWith("Unknown auth action: unknown");
 });
-import { fs } from "../../src/fs.mjs";

@@ -26,3 +26,17 @@ test("user status returns identity or a text message", async () => {
   });
   expect(printer.log).toHaveBeenCalledWith("work authenticated as a@b.test");
 });
+
+test("user status defaults the method and handles missing identity fields", async () => {
+  const cf = { get: jest.fn().mockResolvedValue({}) };
+  const printer = { log: jest.fn() };
+  await showUserTokenStatus({
+    resource: "auth",
+    statusProfile: "environment",
+    data: { profiles: {} },
+    cf,
+    outputJson: false,
+    printer,
+  });
+  expect(printer.log).toHaveBeenCalledWith("environment authenticated");
+});

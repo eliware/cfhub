@@ -46,3 +46,26 @@ test("token verification reports a missing account ID", async () => {
     else process.env.CLOUDFLARE_API_TOKEN = previous;
   }
 });
+
+test("user token verification reports unknown status as text", async () => {
+  const prior = process.env.CLOUDFLARE_API_TOKEN;
+  process.env.CLOUDFLARE_API_TOKEN = "user-token";
+  const cf = { get: jest.fn().mockResolvedValue({}) };
+  const printer = { log: jest.fn() };
+  try {
+    await verifyAuthStatus({
+      opts: {},
+      cf,
+      data: { active: null, profiles: {} },
+      outputJson: false,
+      toJsonOutput: jest.fn(),
+      printer,
+      fail: jest.fn(),
+    });
+  } finally {
+    if (prior === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
+    else process.env.CLOUDFLARE_API_TOKEN = prior;
+  }
+  expect(cf.get).toHaveBeenCalledWith("/user/tokens/verify");
+  expect(printer.log).toHaveBeenCalledWith("unknown");
+});

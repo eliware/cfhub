@@ -82,24 +82,3 @@ export async function fixtureCase1() {
   });
   expect(toJsonOutput).toHaveBeenCalled();
 }
-
-export async function fixtureCase2() {
-  const get = jest.fn().mockResolvedValue({ value: "on" });
-  const patch = jest.fn().mockResolvedValue({ value: "off" });
-  const toJsonOutput = jest.fn();
-  const cf = { get, patch };
-  const base = {
-    cf,
-    opts: { "zone-id": "z", setting: "ssl" },
-    outputJson: true,
-    toJsonOutput,
-    fail: (message) => {
-      throw new Error(message);
-    },
-  };
-  await handleZoneSettings({ ...base, action: "get" });
-  await handleZoneSettings({ ...base, action: "set", body: { value: "off" } });
-  expect(get).toHaveBeenCalledWith("/zones/z/settings/ssl", undefined);
-  expect(patch).toHaveBeenCalledWith("/zones/z/settings/ssl", { body: { value: "off" } });
-  expect(toJsonOutput).toHaveBeenCalledTimes(2);
-}
