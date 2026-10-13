@@ -1,4 +1,5 @@
-import { parseArgs, tokenizeCommand } from "../args.mjs";
+import { parseArgs } from "../args.mjs";
+import { tokenizeCommand } from "../alias-tokenizer.mjs";
 import { discoverExtensions, loadExtensionCommand } from "../extensions.mjs";
 import { readAliases } from "../aliases.mjs";
 import { printCommandHelp } from "../help/commands.mjs";

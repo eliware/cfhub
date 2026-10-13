@@ -6,12 +6,7 @@ export function renderPickerState({
   moduleCount,
   syncModules = true,
 }) {
-  if (syncModules)
-    modules.forEach((module) => {
-      const satisfied = module.scopes.every((scope) => state.selected.has(scope));
-      if (satisfied) state.enabledModules.add(module.id);
-      else state.enabledModules.delete(module.id);
-    });
+  if (syncModules) syncPickerModuleState(modules, state.selected, state.enabledModules);
   boxes.forEach((box) => {
     box.checked = state.selected.has(box.value);
     box.disabled = state.required.has(box.value);
@@ -36,3 +31,4 @@ export function renderPickerState({
   });
   moduleCount.textContent = `${state.enabledModules.size}/${modules.length} modules enabled`;
 }
+import { syncPickerModuleState } from "./picker-module-state.mjs";

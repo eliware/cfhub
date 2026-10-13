@@ -1,63 +1,9 @@
 import { bindPickerNavigation } from "./picker-navigation.mjs";
-import { bindPickerCategoryEvents } from "./picker-category-events.mjs";
+import { bindPickerModuleEvents } from "./picker-module-events.mjs";
+import { bindPickerScopeEvents } from "./picker-scope-events.mjs";
 
-export function bindPickerEvents({
-  categories,
-  required,
-  selected,
-  enabledModules,
-  owners,
-  boxes,
-  sessionOptions,
-  moduleTier,
-  enableModule,
-  disableModule,
-  render,
-}) {
-  boxes.forEach((box) =>
-    box.addEventListener("change", () => {
-      if (box.checked) selected.add(box.value);
-      else selected.delete(box.value);
-      if (!box.checked) (owners.get(box.value) || []).forEach((id) => enabledModules.delete(id));
-      render();
-    }),
-  );
-  sessionOptions.forEach((option) =>
-    option.addEventListener("change", () => {
-      sessionOptions.forEach((other) => {
-        other.checked = option.checked;
-      });
-    }),
-  );
-  document.querySelectorAll("[data-module]").forEach((button) =>
-    button.addEventListener("click", () => {
-      if (enabledModules.has(button.dataset.module)) disableModule(button.dataset.module);
-      else enableModule(button.dataset.module);
-      render();
-    }),
-  );
-  document.querySelectorAll("[data-tier-enable]").forEach((button) =>
-    button.addEventListener("click", () => {
-      moduleTier(button.dataset.tierEnable, true);
-      render();
-    }),
-  );
-  document.querySelectorAll("[data-tier-disable]").forEach((button) =>
-    button.addEventListener("click", () => {
-      moduleTier(button.dataset.tierDisable, false);
-      render();
-    }),
-  );
-  bindPickerCategoryEvents({ categories, required, selected, render });
-  document.querySelector("[data-all-enable]").addEventListener("click", () => {
-    boxes.forEach((box) => selected.add(box.value));
-    render();
-  });
-  document.querySelector("[data-all-disable]").addEventListener("click", () => {
-    selected.clear();
-    required.forEach((scope) => selected.add(scope));
-    enabledModules.clear();
-    render(false);
-  });
+export function bindPickerEvents(options) {
+  bindPickerScopeEvents(options);
+  bindPickerModuleEvents(options);
   bindPickerNavigation();
 }

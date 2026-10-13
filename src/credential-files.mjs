@@ -1,6 +1,7 @@
 import os from "node:os";
 import { configRoot } from "./config.mjs";
-import { ensurePrivateDirectory, parentDirectory, replaceJsonFile } from "./atomic-json-file.mjs";
+import { replaceJsonFile } from "./atomic-json-file.mjs";
+import { ensurePrivateDirectory, parentDirectory } from "./filesystem-paths.mjs";
 
 export const credentialsPath = (homeDir = os.homedir()) =>
   `${configRoot(homeDir)}/credentials.json`;

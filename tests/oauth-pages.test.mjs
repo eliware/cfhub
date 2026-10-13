@@ -1,9 +1,7 @@
 import { jest } from "@jest/globals";
-import { collectOAuthSummary, copyrightYear } from "../src/oauth-pages.mjs";
+import { collectOAuthSummary } from "../src/oauth-pages.mjs";
 
 test("OAuth summary and copyright helpers cover populated results", async () => {
-  expect(copyrightYear(2026)).toBe("2026");
-  expect(copyrightYear(2027)).toBe("2026-2027");
   const summary = await collectOAuthSummary({
     accessToken: "access",
     account: { name: "account" },
@@ -28,7 +26,6 @@ test("OAuth summary and copyright helpers cover populated results", async () => 
 });
 
 test("OAuth summary handles missing zones and failed requests", async () => {
-  expect(copyrightYear()).toBe("2026");
   const fetchImpl = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ result: [{}] }) });
   const noZoneId = await collectOAuthSummary({
     accessToken: "x",

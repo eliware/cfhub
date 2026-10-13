@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import { configRoot } from "./config.mjs";
-import { ensurePrivateDirectory, replaceJsonFile } from "./atomic-json-file.mjs";
+import { replaceJsonFile } from "./atomic-json-file.mjs";
+import { ensurePrivateDirectory } from "./filesystem-paths.mjs";
 
 function aliasesPath(homeDir) {
   return `${configRoot(homeDir)}/aliases.json`;

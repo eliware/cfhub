@@ -25,27 +25,3 @@ export async function fixtureCase1() {
   );
   expect(oauthPrinter.log).toHaveBeenCalledWith(expect.stringContaining("work  oauth"));
 }
-
-export async function fixtureCase2() {
-  const fail = jest.fn();
-  await handleAuthProfile(profileOptions({ action: "unknown" }));
-  await handleAuthProfile(profileOptions({ action: "switch", fail }));
-  await handleAuthProfile(profileOptions({ action: "logout", fail }));
-  await handleAuthProfile(profileOptions({ action: "logout", opts: { profile: "missing" }, fail }));
-  const data = { active: "other", profiles: { work: {}, other: {} } };
-  const write = jest.fn();
-  const printer = { log: jest.fn() };
-  await handleAuthProfile(
-    profileOptions({
-      action: "logout",
-      opts: { profile: "work" },
-      data,
-      deleteCredentialImpl: jest.fn().mockRejectedValue(new Error("local failure")),
-      printer,
-      write,
-    }),
-  );
-  expect(data).toEqual({ active: "other", profiles: { other: {} } });
-  expect(write).toHaveBeenCalled();
-  expect(printer.log).toHaveBeenCalledWith("Removed profile work");
-}

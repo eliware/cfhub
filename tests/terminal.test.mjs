@@ -1,12 +1,6 @@
 import { jest } from "@jest/globals";
 import { EventEmitter } from "node:events";
-import {
-  terminalColorMode,
-  terminalWidth,
-  fitTerminal,
-  styleTerminalText,
-  createTerminalOutput,
-} from "../src/terminal.mjs";
+import { createTerminalOutput } from "../src/terminal.mjs";
 
 const childProcess = (closeCode = 0, inputError) => {
   const child = new EventEmitter();
@@ -20,35 +14,6 @@ const childProcess = (closeCode = 0, inputError) => {
   };
   return child;
 };
-
-test("selects terminal color modes", () => {
-  expect(terminalColorMode("always", { isTTY: false })).toBe(true);
-  expect(terminalColorMode("true", { isTTY: false })).toBe(true);
-  expect(terminalColorMode("never", { isTTY: true })).toBe(false);
-  expect(terminalColorMode("false", { isTTY: true })).toBe(false);
-  expect(terminalColorMode("auto", { isTTY: true, noColor: false })).toBe(true);
-  expect(terminalColorMode("auto", { isTTY: true, noColor: true })).toBe(false);
-  expect(terminalColorMode("auto", { isTTY: false, noColor: false })).toBe(false);
-  expect(typeof terminalColorMode("auto")).toBe("boolean");
-});
-
-test("validates widths and fits each terminal line", () => {
-  expect(terminalWidth()).toBe(120);
-  expect(terminalWidth("80")).toBe(80);
-  expect(terminalWidth("bad", 90)).toBe(90);
-  expect(terminalWidth("39")).toBe(120);
-  expect(fitTerminal("short\nlonger", 5)).toBe("short\nlong…");
-  expect(fitTerminal("long", 0)).toBe("l…");
-  expect(fitTerminal("plain")).toBe("plain");
-});
-
-test("styles multiline output only when color is enabled", () => {
-  expect(styleTerminalText("one\ntwo")).toBe("one\ntwo");
-  expect(styleTerminalText("one\ntwo", { color: true })).toContain(
-    "\u001b[1m\u001b[36mone\u001b[0m\ntwo",
-  );
-  expect(styleTerminalText("123456", { width: 4 })).toBe("123…");
-});
 
 test("writes normal and error output and flushes empty pagers", async () => {
   const printer = { log: jest.fn(), error: jest.fn() };

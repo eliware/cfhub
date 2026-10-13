@@ -1,4 +1,5 @@
 import { getZoneId, requireValue } from "./common.mjs";
+import { getZoneSetting, setZoneSetting } from "./zone-settings-api.mjs";
 
 export async function handleZoneSettings({
   cf,
@@ -16,12 +17,7 @@ export async function handleZoneSettings({
   requireValue(setting, "Missing --setting", fail);
 
   if (action === "get") {
-    const res =
-      typeof cf.get === "function"
-        ? await cf.get(`/zones/${zoneId}/settings/${setting}`, undefined)
-        : cf.zones.settings.get.length >= 2
-          ? await cf.zones.settings.get(setting, { zone_id: zoneId })
-          : await cf.zones.settings.get(zoneId, setting);
+    const res = await getZoneSetting(cf, zoneId, setting);
     return outputJson ? toJsonOutput(res) : printer.log(JSON.stringify(res, null, 2));
   }
 
@@ -32,12 +28,7 @@ export async function handleZoneSettings({
         JSON.stringify({ zoneId, setting, value: body.value, dryRun: true }, null, 2),
       );
 
-    const res =
-      typeof cf.patch === "function"
-        ? await cf.patch(`/zones/${zoneId}/settings/${setting}`, { body: { value: body.value } })
-        : typeof cf.zones.settings.edit === "function"
-          ? await cf.zones.settings.edit(setting, { zone_id: zoneId, value: body.value })
-          : await cf.zones.settings.update(zoneId, setting, { value: body.value });
+    const res = await setZoneSetting(cf, zoneId, setting, body.value);
     return outputJson ? toJsonOutput(res) : printer.log(JSON.stringify(res, null, 2));
   }
 

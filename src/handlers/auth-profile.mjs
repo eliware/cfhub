@@ -1,4 +1,5 @@
 import { projectAuthProfiles } from "./auth-profile-view.mjs";
+import { logoutAuthProfile } from "./auth-profile-logout.mjs";
 
 export async function handleAuthProfile({
   action,
@@ -38,28 +39,18 @@ export async function handleAuthProfile({
   }
   if (action === "logout") {
     const name = opts?.profile || data.active;
-    if (!name || !data.profiles[name]) {
-      fail(`Unknown profile: ${name || "(none)"}`);
-      return;
-    }
-    const credential = await readCredentialImpl(name);
-    try {
-      if (credential?.oauthRefreshToken)
-        await revokeOAuthImpl({ token: credential.oauthRefreshToken });
-      else if (credential?.oauthAccessToken)
-        await revokeOAuthImpl({ token: credential.oauthAccessToken });
-    } catch {
-      // Local cleanup must still happen when the remote token is expired.
-    }
-    try {
-      await deleteCredentialImpl(name);
-    } catch {
-      /* local cleanup is best effort */
-    }
-    delete data.profiles[name];
-    if (data.active === name) data.active = Object.keys(data.profiles)[0] || null;
-    write(data, profileHome, profileFs);
-    return printer.log(`Removed profile ${name}`);
+    return logoutAuthProfile({
+      name,
+      data,
+      readCredentialImpl,
+      revokeOAuthImpl,
+      deleteCredentialImpl,
+      write,
+      profileHome,
+      profileFs,
+      printer,
+      fail,
+    });
   }
 }
 import { printTable } from "../output.mjs";

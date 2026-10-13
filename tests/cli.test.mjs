@@ -1,6 +1,4 @@
 import { jest } from "@jest/globals";
-import { loadBody } from "../src/cli.mjs";
-
 import { run } from "../src/cli.mjs";
 import { fixtureCase1 } from "../test-fixtures/unit/cli-defaults.mjs";
 
@@ -129,14 +127,6 @@ test("handles resource help, unknown actions, missing scopes, and raw errors", a
       cfFactory: jest.fn(() => ({})),
     }),
   ).rejects.toThrow("raw failure");
-});
-
-test("loadBody reads inline data, files, and empty bodies", () => {
-  expect(loadBody({ data: JSON.stringify({ inline: true }) })).toEqual({ inline: true });
-  const readFileSync = jest.fn().mockReturnValue(JSON.stringify({ file: true }));
-  expect(loadBody({ file: "body.json" }, { readFileSync })).toEqual({ file: true });
-  expect(readFileSync).toHaveBeenCalledWith("body.json", "utf8");
-  expect(loadBody({})).toBeNull();
 });
 
 test("routes extension commands before Cloudflare setup", async () => {

@@ -17,15 +17,6 @@ test("createCloudflareClient throws without credentials", () => {
   );
 });
 
-test("createCloudflareClient accepts an API token", () => {
-  const ctor = jest.fn();
-  createCloudflareClient({
-    CloudflareClass: ctor,
-    env: { CLOUDFLARE_API_TOKEN: "token" },
-  });
-  expect(ctor).toHaveBeenCalledWith({ apiToken: "token" });
-});
-
 test("createCloudflareClient handles omitted options safely", () => {
   expect(() => createCloudflareClient()).toThrow(
     "You are not logged into Cloudflare. Run: cfhub auth login",

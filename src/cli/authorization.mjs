@@ -1,5 +1,11 @@
 import { applyActiveProfile } from "../profiles.mjs";
-import { missingScopes, missingApiPermissions } from "../scopes.mjs";
+import { missingScopes } from "../scopes.mjs";
+import { missingApiPermissions } from "../api-permissions.mjs";
+import {
+  managesCredentials,
+  missingApiPermissionMessage,
+  missingScopeMessage,
+} from "./authorization-rules.mjs";
 
 export async function authorizeCommand({
   resource,
@@ -14,18 +20,14 @@ export async function authorizeCommand({
   cfFactory,
 }) {
   loadEnv(projectRoot, env, fsImpl);
-  const managesCredentials =
-    (resource === "auth" && ["login", "logout", "list", "switch"].includes(action)) ||
-    (resource === "oauth" && (action === "login" || action === "logout"));
-  if (!managesCredentials) await applyActiveProfile(env, homeDir, fsImpl);
+  const managesCredentialAction = managesCredentials(resource, action);
+  if (!managesCredentialAction) await applyActiveProfile(env, homeDir, fsImpl);
   const grantedScopes = env.CFHUB_OAUTH_SCOPES?.split(",")
     .map((scope) => scope.trim())
     .filter(Boolean);
-  const missing = managesCredentials ? [] : missingScopes(resource, action, grantedScopes);
+  const missing = managesCredentialAction ? [] : missingScopes(resource, action, grantedScopes);
   if (missing.length) {
-    printer.error(
-      `Your Cloudflare login is missing scope${missing.length === 1 ? "" : "s"}: ${missing.join(", ")}\n\nRun cfhub auth login again and select the required permissions, or use:\n  cfhub auth login --scopes ${missing.join(",")}`,
-    );
+    printer.error(missingScopeMessage(missing));
     return { allowed: false, result: exit(1) };
   }
   const apiPermissions =
@@ -34,14 +36,12 @@ export async function authorizeCommand({
           .map((permission) => permission.trim())
           .filter(Boolean)
       : null;
-  const missingApi = managesCredentials
+  const missingApi = managesCredentialAction
     ? []
     : missingApiPermissions(resource, action, apiPermissions);
   if (missingApi.length) {
-    printer.error(
-      `Your active API token is missing permission${missingApi.length === 1 ? "" : "s"}: ${missingApi.join(", ")}\n\nRun cfhub auth login again with a token that grants the required permissions.`,
-    );
+    printer.error(missingApiPermissionMessage(missingApi));
     return { allowed: false, result: exit(1) };
   }
-  return { allowed: true, cf: managesCredentials ? null : cfFactory({ env }) };
+  return { allowed: true, cf: managesCredentialAction ? null : cfFactory({ env }) };
 }

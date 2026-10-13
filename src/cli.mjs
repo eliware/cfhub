@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import { dispatchCommand } from "./cli/dispatch.mjs";
 import os from "node:os";
 import { parseArgs } from "./args.mjs";
+import { loadBody } from "./cli/body-loader.mjs";
 import { resolveCommand } from "./cli/resolve-command.mjs";
 import { loadProjectEnv } from "./env.mjs";
 import { createCloudflareClient } from "./cloudflare.mjs";
@@ -11,12 +12,6 @@ import { handleLocalCommand } from "./cli/local-commands.mjs";
 import { checkForUpdate } from "./update-check.mjs";
 import { authorizeCommand } from "./cli/authorization.mjs";
 import { createOutputContext } from "./cli/output-context.mjs";
-
-export function loadBody(opts, fsImpl = fs) {
-  if (opts.data) return JSON.parse(opts.data);
-  if (opts.file) return JSON.parse(fsImpl.readFileSync(opts.file, "utf8"));
-  return null;
-}
 
 export async function run({
   argv = process.argv.slice(2),

@@ -5,30 +5,23 @@ import {
   readCredentialFile,
   writeCredentialFile,
 } from "./credential-files.mjs";
-
-const SERVICE = "cfhub";
+import {
+  deleteKeychainCredential,
+  loadKeychain,
+  readKeychainCredential,
+  writeKeychainCredential,
+} from "./credential-keychain.mjs";
 export { credentialsPath } from "./credential-files.mjs";
-
-async function keychain() {
-  try {
-    return (await import("keytar")).default;
-  } catch {
-    return null;
-  }
-}
 
 export async function readCredential(
   profile,
-  load = keychain,
+  load = loadKeychain,
   fsImpl = fs,
   homeDir = os.homedir(),
 ) {
   try {
-    const store = await load();
-    if (store) {
-      const value = await store.getPassword(SERVICE, profile);
-      if (value) return JSON.parse(value);
-    }
+    const value = await readKeychainCredential(profile, load);
+    if (value) return value;
   } catch {}
   return readCredentialFile(profile, fsImpl, homeDir);
 }
@@ -36,30 +29,25 @@ export async function readCredential(
 export async function writeCredential(
   profile,
   value,
-  load = keychain,
+  load = loadKeychain,
   fsImpl = fs,
   homeDir = os.homedir(),
 ) {
   try {
-    const store = await load();
-    if (store) {
-      await store.setPassword(SERVICE, profile, JSON.stringify(value));
-      return true;
-    }
+    if (await writeKeychainCredential(profile, value, load)) return true;
   } catch {}
   return writeCredentialFile(profile, value, fsImpl, homeDir);
 }
 
 export async function deleteCredential(
   profile,
-  load = keychain,
+  load = loadKeychain,
   fsImpl = fs,
   homeDir = os.homedir(),
 ) {
   let deleted = false;
   try {
-    const store = await load();
-    if (store) deleted = await store.deletePassword(SERVICE, profile);
+    deleted = await deleteKeychainCredential(profile, load);
   } catch {}
   return deleteCredentialFile(profile, fsImpl, homeDir) || deleted;
 }

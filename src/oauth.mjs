@@ -1,13 +1,14 @@
 import http from "node:http";
 import { startOAuthServer } from "./oauth-server.mjs";
 import { openBrowser } from "./oauth-browser.mjs";
-import { REQUIRED_OAUTH_SCOPES } from "./oauth-pages.mjs";
+import { REQUIRED_OAUTH_SCOPES } from "./oauth-page-metadata.mjs";
 import { exchangeOAuthCode } from "./oauth-exchange.mjs";
 import { DEFAULT_OAUTH_SCOPES } from "./oauth-scopes.mjs";
 import { createOAuthAuthorization } from "./oauth-authorization.mjs";
 import { launchOAuthBrowser } from "./oauth-browser-launch.mjs";
 import { createOAuthCallback } from "./oauth-callback.mjs";
-export { collectOAuthSummary, copyrightYear, REQUIRED_OAUTH_SCOPES } from "./oauth-pages.mjs";
+export { collectOAuthSummary } from "./oauth-pages.mjs";
+export { copyrightYear, REQUIRED_OAUTH_SCOPES } from "./oauth-page-metadata.mjs";
 
 export { openBrowser } from "./oauth-browser.mjs";
 export { DEFAULT_OAUTH_CLIENT_ID, refreshOAuth, revokeOAuth } from "./oauth-tokens.mjs";

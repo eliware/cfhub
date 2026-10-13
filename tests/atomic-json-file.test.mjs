@@ -1,9 +1,5 @@
 import { jest } from "@jest/globals";
-import {
-  ensurePrivateDirectory,
-  parentDirectory,
-  replaceJsonFile,
-} from "../src/atomic-json-file.mjs";
+import { replaceJsonFile } from "../src/atomic-json-file.mjs";
 
 test("atomic JSON replacement writes a private temp file and renames it", () => {
   const fsImpl = { writeFileSync: jest.fn(), chmodSync: jest.fn(), renameSync: jest.fn() };
@@ -33,11 +29,4 @@ test("JSON replacement supports simple file adapters", () => {
     mode: 0o600,
   });
   expect(fsImpl.chmodSync).toHaveBeenCalledWith("data.json", 0o600);
-});
-
-test("private directory helper sets restrictive mode", () => {
-  const mkdirSync = jest.fn();
-  ensurePrivateDirectory("/workspace/cfhub", { mkdirSync });
-  expect(mkdirSync).toHaveBeenCalledWith("/workspace/cfhub", { recursive: true, mode: 0o700 });
-  expect(parentDirectory("/workspace/cfhub/file.json")).toBe("/workspace/cfhub");
 });

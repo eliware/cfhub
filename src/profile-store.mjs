@@ -1,7 +1,8 @@
 import os from "node:os";
 import * as fs from "node:fs";
 import { configRoot } from "./config.mjs";
-import { ensurePrivateDirectory, parentDirectory, replaceJsonFile } from "./atomic-json-file.mjs";
+import { replaceJsonFile } from "./atomic-json-file.mjs";
+import { ensurePrivateDirectory, parentDirectory } from "./filesystem-paths.mjs";
 
 export const profilesPath = (homeDir = os.homedir()) => `${configRoot(homeDir)}/profiles.json`;
 

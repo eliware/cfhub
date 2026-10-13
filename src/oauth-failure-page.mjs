@@ -1,5 +1,5 @@
 import { VERSION } from "./version.mjs";
-import { copyrightYear } from "./oauth-pages.mjs";
+import { copyrightYear } from "./oauth-page-metadata.mjs";
 import { pickerAsset } from "./oauth-picker-assets.mjs";
 import { escapeOAuthHtml } from "./oauth-html.mjs";
 
