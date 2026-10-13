@@ -2,7 +2,13 @@ import { jest } from "@jest/globals";
 import * as fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { applyActiveProfile, writeProfiles } from "../src/profiles.mjs";
+import {
+  activeProfile,
+  applyActiveProfile,
+  profilesPath,
+  readProfiles,
+  writeProfiles,
+} from "../src/profiles.mjs";
 import { deleteCredential, readCredential, writeCredential } from "../src/credentials.mjs";
 
 test("profile application exports known API permissions", async () => {

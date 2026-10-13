@@ -74,3 +74,48 @@ test("rejects inactive tokens and tolerates unavailable token details", async ()
     inspectApiToken({ token: "cfut_token", fetchImpl: unavailable }),
   ).resolves.toMatchObject({ permissionsKnown: false });
 });
+
+test("token details with missing policies or groups return no permissions", async () => {
+  const fetchImpl = jest
+    .fn()
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ result: { id: "token-1", status: "active" } }),
+    })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ result: {} }) });
+  await expect(inspectApiToken({ token: "cfut_token", fetchImpl })).resolves.toMatchObject({
+    permissionsKnown: true,
+    permissions: [],
+    permissionSummary: { total: 0, read: 0, write: 0, other: 0 },
+  });
+
+  const missingGroups = jest
+    .fn()
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ result: { id: "token-2", status: "active" } }),
+    })
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ result: { policies: [{ effect: "allow" }] } }),
+    });
+  await expect(
+    inspectApiToken({ token: "cfut_token", fetchImpl: missingGroups }),
+  ).resolves.toMatchObject({
+    permissionsKnown: true,
+    permissions: [],
+  });
+});
+
+test("token inspection uses default options and fetch", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({ result: { status: "active" } }),
+  });
+  try {
+    await expect(inspectApiToken()).resolves.toMatchObject({ verified: true, permissions: [] });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

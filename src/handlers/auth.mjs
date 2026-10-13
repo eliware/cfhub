@@ -29,7 +29,7 @@ export async function handleAuth({
   deleteCredentialImpl = deleteCredential,
   revokeOAuthImpl = revokeOAuth,
   inspectApiTokenImpl = inspectApiToken,
-} = /* istanbul ignore next */ {}) {
+} = {}) {
   const data = read(profileHome, profileFs);
   if (action === "login")
     return handleAuthLogin({

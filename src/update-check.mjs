@@ -21,7 +21,6 @@ function newerVersion(latest, current) {
   return false;
 }
 
-/* istanbul ignore next -- network/cache behavior is covered through public outcomes. */
 export async function checkForUpdate({
   currentVersion,
   homeDir,
@@ -44,7 +43,6 @@ export async function checkForUpdate({
   }
   if (typeof fetchImpl !== "function") return null;
   try {
-    /* istanbul ignore next -- supported Node versions provide AbortSignal.timeout. */
     const signal =
       typeof globalThis.AbortSignal?.timeout === "function"
         ? globalThis.AbortSignal.timeout(2000)
@@ -59,7 +57,6 @@ export async function checkForUpdate({
     if (typeof fsImpl.chmodSync === "function") fsImpl.chmodSync(path, 0o600);
     return newerVersion(latestVersion, currentVersion) ? latestVersion : null;
   } catch {
-    /* istanbul ignore next -- network and cache failures are intentionally silent. */
     return null;
   }
 }

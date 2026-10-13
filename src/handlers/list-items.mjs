@@ -17,14 +17,13 @@ export async function handleListItems({
   requireValue(id, "Missing --id", fail);
 
   if (action === "list") {
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
     const response =
       typeof cf.get === "function"
         ? await cf.get(`/accounts/${accountId}/rules/lists/${id}/items`, undefined)
         : null;
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const items = response ? (Array.isArray(response.result) ? response.result : response) : [];
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     if (!response)
       for await (const item of cf.rules.lists.items.list(id, { account_id: accountId }))
         items.push(item);
@@ -43,7 +42,7 @@ export async function handleListItems({
       return printer.log(
         JSON.stringify({ listId: id, action: "create", body, dryRun: true }, null, 2),
       );
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const res =
       typeof cf.post === "function"
         ? await cf.post(`/accounts/${accountId}/rules/lists/${id}/items`, {
@@ -59,7 +58,7 @@ export async function handleListItems({
   if (action === "delete") {
     if (!body || !Array.isArray(body.ids)) fail('Missing --data or --file with {"ids":[...]}');
     requireValue(opts.force, "Refusing to delete without --force", fail);
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const res =
       typeof cf.delete === "function"
         ? await cf.delete(`/accounts/${accountId}/rules/lists/${id}/items`, {

@@ -24,3 +24,20 @@ test("alias handler lists, stores, and deletes aliases", () => {
   expect(printer.log).toHaveBeenCalledWith("Deleted alias staging");
   expect(fsImpl.writeFileSync).toHaveBeenCalledTimes(2);
 });
+
+test("alias handler supports JSON, validation, and help paths", () => {
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const fsImpl = { existsSync: () => false };
+  const base = { args: ["alias"], opts: {}, printer, fsImpl, homeDir: "home" };
+  handleAlias({ ...base, args: ["alias", "list"], opts: { json: true } });
+  expect(printer.log).toHaveBeenCalledWith("{}");
+  handleAlias({ ...base, args: ["alias", "set"] });
+  handleAlias({ ...base, args: ["alias", "set", "work"] });
+  handleAlias({ ...base, args: ["alias", "delete"] });
+  handleAlias({ ...base, args: ["alias", "delete", "missing"] });
+  expect(printer.error).toHaveBeenCalledWith("Usage: cfhub alias set <name> <command>");
+  expect(printer.error).toHaveBeenCalledWith("Unknown alias: (missing)");
+  expect(printer.error).toHaveBeenCalledWith("Unknown alias: missing");
+  handleAlias({ ...base, args: ["alias", "unknown"] });
+  expect(printer.log).toHaveBeenCalled();
+});

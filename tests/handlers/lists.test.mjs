@@ -1,11 +1,9 @@
 import { jest } from "@jest/globals";
+
 import { handleLists } from "../../src/handlers/lists.mjs";
 
-test("handleLists is exported", () => {
-  expect(typeof handleLists).toBe("function");
-});
-
-function context(overrides = {}) {
+function context(overrides = {}, fields = {}) {
+  if (typeof overrides === "string") overrides = { action: overrides, ...fields };
   return {
     cf: {
       rules: {
@@ -25,10 +23,16 @@ function context(overrides = {}) {
     outputJson: true,
     printer: { log: jest.fn() },
     toJsonOutput: jest.fn(),
-    fail: jest.fn(),
+    fail: (message) => {
+      throw new Error(message);
+    },
     ...overrides,
   };
 }
+
+test("handleLists is exported", () => {
+  expect(typeof handleLists).toBe("function");
+});
 
 test("lists list and get use the SDK and JSON output", async () => {
   const list = context();
@@ -96,8 +100,8 @@ test("lists delete requires force and sends the request", async () => {
     action: "delete",
     opts: { "account-id": "account-1", id: "list-1" },
   });
-  await handleLists(missingForce);
-  expect(missingForce.fail).toHaveBeenCalledWith("Refusing lists delete without --force");
+  await expect(handleLists(missingForce)).rejects.toThrow("Refusing lists delete without --force");
+  expect(missingForce.cf.delete).not.toHaveBeenCalled();
 
   const deletion = context({
     action: "delete",
@@ -116,132 +120,51 @@ test("lists delete requires force and sends the request", async () => {
   expect(deletionText.printer.log).toHaveBeenCalledWith(JSON.stringify({ success: true }, null, 2));
 });
 
-test("lists reports missing values and unknown actions", async () => {
-  const missingAccount = context({ opts: {} });
-  await handleLists(missingAccount);
-  expect(missingAccount.fail).toHaveBeenCalledWith("Missing --account-id or CLOUDFLARE_ACCOUNT_ID");
-
-  const missingId = context({ action: "get", opts: { "account-id": "account-1" } });
-  await handleLists(missingId);
-  expect(missingId.fail).toHaveBeenCalledWith("Missing --id");
-
-  const missingCreateBody = context({ action: "create" });
-  await handleLists(missingCreateBody);
-  expect(missingCreateBody.fail).toHaveBeenCalledWith("Missing --data or --file");
-
-  const missingUpdateId = context({ action: "update", body: {} });
-  await handleLists(missingUpdateId);
-  expect(missingUpdateId.fail).toHaveBeenCalledWith("Missing --id");
-
-  const missingUpdateBody = context({
-    action: "update",
-    opts: { "account-id": "account-1", id: "list-1" },
-  });
-  await handleLists(missingUpdateBody);
-  expect(missingUpdateBody.fail).toHaveBeenCalledWith("Missing --data or --file");
-
-  const missingDeleteId = context({
-    action: "delete",
-    opts: { "account-id": "account-1", force: true },
-  });
-  await handleLists(missingDeleteId);
-  expect(missingDeleteId.fail).toHaveBeenCalledWith("Missing --id");
-
-  const unknown = context({ action: "unknown" });
-  await handleLists(unknown);
-  expect(unknown.fail).toHaveBeenCalledWith("Unknown lists action: unknown");
+test("lists handles SDK response forms and text output", async () => {
+  const log = jest.spyOn(console, "log").mockImplementation(() => {});
+  const lists = [{ id: "one", name: "allow" }];
+  const cf = { get: jest.fn().mockResolvedValue({ result: lists }) };
+  await handleLists(context({ cf, outputJson: false, printer: undefined }));
+  expect(cf.get).toHaveBeenCalledWith("/accounts/account-1/rules/lists", undefined);
+  expect(log).toHaveBeenCalledWith("ID   NAME\n--   ----\none  allow");
+  const raw = { unexpected: true };
+  const toJsonOutput = jest.fn();
+  await handleLists(context({ cf: { get: jest.fn().mockResolvedValue(raw) }, toJsonOutput }));
+  expect(toJsonOutput).toHaveBeenCalledWith(raw);
+  log.mockRestore();
 });
-describe("handler command integration cases", () => {
-  let fail;
-  let toJsonOutput;
-  let log;
-  beforeEach(() => {
-    fail = jest.fn((msg) => {
-      throw new Error(msg);
-    });
-    toJsonOutput = jest.fn();
-    log = jest.spyOn(console, "log").mockImplementation(() => {});
-  });
-  afterEach(() => log.mockRestore());
-  test("handleLists list/get/unknown and validation", async () => {
-    async function* iterator() {
-      yield { id: "l1", name: "list1" };
-    }
-    const cf = {
-      rules: {
-        lists: {
-          list: jest.fn().mockReturnValue(iterator()),
-          get: jest.fn().mockResolvedValue({ id: "l1" }),
-        },
-      },
-    };
-    await handleLists({
-      cf,
-      action: "list",
-      opts: { "account-id": "acct1" },
-      outputJson: false,
-      toJsonOutput,
-      fail,
-    });
-    await handleLists({
-      cf,
-      action: "get",
-      opts: { "account-id": "acct1", id: "l1" },
-      outputJson: true,
-      toJsonOutput,
-      fail,
-    });
-    await expect(
-      handleLists({
-        cf,
-        action: "bogus",
-        opts: { "account-id": "acct1" },
-        outputJson: false,
-        toJsonOutput,
-        fail,
-      }),
-    ).rejects.toThrow("Unknown lists action: bogus");
-    await expect(
-      handleLists({ cf, action: "list", opts: {}, outputJson: false, toJsonOutput, fail }),
-    ).rejects.toThrow("Missing --account-id or CLOUDFLARE_ACCOUNT_ID");
-  });
 
-  test("handleLists covers text get and JSON list output", async () => {
-    const printer = { log: jest.fn() };
-    const toJsonOutput = jest.fn();
-    const fail = jest.fn((msg) => {
-      throw new Error(msg);
-    });
-    async function* iterator() {
-      yield { id: "l2", name: "list2" };
-    }
-    const cf = {
-      rules: {
-        lists: {
-          list: jest.fn().mockReturnValue(iterator()),
-          get: jest.fn().mockResolvedValue({ id: "l2" }),
-        },
-      },
-    };
-    await handleLists({
-      cf,
-      action: "list",
-      opts: { "account-id": "a" },
-      outputJson: true,
-      printer,
-      toJsonOutput,
-      fail,
-    });
-    await handleLists({
-      cf,
+test("lists validates account, ID, body, and unknown action", async () => {
+  await expect(handleLists(context({ opts: {} }))).rejects.toThrow("Missing --account-id");
+  await expect(
+    handleLists(context({ action: "get", opts: { "account-id": "a" } })),
+  ).rejects.toThrow("Missing --id");
+  await expect(handleLists(context({ action: "create", body: null }))).rejects.toThrow(
+    "Missing --data",
+  );
+  await expect(
+    handleLists(context({ action: "update", opts: { "account-id": "a" }, body: {} })),
+  ).rejects.toThrow("Missing --id");
+  await expect(
+    handleLists(context({ action: "update", opts: { "account-id": "a", id: "x" }, body: null })),
+  ).rejects.toThrow("Missing --data");
+  await expect(handleLists(context({ action: "unknown" }))).rejects.toThrow(
+    "Unknown lists action: unknown",
+  );
+});
+
+test("gets lists through the SDK and prints text output", async () => {
+  const get = jest.fn().mockResolvedValue({ id: "sdk-list" });
+  const printer = { log: jest.fn() };
+  await handleLists(
+    context({
       action: "get",
-      opts: { "account-id": "a", id: "l2" },
+      opts: { "account-id": "acct", id: "sdk-list" },
+      cf: { get },
       outputJson: false,
       printer,
-      toJsonOutput,
-      fail,
-    });
-    expect(toJsonOutput).toHaveBeenCalledWith([{ id: "l2", name: "list2" }]);
-    expect(printer.log).toHaveBeenCalled();
-  });
+    }),
+  );
+  expect(get).toHaveBeenCalledWith("/accounts/acct/rules/lists/sdk-list", undefined);
+  expect(printer.log).toHaveBeenCalledWith('{\n  "id": "sdk-list"\n}');
 });

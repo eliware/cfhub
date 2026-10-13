@@ -1,5 +1,5 @@
 import { readSettings, writeSettings } from "../settings.mjs";
-import { printResourceHelp } from "../help.mjs";
+import { printResourceHelp } from "../help/resources.mjs";
 
 export function handleConfigCommand({ args, opts, printer, homeDir, fsImpl }) {
   const settings = readSettings(homeDir, fsImpl);

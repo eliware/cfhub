@@ -59,7 +59,7 @@ const apiPermissionAliases = new Map([
 export function requiredApiPermissions(resource, action) {
   return requiredScopes(resource, action).map((scope) => {
     const [name, mode] = scope.split(".");
-    /* istanbul ignore next -- every built-in API permission has a read/write mode. */
+
     return `${apiPermissionAliases.get(name) || name.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase())} ${mode === "write" ? "Write" : "Read"}`;
   });
 }

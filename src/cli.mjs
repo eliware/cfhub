@@ -1,98 +1,16 @@
 import * as fs from "node:fs";
+import { dispatchCommand } from "./cli/dispatch.mjs";
 import os from "node:os";
-import { parseArgs, tokenizeCommand } from "./args.mjs";
+import { parseArgs } from "./args.mjs";
+import { resolveCommand } from "./cli/resolve-command.mjs";
 import { loadProjectEnv } from "./env.mjs";
 import { createCloudflareClient } from "./cloudflare.mjs";
-import { printHelp } from "./help.mjs";
-import { printCommandHelp } from "./help/commands.mjs";
-import { printResourceHelp } from "./help/resources.mjs";
-import { VERSION } from "./version.mjs";
-import { renderTemplate, selectJson, toJsonOutput } from "./output.mjs";
-import { handleZones } from "./handlers/zones.mjs";
-import { handleZoneSettings } from "./handlers/zone-settings.mjs";
-import { handleDnsRecords } from "./handlers/dns-records.mjs";
-import { handleRulesets } from "./handlers/rulesets.mjs";
-import { handleLists } from "./handlers/lists.mjs";
-import { handleListItems } from "./handlers/list-items.mjs";
-import { handleApi } from "./handlers/api.mjs";
-import { handleAuth } from "./handlers/auth.mjs";
-import { handleSsl } from "./handlers/ssl.mjs";
-import { handleCache } from "./handlers/cache.mjs";
-import { handleHealth } from "./handlers/health.mjs";
-import { handleAudit } from "./handlers/audit.mjs";
-import { handleInventory } from "./handlers/inventory.mjs";
-import { handleOriginCa } from "./handlers/origin-ca.mjs";
-import { makeSimpleResource } from "./handlers/simple-resource.mjs";
-import { handleExtension } from "./handlers/extension.mjs";
-import { applyActiveProfile } from "./profiles.mjs";
-import { discoverExtensions, loadExtensionCommand } from "./extensions.mjs";
-import { readAliases } from "./aliases.mjs";
-import { readSettings } from "./settings.mjs";
-import { handleAlias } from "./handlers/alias.mjs";
-import { handleConfigCommand } from "./handlers/config.mjs";
-import { createTerminalOutput, terminalColorMode, terminalWidth } from "./terminal.mjs";
-import { commandNamesFor, resourceNames, suggestCommand } from "./suggestions.mjs";
-import { missingScopes, missingApiPermissions } from "./scopes.mjs";
-import { formatCloudflareError } from "./errors.mjs";
-import { checkForUpdate, updateNotice } from "./update-check.mjs";
-
-const defaultHandlers = {
-  loadBalancer: makeSimpleResource({
-    name: "load-balancer",
-    scope: "zone",
-    path: (id) => `/zones/${id}/load_balancers`,
-  }),
-  tunnel: makeSimpleResource({
-    name: "tunnel",
-    scope: "account",
-    path: (id) => `/accounts/${id}/cfd_tunnel`,
-  }),
-  workers: makeSimpleResource({
-    name: "workers",
-    scope: "account",
-    path: (id) => `/accounts/${id}/workers/scripts`,
-  }),
-  pages: makeSimpleResource({
-    name: "pages",
-    scope: "account",
-    path: (id) => `/accounts/${id}/pages/projects`,
-  }),
-  r2: makeSimpleResource({
-    name: "r2",
-    scope: "account",
-    path: (id) => `/accounts/${id}/r2/buckets`,
-  }),
-  d1: makeSimpleResource({
-    name: "d1",
-    scope: "account",
-    path: (id) => `/accounts/${id}/d1/database`,
-  }),
-  queues: makeSimpleResource({
-    name: "queues",
-    scope: "account",
-    path: (id) => `/accounts/${id}/queues`,
-  }),
-  stream: makeSimpleResource({
-    name: "stream",
-    scope: "account",
-    path: (id) => `/accounts/${id}/stream`,
-  }),
-  images: makeSimpleResource({
-    name: "images",
-    scope: "account",
-    path: (id) => `/accounts/${id}/images/v1`,
-  }),
-  ai: makeSimpleResource({
-    name: "ai",
-    scope: "account",
-    path: (id) => `/accounts/${id}/ai`,
-  }),
-  access: makeSimpleResource({
-    name: "access",
-    scope: "account",
-    path: (id) => `/accounts/${id}/access/apps`,
-  }),
-};
+import { createCommandContext } from "./cli/command-context.mjs";
+import { runExtensionCommand } from "./cli/extension-command.mjs";
+import { handleLocalCommand } from "./cli/local-commands.mjs";
+import { checkForUpdate } from "./update-check.mjs";
+import { authorizeCommand } from "./cli/authorization.mjs";
+import { createOutputContext } from "./cli/output-context.mjs";
 
 export function loadBody(opts, fsImpl = fs) {
   if (opts.data) return JSON.parse(opts.data);
@@ -114,233 +32,54 @@ export async function run({
   updateCheck = checkForUpdate,
 } = {}) {
   let { args, opts } = parseArgs(argv);
-  if (opts.version) return printer.log(VERSION);
-  if (args.length === 0) return printHelp(printer);
+  const local = handleLocalCommand({ args, opts, printer, homeDir, fsImpl });
+  if (local.handled) return local.result;
   let resource = args[0];
   let action = args[1];
-  if (resource === "alias") {
-    return handleAlias({ args, opts, printer, homeDir, fsImpl });
-  }
-  if (resource === "config") {
-    return handleConfigCommand({ args, opts, printer, homeDir, fsImpl });
-  }
-  const expansion = readAliases(homeDir, fsImpl)[args[0]];
-  if (expansion) {
-    const expanded = parseArgs(tokenizeCommand(`${expansion} ${args.slice(1).join(" ")}`.trim()));
-    args = expanded.args;
-    opts = { ...expanded.opts, ...opts };
-    resource = args[0];
-    action = args[1];
-  }
-  const extensionManifest = discoverExtensions(homeDir, fsImpl).find(
-    (manifest) => manifest.commands[resource],
-  );
-  if (!extensionManifest && !resourceNames.includes(resource)) {
-    const suggestion = suggestCommand("resource", resource);
-    if (suggestion) {
-      printer.error(
-        `unknown command "${resource}" for "cfhub"\n\nDid you mean this?\n\t${suggestion}\n\nUsage: cfhub <command> <subcommand> [flags]`,
-      );
-      return exit(1);
-    }
-  }
-  if (opts.help)
-    return args.length > 1
-      ? printCommandHelp(resource, action, printer)
-      : printResourceHelp(resource, printer);
-  if (args.length === 1 && !extensionManifest) return printResourceHelp(resource, printer);
+  const resolution = await resolveCommand({ args, opts, printer, homeDir, fsImpl, exit, loadBody });
+  if (resolution.done) return resolution.value;
+  ({ args, opts, resource, action } = resolution);
 
-  if (extensionManifest) {
-    const extensionHandler = await loadExtensionCommand(extensionManifest, resource, homeDir);
-    if (!extensionHandler) return printer.error(`Extension command is not loadable: ${resource}`);
-    const extensionBody = loadBody(opts, fsImpl);
-    const extensionFail = (message) => printer.error(message);
-    return extensionHandler({
-      cf: null,
-      action,
-      opts,
-      body: extensionBody,
-      outputJson: opts.json || opts.output === "json",
-      printer,
-      toJsonOutput: (value) => toJsonOutput(value, printer.log),
-      fail: extensionFail,
-    });
-  }
+  if (resource === "extension")
+    return runExtensionCommand({ action, opts, printer, fsImpl, homeDir });
 
-  if (
-    resource !== "api" &&
-    action &&
-    commandNamesFor(resource).length &&
-    !commandNamesFor(resource).includes(action)
-  ) {
-    const suggestion = suggestCommand(resource, action);
-    printer.error(
-      `unknown command "${action}" for "cfhub ${resource}"${suggestion ? `\n\nDid you mean this?\n\t${suggestion}` : ""}\n\nUsage: cfhub ${resource} <command> [flags]`,
-    );
-    return exit(1);
-  }
-
-  if (resource === "extension") {
-    return handleExtension({
-      action,
-      opts,
-      outputJson: opts.json || opts.output === "json",
-      printer,
-      toJsonOutput: (value) => toJsonOutput(value, printer.log),
-      fail: (message) => printer.error(message),
-      fsImpl,
-      homeDir,
-    });
-  }
-
-  loadEnv(projectRoot, env, fsImpl);
-  const managesCredentials =
-    (resource === "auth" && ["login", "logout", "list", "switch"].includes(action)) ||
-    (resource === "oauth" && (action === "login" || action === "logout"));
-  if (!managesCredentials) await applyActiveProfile(env, homeDir, fsImpl);
-  const grantedScopes = env.CFHUB_OAUTH_SCOPES?.split(",")
-    .map((scope) => scope.trim())
-    .filter(Boolean);
-  const missing = missingScopes(resource, action, grantedScopes);
-  if (missing.length) {
-    printer.error(
-      `Your Cloudflare login is missing scope${missing.length === 1 ? "" : "s"}: ${missing.join(", ")}\n\nRun cfhub auth login again and select the required permissions, or use:\n  cfhub auth login --scopes ${missing.join(",")}`,
-    );
-    return exit(1);
-  }
-  const apiPermissions =
-    env.CFHUB_API_PERMISSIONS_KNOWN === "1"
-      ? env.CFHUB_API_PERMISSIONS?.split(",")
-          .map((permission) => permission.trim())
-          .filter(Boolean)
-      : null;
-  const missingApi = missingApiPermissions(resource, action, apiPermissions);
-  if (missingApi.length) {
-    /* istanbul ignore next -- plural formatting depends on the command's permission matrix. */
-    printer.error(
-      `Your active API token is missing permission${missingApi.length === 1 ? "" : "s"}: ${missingApi.join(", ")}\n\nRun cfhub auth login again with a token that grants the required permissions.`,
-    );
-    return exit(1);
-  }
-  const cf = managesCredentials ? null : cfFactory({ env });
-  const outputJson = opts.json || opts.output === "json";
-  const settings = readSettings(homeDir, fsImpl);
-  if (
-    !outputJson &&
-    !opts.quiet &&
-    settings["update-check"] !== false &&
-    settings["update-check"] !== "false"
-  ) {
-    /* istanbul ignore next -- best-effort async notification. */
-    void updateCheck({ currentVersion: VERSION, homeDir, env, fsImpl })
-      /* istanbul ignore next -- best-effort async notification callback. */
-      .then((latestVersion) => {
-        const notice = updateNotice(latestVersion, VERSION);
-        /* istanbul ignore next -- asynchronous best-effort notice. */
-        if (notice) printer.error(notice);
-      })
-      .catch(() => {});
-  }
-  const color = terminalColorMode(opts.color ?? settings.color, {
-    isTTY: Boolean(process.stdout?.isTTY),
-  });
-  const pagerSetting =
-    opts.pager === true
-      ? settings.pager || process.env.PAGER || "less"
-      : opts.pager || settings.pager;
-  const pager =
-    outputJson || opts["no-pager"] || opts.quiet || pagerSetting === "never"
-      ? null
-      : pagerSetting || null;
-  const useTerminal = Boolean(
-    pager ||
-    opts.color !== undefined ||
-    opts.width !== undefined ||
-    settings.color ||
-    settings.width,
-  );
-  const terminal = useTerminal
-    ? createTerminalOutput({
-        printer,
-        json: outputJson,
-        color,
-        width: terminalWidth(opts.width ?? settings.width),
-        pager,
-      })
-    : { ...printer, flush: async () => {} };
-  const commandPrinter = opts.quiet ? { ...terminal, log: () => {} } : terminal;
-  if (opts.web) {
-    const target = opts["zone-id"]
-      ? `zones/${opts["zone-id"]}`
-      : opts["account-id"]
-        ? `accounts/${opts["account-id"]}`
-        : "";
-    return commandPrinter.log(`https://dash.cloudflare.com/${target}`);
-  }
-  const body = loadBody(opts, fsImpl);
-  const fail = (message, code = 1) => {
-    printer.error(message);
-    exit(code);
-  };
-  const common = {
+  const authorization = await authorizeCommand({
     resource,
-    cf,
+    action,
+    env,
+    loadEnv,
+    projectRoot,
+    homeDir,
+    fsImpl,
+    printer,
+    exit,
+    cfFactory,
+  });
+  if (!authorization.allowed) return authorization.result;
+  const { cf } = authorization;
+  const output = createOutputContext({ opts, printer, homeDir, env, fsImpl, updateCheck });
+  if (output.handled) return;
+  const { outputJson, terminal, commandPrinter } = output;
+  const body = loadBody(opts, fsImpl);
+  const common = createCommandContext({
+    resource,
     action,
     opts,
+    cf,
     body,
     outputJson,
     printer: commandPrinter,
-    toJsonOutput: (value) =>
-      opts.template
-        ? printer.log(renderTemplate(selectJson(value, opts.jq), opts.template))
-        : toJsonOutput(selectJson(value, opts.jq), printer.log),
-    fail,
-  };
-  const dispatch = {
-    zones: handlers.zones || handleZones,
-    "zone-settings": handlers.zoneSettings || handleZoneSettings,
-    "dns-records": handlers.dnsRecords || handleDnsRecords,
-    rulesets: handlers.rulesets || handleRulesets,
-    lists: handlers.lists || handleLists,
-    "list-items": handlers.listItems || handleListItems,
-    api: handlers.api || handleApi,
-    auth: handlers.auth || handleAuth,
-    oauth: handlers.oauth || handleAuth,
-    ssl: handlers.ssl || handleSsl,
-    cache: handlers.cache || handleCache,
-    health: handlers.health || handleHealth,
-    audit: handlers.audit || handleAudit,
-    inventory: handlers.inventory || handleInventory,
-    "origin-ca": handlers.originCa || handleOriginCa,
-    "load-balancer": handlers.loadBalancer || defaultHandlers.loadBalancer,
-    tunnel: handlers.tunnel || defaultHandlers.tunnel,
-    workers: handlers.workers || defaultHandlers.workers,
-    pages: handlers.pages || defaultHandlers.pages,
-    r2: handlers.r2 || defaultHandlers.r2,
-    d1: handlers.d1 || defaultHandlers.d1,
-    queues: handlers.queues || defaultHandlers.queues,
-    stream: handlers.stream || defaultHandlers.stream,
-    images: handlers.images || defaultHandlers.images,
-    ai: handlers.ai || defaultHandlers.ai,
-    access: handlers.access || defaultHandlers.access,
-    extension: handlers.extension || handleExtension,
-  };
-  if (dispatch[resource]) {
-    try {
-      const result = await dispatch[resource](common);
-      await terminal.flush();
-      return result;
-    } catch (error) {
-      const message = formatCloudflareError(error, {
-        resource,
-        action,
-        outputJson,
-      });
-      if (!message) throw error;
-      printer.error(message);
-      return exit(1);
-    }
-  }
-  printHelp(printer);
-  exit(1);
+    log: printer.log,
+    exit,
+  });
+  return dispatchCommand({
+    resource,
+    action,
+    outputJson,
+    common,
+    terminal,
+    printer,
+    exit,
+    handlers,
+  });
 }

@@ -12,7 +12,6 @@ export const API_TOKEN_TUTORIAL = `Create an Account API Token in Cloudflare:
   8. Copy Your API Token and paste it below.
   9. Copy the Account ID from Cloudflare when cfhub asks for it.`;
 
-/* istanbul ignore next -- interactive terminal input is covered manually. */
 export async function promptHidden(input = process.stdin, output = process.stderr) {
   output.write("Cloudflare API token (input hidden): ");
   if (!input.isTTY || typeof input.setRawMode !== "function") {
@@ -48,7 +47,6 @@ export async function promptHidden(input = process.stdin, output = process.stder
   });
 }
 
-/* istanbul ignore next -- interactive terminal input is covered manually. */
 export async function promptLine(message, input = process.stdin, output = process.stderr) {
   const rl = readline.createInterface({ input, output });
   try {

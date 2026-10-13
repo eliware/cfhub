@@ -9,7 +9,6 @@ import {
 const SERVICE = "cfhub";
 export { credentialsPath } from "./credential-files.mjs";
 
-/* istanbul ignore next */
 async function keychain() {
   try {
     return (await import("keytar")).default;

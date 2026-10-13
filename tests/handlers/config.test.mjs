@@ -21,3 +21,30 @@ test("config handler reads and updates local settings", () => {
   expect(printer.log).toHaveBeenCalledWith("Unset config pager");
   expect(fsImpl.writeFileSync).toHaveBeenCalledTimes(2);
 });
+
+test("config handler lists values and validates writes", () => {
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const fsImpl = { existsSync: () => false };
+  const base = { opts: {}, printer, homeDir: "home", fsImpl };
+  handleConfigCommand({ ...base, args: ["config", "list"] });
+  handleConfigCommand({ ...base, args: ["config", "list"], opts: { json: true } });
+  handleConfigCommand({ ...base, args: ["config", "get", "missing"] });
+  handleConfigCommand({ ...base, args: ["config", "set"] });
+  handleConfigCommand({ ...base, args: ["config", "set", "name"] });
+  handleConfigCommand({ ...base, args: ["config", "unknown"] });
+  expect(printer.log).toHaveBeenCalledWith("");
+  expect(printer.error).toHaveBeenCalledWith("Usage: cfhub config set <name> <value>");
+  expect(printer.log).toHaveBeenCalled();
+});
+
+test("config text listing prints each setting", () => {
+  const printer = { log: jest.fn() };
+  handleConfigCommand({
+    args: ["config", "list"],
+    opts: {},
+    printer,
+    homeDir: "home",
+    fsImpl: { existsSync: () => true, readFileSync: () => JSON.stringify({ pager: "less" }) },
+  });
+  expect(printer.log).toHaveBeenCalledWith("pager less");
+});

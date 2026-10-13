@@ -6,3 +6,10 @@ test("detailed help prints global options", () => {
   printDetailedHelp(printer);
   expect(printer.log).toHaveBeenCalledWith(expect.stringContaining("Global options:"));
 });
+
+test("uses the default detailed help printer", () => {
+  const log = jest.spyOn(console, "log").mockImplementation(() => {});
+  printDetailedHelp();
+  expect(log).toHaveBeenCalled();
+  log.mockRestore();
+});

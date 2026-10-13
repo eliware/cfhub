@@ -30,7 +30,6 @@ async function exists(path) {
   }
 }
 
-/* istanbul ignore next -- parameter defaults depend on the host runtime. */
 export async function findBrowser({
   env = process.env,
   platform = process.platform,
@@ -54,7 +53,7 @@ export async function findBrowser({
 
   if (puppeteerPath && (await accessImpl(puppeteerPath))) return puppeteerPath;
   const pathDelimiter = platform === "win32" ? ";" : ":";
-  /* istanbul ignore next -- PATH is always present in supported runtimes. */
+
   const pathEntries = (env.PATH ?? "").split(pathDelimiter).filter(Boolean);
   const executableNames =
     platform === "win32"

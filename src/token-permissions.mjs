@@ -1,6 +1,5 @@
 const API_ROOT = "https://api.cloudflare.com/client/v4";
 
-/* istanbul ignore next -- Cloudflare may omit policy fields for restricted tokens. */
 function permissionNames(details) {
   return [
     ...new Set(
@@ -23,7 +22,6 @@ export function summarizePermissions(permissions = []) {
   return summary;
 }
 
-/* istanbul ignore next -- network response variants are covered with live API tests. */
 export async function inspectApiToken({ token, accountId, fetchImpl = fetch } = {}) {
   const accountToken = token?.startsWith("cfat_");
   const verifyPath =

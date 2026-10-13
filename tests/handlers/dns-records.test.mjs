@@ -1,340 +1,138 @@
 import { jest } from "@jest/globals";
 import { handleDnsRecords } from "../../src/handlers/dns-records.mjs";
 
-test("DNS diff plans and apply mutates only differences", async () => {
-  const create = jest.fn();
-  const remove = jest.fn();
+const context = (overrides = {}) => ({
+  cf: { dns: { records: {} } },
+  action: "list",
+  opts: { "zone-id": "zone-1" },
+  outputJson: true,
+  printer: { log: jest.fn() },
+  toJsonOutput: jest.fn(),
+  fail: (message) => {
+    throw new Error(message);
+  },
+  ...overrides,
+});
+
+test("lists records from SDK and generic clients", async () => {
+  const records = [{ id: "r1", type: "A", name: "www", content: "192.0.2.1" }];
   const toJsonOutput = jest.fn();
-  const current = {
-    type: "A",
-    name: "keep",
-    content: "192.0.2.1",
-    ttl: 60,
-    proxied: false,
-    id: "old",
-  };
-  const ctx = {
-    cf: {
-      dns: {
-        records: {
-          list: jest.fn().mockResolvedValue({ result: [current] }),
-          create,
-          delete: remove,
-        },
-      },
-    },
-    action: "diff",
-    opts: { "zone-id": "z1" },
-    body: {
-      records: [
-        { ...current },
-        { type: "A", name: "new", content: "192.0.2.2", ttl: 60, proxied: false },
-      ],
-    },
-    outputJson: true,
-    toJsonOutput,
-    printer: { log: jest.fn() },
-    fail: jest.fn(),
-  };
-  await handleDnsRecords(ctx);
-  expect(toJsonOutput).toHaveBeenCalledWith(
-    expect.objectContaining({ add: [expect.objectContaining({ name: "new" })], remove: [] }),
-  );
-  await handleDnsRecords({ ...ctx, action: "apply", opts: { "zone-id": "z1", force: true } });
-  expect(create).toHaveBeenCalled();
-});
+  const get = jest.fn().mockResolvedValue({ result: records });
+  await handleDnsRecords(context({ cf: { get }, toJsonOutput }));
+  expect(get).toHaveBeenCalledWith("/zones/zone-1/dns_records", undefined);
+  expect(toJsonOutput).toHaveBeenCalledWith(records);
 
-test("DNS apply removes stale records and rejects unsafe apply", async () => {
-  const remove = jest.fn();
+  const list = jest.fn().mockResolvedValue(records);
   const printer = { log: jest.fn() };
-  const stale = {
-    type: "A",
-    name: "stale",
-    content: "192.0.2.9",
-    ttl: 60,
-    proxied: false,
-    id: "stale-id",
-  };
-  const base = {
-    cf: {
-      dns: {
-        records: {
-          list: jest.fn().mockResolvedValue({ result: [stale] }),
-          create: jest.fn(),
-          delete: remove,
-        },
-      },
-    },
-    opts: { "zone-id": "z1" },
-    body: [{ type: "A", name: "desired", content: "192.0.2.8", ttl: 60, proxied: false }],
-    outputJson: false,
-    printer,
-    toJsonOutput: jest.fn(),
-    fail: jest.fn(),
-  };
-  await handleDnsRecords({ ...base, action: "apply" });
-  expect(base.fail).toHaveBeenCalledWith(expect.stringContaining("force"));
-  await handleDnsRecords({ ...base, action: "apply", opts: { "zone-id": "z1", force: true } });
-  expect(remove).toHaveBeenCalledWith("stale-id", { zone_id: "z1" });
-  expect(printer.log).toHaveBeenCalledWith(expect.stringContaining("applied"));
-});
-
-test("DNS diff accepts array bodies and dry-run with unusual response shapes", async () => {
-  const ctx = {
-    cf: {
-      dns: {
-        records: { list: jest.fn().mockResolvedValue({}), create: jest.fn(), delete: jest.fn() },
-      },
-    },
-    action: "apply",
-    opts: { "zone-id": "z1", "dry-run": true },
-    body: [],
-    outputJson: true,
-    toJsonOutput: jest.fn(),
-    printer: { log: jest.fn() },
-    fail: jest.fn(),
-  };
-  await handleDnsRecords(ctx);
-  expect(ctx.toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ add: [], remove: [] }));
-  const text = { ...ctx, outputJson: false, printer: { log: jest.fn() } };
-  await handleDnsRecords(text);
-  expect(text.printer.log).toHaveBeenCalledWith(expect.stringContaining("add"));
-});
-
-test("handleDnsRecords is exported", () => {
-  expect(typeof handleDnsRecords).toBe("function");
-});
-describe("handler command integration cases", () => {
-  let fail;
-  let toJsonOutput;
-  let log;
-  beforeEach(() => {
-    fail = jest.fn((msg) => {
-      throw new Error(msg);
-    });
-    toJsonOutput = jest.fn();
-    log = jest.spyOn(console, "log").mockImplementation(() => {});
-  });
-  afterEach(() => log.mockRestore());
-  test("handleDnsRecords list/get/create/update/delete/unknown", async () => {
-    const cf = {
-      dns: {
-        records: {
-          list: jest.fn().mockResolvedValue({
-            result: [{ id: "r1", type: "A", name: "www", content: "1.2.3.4" }],
-          }),
-          get: jest.fn().mockResolvedValue({ id: "r1" }),
-          create: jest.fn().mockResolvedValue({ created: true }),
-          update: jest.fn().mockResolvedValue({ updated: true }),
-          delete: jest.fn().mockResolvedValue({ deleted: true }),
-        },
-      },
-    };
-    await handleDnsRecords({
-      cf,
-      action: "list",
-      opts: { "zone-id": "z1" },
-      outputJson: false,
-      toJsonOutput,
-      fail,
-    });
-    await handleDnsRecords({
-      cf,
-      action: "get",
-      opts: { "zone-id": "z1", id: "r1" },
-      outputJson: true,
-      toJsonOutput,
-      fail,
-    });
-    await handleDnsRecords({
-      cf,
-      action: "create",
-      opts: { "zone-id": "z1" },
-      body: { type: "A" },
-      outputJson: false,
-      toJsonOutput,
-      fail,
-    });
-    await handleDnsRecords({
-      cf,
-      action: "update",
-      opts: { "zone-id": "z1", id: "r1" },
-      body: { content: "5.6.7.8" },
-      outputJson: true,
-      toJsonOutput,
-      fail,
-    });
-    await handleDnsRecords({
-      cf,
-      action: "delete",
-      opts: { "zone-id": "z1", id: "r1", force: true },
-      outputJson: false,
-      toJsonOutput,
-      fail,
-    });
-    await expect(
-      handleDnsRecords({
-        cf,
-        action: "bogus",
-        opts: { "zone-id": "z1" },
-        outputJson: false,
-        toJsonOutput,
-        fail,
-      }),
-    ).rejects.toThrow("Unknown dns-records action: bogus");
-    expect(console.log).toHaveBeenCalledWith(
-      "ID  TYPE  NAME  CONTENT\n--  ----  ----  -------\nr1  A     www   1.2.3.4",
-    );
-  });
-
-  test("handleDnsRecords validates missing inputs", async () => {
-    const cf = { dns: { records: { list: jest.fn() } } };
-    await expect(
-      handleDnsRecords({ cf, action: "list", opts: {}, outputJson: false, toJsonOutput, fail }),
-    ).rejects.toThrow("Missing --zone-id");
-    await expect(
-      handleDnsRecords({
-        cf,
-        action: "get",
-        opts: { "zone-id": "z1" },
-        outputJson: false,
-        toJsonOutput,
-        fail,
-      }),
-    ).rejects.toThrow("Missing --id");
-    await expect(
-      handleDnsRecords({
-        cf,
-        action: "create",
-        opts: { "zone-id": "z1" },
-        outputJson: false,
-        toJsonOutput,
-        fail,
-      }),
-    ).rejects.toThrow("Missing --data or --file");
-    await expect(
-      handleDnsRecords({
-        cf,
-        action: "update",
-        opts: { "zone-id": "z1", id: "r1" },
-        outputJson: false,
-        toJsonOutput,
-        fail,
-      }),
-    ).rejects.toThrow("Missing --data or --file");
-    await expect(
-      handleDnsRecords({
-        cf,
-        action: "delete",
-        opts: { "zone-id": "z1", id: "r1" },
-        outputJson: false,
-        toJsonOutput,
-        fail,
-      }),
-    ).rejects.toThrow("Refusing to delete without --force");
-  });
-
-  test("handleDnsRecords covers raw-list and text mutation branches", async () => {
-    const printer = { log: jest.fn() };
-    const toJsonOutput = jest.fn();
-    const fail = jest.fn((msg) => {
-      throw new Error(msg);
-    });
-    const cf = {
-      dns: {
-        records: {
-          list: jest
-            .fn()
-            .mockResolvedValue([{ id: "r", type: "A", name: "x", content: "1.2.3.4" }]),
-          get: jest.fn().mockResolvedValue({ id: "r" }),
-          create: jest.fn().mockResolvedValue({ created: true }),
-          delete: jest.fn().mockResolvedValue({ deleted: true }),
-        },
-      },
-    };
-    await handleDnsRecords({
-      cf,
-      action: "list",
-      opts: { "zone-id": "z" },
+  await handleDnsRecords(
+    context({
+      cf: { dns: { records: { list } } },
       outputJson: false,
       printer,
-      toJsonOutput,
-      fail,
-    });
-    await handleDnsRecords({
-      cf,
+    }),
+  );
+  expect(list).toHaveBeenCalledWith({ zone_id: "zone-1" });
+  expect(printer.log).toHaveBeenCalledWith(
+    "ID  TYPE  NAME  CONTENT\n--  ----  ----  -------\nr1  A     www   192.0.2.1",
+  );
+});
+
+test("uses default printer and accepts result arrays", async () => {
+  jest.spyOn(console, "log").mockImplementation(() => {});
+  const records = [{ id: "r1", type: "A", name: "www", content: "192.0.2.1" }];
+  await handleDnsRecords(
+    context({
+      cf: { get: jest.fn().mockResolvedValue({ result: records }) },
+      outputJson: false,
+      printer: undefined,
+    }),
+  );
+  expect(console.log).toHaveBeenCalled();
+  jest.restoreAllMocks();
+});
+
+test("gets records from SDK and generic clients", async () => {
+  const toJsonOutput = jest.fn();
+  const get = jest.fn().mockResolvedValue({ id: "sdk" });
+  await handleDnsRecords(
+    context({ action: "get", opts: { "zone-id": "z", id: "r" }, cf: { get }, toJsonOutput }),
+  );
+  expect(get).toHaveBeenCalledWith("/zones/z/dns_records/r", undefined);
+  expect(toJsonOutput).toHaveBeenCalledWith({ id: "sdk" });
+
+  const getRecord = jest.fn().mockResolvedValue({ id: "generic" });
+  const printer = { log: jest.fn() };
+  await handleDnsRecords(
+    context({
       action: "get",
       opts: { "zone-id": "z", id: "r" },
+      cf: { dns: { records: { get: getRecord } } },
       outputJson: false,
       printer,
-      toJsonOutput,
-      fail,
-    });
-    await handleDnsRecords({
-      cf,
-      action: "create",
-      opts: { "zone-id": "z" },
-      body: { type: "A" },
-      outputJson: false,
-      printer,
-      toJsonOutput,
-      fail,
-    });
-    await handleDnsRecords({
-      cf,
-      action: "delete",
-      opts: { "zone-id": "z", id: "r", force: true },
-      outputJson: false,
-      printer,
-      toJsonOutput,
-      fail,
-    });
-    expect(printer.log).toHaveBeenCalled();
-  });
+    }),
+  );
+  expect(getRecord).toHaveBeenCalledWith("r", { zone_id: "z" });
+  expect(printer.log).toHaveBeenCalledWith('{\n  "id": "generic"\n}');
+});
 
-  test("handleDnsRecords covers JSON list/create/delete outputs", async () => {
-    const printer = { log: jest.fn() };
-    const toJsonOutput = jest.fn();
-    const fail = jest.fn((msg) => {
-      throw new Error(msg);
-    });
-    const cf = {
-      dns: {
-        records: {
-          list: jest.fn().mockResolvedValue([]),
-          create: jest.fn().mockResolvedValue({ created: true }),
-          delete: jest.fn().mockResolvedValue({ deleted: true }),
-        },
-      },
-    };
-    await handleDnsRecords({
+test("delegates diff and apply actions", async () => {
+  const list = jest.fn().mockResolvedValue({ result: [] });
+  const toJsonOutput = jest.fn();
+  const cf = { get: jest.fn(), post: jest.fn() };
+  await handleDnsRecords(context({ action: "diff", body: [], cf, toJsonOutput }));
+  expect(cf.get).toHaveBeenCalledWith("/zones/zone-1/dns_records", undefined);
+  await handleDnsRecords(
+    context({
+      action: "apply",
+      body: [],
+      opts: { "zone-id": "zone-1", "dry-run": true },
       cf,
-      action: "list",
-      opts: { "zone-id": "z" },
-      outputJson: true,
-      printer,
       toJsonOutput,
-      fail,
-    });
-    await handleDnsRecords({
-      cf,
+    }),
+  );
+  expect(toJsonOutput).toHaveBeenCalled();
+  expect(list).not.toHaveBeenCalled();
+});
+
+test("delegates mutation actions", async () => {
+  const create = jest.fn().mockResolvedValue({ id: "created" });
+  const toJsonOutput = jest.fn();
+  await handleDnsRecords(
+    context({
       action: "create",
-      opts: { "zone-id": "z" },
       body: { type: "A" },
-      outputJson: true,
-      printer,
+      cf: { dns: { records: { create } } },
       toJsonOutput,
-      fail,
-    });
-    await handleDnsRecords({
-      cf,
+    }),
+  );
+  expect(create).toHaveBeenCalled();
+  const update = jest.fn().mockResolvedValue({ id: "updated" });
+  await handleDnsRecords(
+    context({
+      action: "update",
+      opts: { "zone-id": "z", id: "r" },
+      body: { content: "192.0.2.3" },
+      cf: { dns: { records: { update } } },
+      toJsonOutput,
+    }),
+  );
+  expect(update).toHaveBeenCalled();
+  const remove = jest.fn().mockResolvedValue({ id: "deleted" });
+  await handleDnsRecords(
+    context({
       action: "delete",
       opts: { "zone-id": "z", id: "r", force: true },
-      outputJson: true,
-      printer,
+      cf: { dns: { records: { delete: remove } } },
       toJsonOutput,
-      fail,
-    });
-    expect(toJsonOutput).toHaveBeenCalledTimes(3);
-  });
+    }),
+  );
+  expect(remove).toHaveBeenCalled();
+});
+
+test("validates required values and rejects unknown actions", async () => {
+  await expect(handleDnsRecords(context({ opts: {} }))).rejects.toThrow("Missing --zone-id");
+  await expect(handleDnsRecords(context({ action: "get" }))).rejects.toThrow("Missing --id");
+  await expect(handleDnsRecords(context({ action: "unknown" }))).rejects.toThrow(
+    "Unknown dns-records action: unknown",
+  );
 });

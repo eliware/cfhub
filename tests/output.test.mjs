@@ -16,33 +16,31 @@ import {
   terminalWidth,
 } from "../src/terminal.mjs";
 
-describe("output helpers", () => {
-  test("toJsonOutput uses injected printer", () => {
-    const printer = jest.fn();
-    toJsonOutput({ a: 1 }, printer);
-    expect(printer).toHaveBeenCalledWith(JSON.stringify({ a: 1 }, null, 2));
-  });
+test("toJsonOutput uses injected printer", () => {
+  const printer = jest.fn();
+  toJsonOutput({ a: 1 }, printer);
+  expect(printer).toHaveBeenCalledWith(JSON.stringify({ a: 1 }, null, 2));
+});
 
-  test("printTextList uses injected printer", () => {
-    const printer = jest.fn();
-    printTextList([{ id: 1 }], (x) => `id:${x.id}`, printer);
-    expect(printer).toHaveBeenCalledWith("id:1");
-  });
+test("printTextList uses injected printer", () => {
+  const printer = jest.fn();
+  printTextList([{ id: 1 }], (x) => `id:${x.id}`, printer);
+  expect(printer).toHaveBeenCalledWith("id:1");
+});
 
-  test("table helpers align columns and print one human-readable table", () => {
-    const printer = jest.fn();
-    expect(
-      renderTable(
-        ["ID", "NAME"],
-        [
-          ["1", "alpha"],
-          ["22", null],
-        ],
-      ),
-    ).toBe("ID  NAME\n--  ----\n1   alpha\n22");
-    printTable(["ID"], [["1"]], printer);
-    expect(printer).toHaveBeenCalledWith("ID\n--\n1");
-  });
+test("table helpers align columns and print one human-readable table", () => {
+  const printer = jest.fn();
+  expect(
+    renderTable(
+      ["ID", "NAME"],
+      [
+        ["1", "alpha"],
+        ["22", null],
+      ],
+    ),
+  ).toBe("ID  NAME\n--  ----\n1   alpha\n22");
+  printTable(["ID"], [["1"]], printer);
+  expect(printer).toHaveBeenCalledWith("ID\n--\n1");
 });
 
 test("output helpers support default console printers", () => {
@@ -93,7 +91,10 @@ test("terminal helpers honor color, width, and safe defaults", () => {
   expect(styleTerminalText("ID")).toBe("ID");
   const defaults = createTerminalOutput({ printer });
   defaults.log("default");
+  const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
   createTerminalOutput().log("default console output");
+  expect(consoleSpy).toHaveBeenCalledWith("default console output");
+  consoleSpy.mockRestore();
 });
 
 test("terminal output preserves JSON and can buffer human-readable output", async () => {

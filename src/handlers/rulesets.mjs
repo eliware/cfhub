@@ -16,15 +16,13 @@ export async function handleRulesets({
   requireAnyValue([zoneId, accountId], "Missing --zone-id or --account-id", fail);
 
   if (action === "list") {
-    /* istanbul ignore next -- supports both the production client and legacy test adapters. */
     const target =
       typeof cf.get === "function"
         ? await cf.get(
             zoneId ? `/zones/${zoneId}/rulesets` : `/accounts/${accountId}/rulesets`,
             undefined,
           )
-        : /* istanbul ignore next -- legacy injected clients are covered by adapter tests. */
-          zoneId
+        : zoneId
           ? await cf.rulesets.list({ zone_id: zoneId })
           : await cf.rulesets.list({ account_id: accountId });
     return outputJson ? toJsonOutput(target) : printer.log(JSON.stringify(target, null, 2));
@@ -32,15 +30,14 @@ export async function handleRulesets({
 
   if (action === "get") {
     requireValue(id, "Missing --id", fail);
-    /* istanbul ignore next -- supports both the production client and legacy test adapters. */
+
     const target =
       typeof cf.get === "function"
         ? await cf.get(
             zoneId ? `/zones/${zoneId}/rulesets/${id}` : `/accounts/${accountId}/rulesets/${id}`,
             undefined,
           )
-        : /* istanbul ignore next -- legacy injected clients are covered by adapter tests. */
-          zoneId
+        : zoneId
           ? await cf.rulesets.get(id, { zone_id: zoneId })
           : await cf.rulesets.get(id, { account_id: accountId });
     return outputJson ? toJsonOutput(target) : printer.log(JSON.stringify(target, null, 2));
@@ -52,7 +49,7 @@ export async function handleRulesets({
       return printer.log(
         JSON.stringify({ zoneId, accountId, action: "create", body, dryRun: true }, null, 2),
       );
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const target =
       typeof cf.post === "function"
         ? await cf.post(zoneId ? `/zones/${zoneId}/rulesets` : `/accounts/${accountId}/rulesets`, {
@@ -71,7 +68,7 @@ export async function handleRulesets({
       return printer.log(
         JSON.stringify({ zoneId, accountId, id, action: "update", body, dryRun: true }, null, 2),
       );
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const target =
       typeof cf.put === "function"
         ? await cf.put(

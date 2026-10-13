@@ -16,8 +16,12 @@ export async function handleZoneReport({
       typeof cf.get === "function"
         ? cf.get(`/zones/${zoneId}`, undefined)
         : cf.zones.get({ zone_id: zoneId }),
-      cf.get(`/zones/${zoneId}/settings/ssl`, undefined),
-      cf.get(`/zones/${zoneId}/dns_records`, undefined),
+      typeof cf.get === "function"
+        ? cf.get(`/zones/${zoneId}/settings/ssl`, undefined)
+        : cf.zones.settings.get(zoneId, "ssl"),
+      typeof cf.get === "function"
+        ? cf.get(`/zones/${zoneId}/dns_records`, undefined)
+        : cf.dns.records.list({ zone_id: zoneId }),
     ]);
     const report = { zone, ssl, dns: Array.isArray(dns?.result) ? dns.result : dns };
     return outputJson ? toJsonOutput(report) : printer.log(JSON.stringify(report, null, 2));

@@ -21,7 +21,7 @@ export async function handleAuthStatus({
         opts?.["account-id"] ||
         data.profiles[statusProfile]?.accountId ||
         process.env.CLOUDFLARE_ACCOUNT_ID;
-      /* istanbul ignore next -- account list response shape depends on Cloudflare account access. */
+
       const accounts = await cf.get(accountId ? `/accounts/${accountId}` : "/accounts");
       const status = {
         authenticated: true,
@@ -40,7 +40,7 @@ export async function handleAuthStatus({
     const status = {
       authenticated: true,
       profile: statusProfile,
-      /* istanbul ignore next -- both resources share this handler in production. */
+
       method:
         resource === "oauth" ? "oauth" : data.profiles[statusProfile]?.authMethod || "api-token",
       id: identity?.result?.id || null,

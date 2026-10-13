@@ -2,7 +2,7 @@ import os from "node:os";
 import * as fs from "node:fs";
 import { deleteCredential, readCredential, writeCredential } from "./credentials.mjs";
 import { refreshOAuth } from "./oauth.mjs";
-import { activeProfile } from "./profile-store.mjs";
+import { activeProfile, readProfiles, writeProfiles } from "./profile-store.mjs";
 
 export { activeProfile, profilesPath, readProfiles, writeProfiles } from "./profile-store.mjs";
 
@@ -77,7 +77,7 @@ export async function applyActiveProfile(
     CLOUDFLARE_ZONE_ID: values.zoneId,
     CFHUB_OAUTH_SCOPES: values.scopes?.join(","),
     CFHUB_API_PERMISSIONS: values.apiPermissions?.join(","),
-    /* istanbul ignore next -- profiles without API permission metadata are supported. */
+
     CFHUB_API_PERMISSIONS_KNOWN: values.apiPermissionsKnown ? "1" : undefined,
   }))
     if (value && !env[key]) env[key] = value;

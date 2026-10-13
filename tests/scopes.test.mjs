@@ -30,6 +30,8 @@ test("reports only scopes absent from the active OAuth profile", () => {
 
 test("maps API token permissions and reports missing permissions", () => {
   expect(requiredApiPermissions("dns-records", "create")).toEqual(["DNS Write"]);
+  expect(requiredApiPermissions("workers", "list")).toEqual(["Workers Scripts Read"]);
+  expect(requiredApiPermissions("workers", "create")).toEqual(["Workers Scripts Write"]);
   expect(missingApiPermissions("dns-records", "create", ["DNS Read"])).toEqual(["DNS Write"]);
   expect(missingApiPermissions("dns-records", "create", ["DNS Write"])).toEqual([]);
   expect(missingApiPermissions("dns-records", "create", null)).toEqual([]);

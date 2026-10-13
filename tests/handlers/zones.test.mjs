@@ -1,273 +1,199 @@
 import { jest } from "@jest/globals";
 import { handleZones } from "../../src/handlers/zones.mjs";
+import { context } from "../../test-fixtures/zones-context.mjs";
 
-test("handleZones is exported", () => {
-  expect(typeof handleZones).toBe("function");
-});
-
-test("zone audit combines metadata, SSL, and DNS", async () => {
+test("zone listing supports SDK and generic clients", async () => {
   const toJsonOutput = jest.fn();
-  const ctx = {
-    cf: {
-      zones: { get: jest.fn().mockResolvedValue({ id: "z1" }) },
-      get: jest.fn((path) =>
-        path.includes("dns_records")
-          ? { result: [{ name: "example.com" }] }
-          : { id: "z1", value: "full" },
-      ),
-      dns: {
-        records: { list: jest.fn().mockResolvedValue({ result: [{ name: "example.com" }] }) },
-      },
-    },
-    action: "audit",
-    opts: { "zone-id": "z1" },
-    outputJson: true,
-    toJsonOutput,
-    fail: jest.fn(),
-    printer: { log: jest.fn() },
-  };
-  await handleZones(ctx);
-  expect(toJsonOutput).toHaveBeenCalledWith({
-    zone: { id: "z1", value: "full" },
-    ssl: { id: "z1", value: "full" },
-    dns: [{ name: "example.com" }],
-  });
-  const text = { ...ctx, outputJson: false, toJsonOutput: jest.fn() };
-  text.cf.dns.records.list.mockResolvedValue({ count: 0 });
-  await handleZones(text);
-  expect(text.printer.log).toHaveBeenCalledWith(
-    JSON.stringify(
-      {
-        zone: { id: "z1", value: "full" },
-        ssl: { id: "z1", value: "full" },
-        dns: [{ name: "example.com" }],
-      },
-      null,
-      2,
-    ),
+  const generic = jest.fn().mockResolvedValue({ result: [{ id: "z1" }] });
+  await handleZones(context({ cf: { get: generic }, toJsonOutput }));
+  expect(generic).toHaveBeenCalledWith("/zones", undefined);
+  expect(toJsonOutput).toHaveBeenCalledWith([{ id: "z1" }]);
+
+  const accountGet = jest.fn().mockResolvedValue([{ id: "z2" }]);
+  await handleZones(context({ cf: { get: accountGet }, opts: { "account-id": "a1" } }));
+  expect(accountGet).toHaveBeenCalledWith("/zones?account.id=a1", undefined);
+
+  const sdkList = jest.fn().mockResolvedValue({ result: [{ id: "z3", name: "site" }] });
+  const printer = { log: jest.fn() };
+  await handleZones(context({ cf: { zones: { list: sdkList } }, outputJson: false, printer }));
+  expect(sdkList).toHaveBeenCalledWith(undefined);
+  expect(printer.log).toHaveBeenCalledWith("ID  NAME\n--  ----\nz3  site");
+
+  const sdkAccountList = jest.fn().mockResolvedValue([]);
+  await handleZones(
+    context({ cf: { zones: { list: sdkAccountList } }, opts: { "account-id": "a2" } }),
   );
-});
+  expect(sdkAccountList).toHaveBeenCalledWith({ account: { id: "a2" } });
 
-test("zone security reports baseline settings", async () => {
-  const toJsonOutput = jest.fn();
-  const ctx = {
-    cf: {
-      get: jest.fn().mockResolvedValue({
-        result: [
-          { id: "ssl", value: "full" },
-          { id: "tls_1_3", value: "on" },
-        ],
-      }),
-    },
-    action: "security",
-    opts: { "zone-id": "z1" },
-    outputJson: true,
-    toJsonOutput,
-    printer: { log: jest.fn() },
-    fail: jest.fn(),
-  };
-  await handleZones(ctx);
-  expect(toJsonOutput).toHaveBeenCalledWith(
-    expect.objectContaining({ zoneId: "z1", missing: expect.arrayContaining(["min_tls_version"]) }),
-  );
-  const text = {
-    ...ctx,
-    outputJson: false,
-    printer: { log: jest.fn() },
-    cf: { get: jest.fn().mockResolvedValue({}) },
-  };
-  await handleZones(text);
-  expect(text.printer.log).toHaveBeenCalledWith(expect.stringContaining("missing"));
-});
-describe("handler command integration cases", () => {
-  let fail;
-  let toJsonOutput;
-  let log;
-  beforeEach(() => {
-    fail = jest.fn((msg) => {
-      throw new Error(msg);
-    });
-    toJsonOutput = jest.fn();
-    log = jest.spyOn(console, "log").mockImplementation(() => {});
-  });
-  afterEach(() => log.mockRestore());
-  test("handleZones list prints simplified text rows when not JSON", async () => {
-    const cf = {
-      zones: { list: jest.fn().mockResolvedValue({ result: [{ id: "z1", name: "example.com" }] }) },
-    };
-    await handleZones({ cf, action: "list", opts: {}, outputJson: false, toJsonOutput, fail });
-    expect(cf.zones.list).toHaveBeenCalledWith(undefined);
-    expect(console.log).toHaveBeenCalledWith("ID  NAME\n--  ----\nz1  example.com");
-  });
-
-  test("handleZones supports account-scoped list and JSON output", async () => {
-    const cf = {
-      zones: { list: jest.fn().mockResolvedValue([{ id: "z2", name: "example.net" }]) },
-    };
-    await handleZones({
-      cf,
-      action: "list",
-      opts: { "account-id": "acct1" },
-      outputJson: true,
-      toJsonOutput,
-      fail,
-    });
-    expect(cf.zones.list).toHaveBeenCalledWith({ account: { id: "acct1" } });
-    expect(toJsonOutput).toHaveBeenCalledWith([{ id: "z2", name: "example.net" }]);
-  });
-
-  test("handleZones get/update/delete and unknown action are covered", async () => {
-    const cf = {
-      zones: {
-        get: jest.fn().mockResolvedValue({ id: "z1" }),
-        edit: jest.fn().mockResolvedValue({ ok: true }),
-        delete: jest.fn().mockResolvedValue({ deleted: true }),
-      },
-    };
-    await handleZones({
-      cf,
-      action: "get",
-      opts: { "zone-id": "z1" },
-      outputJson: true,
-      toJsonOutput,
-      fail,
-    });
-    await handleZones({
-      cf,
-      action: "update",
-      opts: { "zone-id": "z1" },
-      body: { name: "x" },
+  const consoleLog = jest.spyOn(console, "log").mockImplementation(() => {});
+  await handleZones(
+    context({
+      cf: { zones: { list: jest.fn().mockResolvedValue([]) } },
       outputJson: false,
-      toJsonOutput,
-      fail,
-    });
-    await handleZones({
-      cf,
+      printer: undefined,
+    }),
+  );
+  expect(consoleLog).toHaveBeenCalled();
+  consoleLog.mockRestore();
+});
+
+test("zone reads support SDK and generic clients", async () => {
+  const generic = jest.fn().mockResolvedValue({ id: "z1" });
+  const toJsonOutput = jest.fn();
+  await handleZones(
+    context({ action: "get", cf: { get: generic }, opts: { "zone-id": "z1" }, toJsonOutput }),
+  );
+  expect(generic).toHaveBeenCalledWith("/zones/z1", undefined);
+  expect(toJsonOutput).toHaveBeenCalledWith({ id: "z1" });
+
+  const sdkGet = jest.fn().mockResolvedValue({ id: "z2" });
+  const printer = { log: jest.fn() };
+  await handleZones(
+    context({
+      action: "get",
+      cf: { zones: { get: sdkGet } },
+      opts: { "zone-id": "z2" },
+      outputJson: false,
+      printer,
+    }),
+  );
+  expect(sdkGet).toHaveBeenCalledWith({ zone_id: "z2" });
+  expect(printer.log).toHaveBeenCalledWith('{\n  "id": "z2"\n}');
+});
+
+test("zone report actions stay connected to their report handler", async () => {
+  const cf = { get: jest.fn().mockResolvedValue({ result: [] }) };
+  const fail = jest.fn();
+  const toJsonOutput = jest.fn();
+  for (const action of ["audit", "security"])
+    await handleZones(context({ action, cf, opts: { "zone-id": "z1" }, fail, toJsonOutput }));
+  expect(cf.get).toHaveBeenCalled();
+  expect(toJsonOutput).toHaveBeenCalled();
+});
+
+test("zone creation supports dry runs and both client styles", async () => {
+  const body = { name: "example.com" };
+  const printer = { log: jest.fn() };
+  const sdkCreate = jest.fn().mockResolvedValue({ created: true });
+  await handleZones(
+    context({
+      action: "create",
+      cf: { zones: { create: sdkCreate } },
+      opts: { "dry-run": true },
+      body,
+      outputJson: false,
+      printer,
+    }),
+  );
+  expect(sdkCreate).not.toHaveBeenCalled();
+  expect(printer.log).toHaveBeenCalledWith(
+    JSON.stringify({ action: "create", body, dryRun: true }, null, 2),
+  );
+
+  const post = jest.fn().mockResolvedValue({ created: true });
+  const toJsonOutput = jest.fn();
+  await handleZones(context({ action: "create", cf: { post }, body, toJsonOutput }));
+  expect(post).toHaveBeenCalledWith("/zones", { body });
+  expect(toJsonOutput).toHaveBeenCalledWith({ created: true });
+
+  const legacyCreate = jest.fn().mockResolvedValue({ created: true });
+  const textPrinter = { log: jest.fn() };
+  await handleZones(
+    context({
+      action: "create",
+      cf: { zones: { create: legacyCreate } },
+      body,
+      outputJson: false,
+      printer: textPrinter,
+    }),
+  );
+  expect(textPrinter.log).toHaveBeenCalledWith('{\n  "created": true\n}');
+});
+
+test("zone updates support dry runs and both client styles", async () => {
+  const body = { name: "example.com" };
+  const printer = { log: jest.fn() };
+  const patch = jest.fn().mockResolvedValue({ updated: true });
+  await handleZones(
+    context({
+      action: "update",
+      cf: { patch },
+      opts: { "zone-id": "z1", "dry-run": true },
+      body,
+      outputJson: false,
+      printer,
+    }),
+  );
+  expect(patch).not.toHaveBeenCalled();
+  expect(printer.log).toHaveBeenCalledWith(
+    JSON.stringify({ zoneId: "z1", action: "update", body, dryRun: true }, null, 2),
+  );
+
+  const sdkEdit = jest.fn().mockResolvedValue({ updated: true });
+  await handleZones(
+    context({
+      action: "update",
+      cf: { zones: { edit: sdkEdit } },
+      opts: { "zone-id": "z1" },
+      body,
+    }),
+  );
+  expect(sdkEdit).toHaveBeenCalledWith({ zone_id: "z1", ...body });
+
+  const genericPatch = jest.fn().mockResolvedValue({ updated: true });
+  const textPrinter = { log: jest.fn() };
+  await handleZones(
+    context({
+      action: "update",
+      cf: { patch: genericPatch },
+      opts: { "zone-id": "z1" },
+      body,
+      outputJson: false,
+      printer: textPrinter,
+    }),
+  );
+  expect(genericPatch).toHaveBeenCalledWith("/zones/z1", { body });
+  expect(textPrinter.log).toHaveBeenCalledWith('{\n  "updated": true\n}');
+});
+
+test("zone deletion supports both client styles and force checks", async () => {
+  const remove = jest.fn().mockResolvedValue({ deleted: true });
+  const toJsonOutput = jest.fn();
+  await handleZones(
+    context({
       action: "delete",
+      cf: { delete: remove },
       opts: { "zone-id": "z1", force: true },
-      outputJson: true,
       toJsonOutput,
-      fail,
-    });
-    await expect(
-      handleZones({ cf, action: "bogus", opts: {}, outputJson: false, toJsonOutput, fail }),
-    ).rejects.toThrow("Unknown zones action: bogus");
-    expect(cf.zones.get).toHaveBeenCalledWith({ zone_id: "z1" });
-    expect(cf.zones.edit).toHaveBeenCalledWith({ zone_id: "z1", name: "x" });
-    expect(cf.zones.delete).toHaveBeenCalledWith({ zone_id: "z1" });
-  });
+    }),
+  );
+  expect(remove).toHaveBeenCalledWith("/zones/z1");
+  expect(toJsonOutput).toHaveBeenCalledWith({ deleted: true });
 
-  test("handleZones create respects dry-run and real create", async () => {
-    const cf = { zones: { create: jest.fn().mockResolvedValue({ created: true }) } };
-    await handleZones({
-      cf,
-      action: "create",
-      opts: { "dry-run": true },
-      body: { name: "x" },
-      outputJson: false,
-      toJsonOutput,
-      fail,
-    });
-    await handleZones({
-      cf,
-      action: "create",
-      opts: {},
-      body: { name: "x" },
-      outputJson: true,
-      toJsonOutput,
-      fail,
-    });
-    expect(cf.zones.create).toHaveBeenCalledWith({ name: "x" });
-  });
-
-  test("handleZones covers text mutation and dry-run branches", async () => {
-    const printer = { log: jest.fn() };
-    const toJsonOutput = jest.fn();
-    const fail = jest.fn((msg) => {
-      throw new Error(msg);
-    });
-    const cf = {
-      zones: {
-        get: jest.fn().mockResolvedValue({ id: "z" }),
-        create: jest.fn().mockResolvedValue({ created: true }),
-        edit: jest.fn().mockResolvedValue({ updated: true }),
-        delete: jest.fn().mockResolvedValue({ deleted: true }),
-      },
-    };
-    await handleZones({
-      cf,
-      action: "get",
-      opts: { "zone-id": "z" },
-      outputJson: false,
-      printer,
-      toJsonOutput,
-      fail,
-    });
-    await handleZones({
-      cf,
-      action: "create",
-      opts: { "dry-run": true },
-      body: { name: "x" },
-      outputJson: false,
-      printer,
-      toJsonOutput,
-      fail,
-    });
-    await handleZones({
-      cf,
-      action: "create",
-      opts: {},
-      body: { name: "x" },
-      outputJson: false,
-      printer,
-      toJsonOutput,
-      fail,
-    });
-    await handleZones({
-      cf,
-      action: "update",
-      opts: { "zone-id": "z", "dry-run": true },
-      body: { name: "x" },
-      outputJson: false,
-      printer,
-      toJsonOutput,
-      fail,
-    });
-    await handleZones({
-      cf,
-      action: "update",
-      opts: { "zone-id": "z" },
-      body: { name: "x" },
-      outputJson: false,
-      printer,
-      toJsonOutput,
-      fail,
-    });
-    await handleZones({
-      cf,
+  const sdkDelete = jest.fn().mockResolvedValue({ deleted: true });
+  const printer = { log: jest.fn() };
+  await handleZones(
+    context({
       action: "delete",
-      opts: { "zone-id": "z", force: true },
+      cf: { zones: { delete: sdkDelete } },
+      opts: { "zone-id": "z2", force: true },
       outputJson: false,
       printer,
-      toJsonOutput,
-      fail,
-    });
-    expect(printer.log).toHaveBeenCalled();
-  });
+    }),
+  );
+  expect(sdkDelete).toHaveBeenCalledWith({ zone_id: "z2" });
+  expect(printer.log).toHaveBeenCalledWith('{\n  "deleted": true\n}');
 
-  test("handleZones update supports JSON output", async () => {
-    const toJsonOutput = jest.fn();
-    const cf = { zones: { edit: jest.fn().mockResolvedValue({ updated: true }) } };
-    await handleZones({
-      cf,
-      action: "update",
-      opts: { "zone-id": "z" },
-      body: { name: "x" },
-      outputJson: true,
-      printer: { log: jest.fn() },
-      toJsonOutput,
-      fail: jest.fn(),
-    });
-    expect(toJsonOutput).toHaveBeenCalledWith({ updated: true });
+  const fail = jest.fn((message) => {
+    throw new Error(message);
   });
+  await expect(
+    handleZones(context({ action: "delete", opts: { "zone-id": "z1" }, fail })),
+  ).rejects.toThrow("Refusing to delete without --force");
+});
+
+test("zone handler rejects unknown actions", async () => {
+  await expect(handleZones(context({ action: "unknown" }))).rejects.toThrow(
+    "Unknown zones action: unknown",
+  );
 });

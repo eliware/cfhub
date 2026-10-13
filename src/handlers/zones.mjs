@@ -16,7 +16,6 @@ export async function handleZones({
   const zoneId = getZoneId(opts);
 
   if (action === "list") {
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
     const res =
       typeof cf.get === "function"
         ? await cf.get(accountId ? `/zones?account.id=${accountId}` : "/zones", undefined)
@@ -33,7 +32,7 @@ export async function handleZones({
 
   if (action === "get") {
     requireValue(zoneId, "Missing --zone-id", fail);
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const zone =
       typeof cf.get === "function"
         ? await cf.get(`/zones/${zoneId}`, undefined)
@@ -48,7 +47,7 @@ export async function handleZones({
     requireValue(body, "Missing --data or --file", fail);
     if (opts["dry-run"])
       return printer.log(JSON.stringify({ action: "create", body, dryRun: true }, null, 2));
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const res =
       typeof cf.post === "function"
         ? await cf.post("/zones", { body })
@@ -61,7 +60,7 @@ export async function handleZones({
     requireValue(body, "Missing --data or --file", fail);
     if (opts["dry-run"])
       return printer.log(JSON.stringify({ zoneId, action: "update", body, dryRun: true }, null, 2));
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const res =
       typeof cf.patch === "function"
         ? await cf.patch(`/zones/${zoneId}`, { body })
@@ -72,7 +71,7 @@ export async function handleZones({
   if (action === "delete") {
     requireValue(zoneId, "Missing --zone-id", fail);
     requireValue(opts.force, "Refusing to delete without --force", fail);
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const res =
       typeof cf.delete === "function"
         ? await cf.delete(`/zones/${zoneId}`)

@@ -26,3 +26,41 @@ test("OAuth summary and copyright helpers cover populated results", async () => 
   });
   expect(unavailable.dns).toEqual([]);
 });
+
+test("OAuth summary handles missing zones and failed requests", async () => {
+  expect(copyrightYear()).toBe("2026");
+  const fetchImpl = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ result: [{}] }) });
+  const noZoneId = await collectOAuthSummary({
+    accessToken: "x",
+    account: null,
+    scopes: ["zone.read", "zone.write"],
+    fetchImpl,
+  });
+  expect(noZoneId.zones).toEqual([{}]);
+  expect(noZoneId.dns).toEqual([]);
+  const failed = await collectOAuthSummary({
+    accessToken: "x",
+    account: null,
+    scopes: ["zone.read", "zone.write"],
+    fetchImpl: jest.fn().mockRejectedValue(Error("offline")),
+  });
+  expect(failed.errors).toEqual(["offline"]);
+  const disabled = await collectOAuthSummary({
+    accessToken: "x",
+    account: null,
+    scopes: [],
+    fetchImpl: jest.fn(),
+  });
+  expect(disabled.enabled).toEqual([]);
+  expect(disabled.errors).toEqual([]);
+});
+
+test("OAuth summary ignores responses without result data", async () => {
+  const summary = await collectOAuthSummary({
+    accessToken: "x",
+    account: null,
+    scopes: ["zone.read", "zone.write"],
+    fetchImpl: jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) }),
+  });
+  expect(summary.zones).toEqual([]);
+});

@@ -48,6 +48,88 @@ test("update check respects opt-out, current versions, bad responses, and failur
   await expect(updateNotice(null, "1.1.3")).toBeNull();
 });
 
+test("update check uses defaults and recovers from invalid cache data", async () => {
+  await expect(checkForUpdate()).resolves.toBeNull();
+  await expect(checkForUpdate({ currentVersion: null })).resolves.toBeNull();
+  const fs = {
+    existsSync: () => true,
+    readFileSync: () => "{invalid",
+    mkdirSync: jest.fn(),
+    writeFileSync: jest.fn(),
+  };
+  const fetchImpl = jest.fn().mockResolvedValue({ ok: false });
+  await expect(
+    checkForUpdate({
+      currentVersion: "1.0.0",
+      homeDir: "/tmp/cfhub",
+      fsImpl: fs,
+      fetchImpl,
+      now: 86_400_001,
+    }),
+  ).resolves.toBeNull();
+  expect(fetchImpl).toHaveBeenCalled();
+  const withoutChmod = memoryFs();
+  delete withoutChmod.chmodSync;
+  await expect(
+    checkForUpdate({
+      currentVersion: "1.0.0",
+      homeDir: "/tmp/cfhub",
+      env: {},
+      fsImpl: withoutChmod,
+      fetchImpl: jest
+        .fn()
+        .mockResolvedValue({ ok: true, json: async () => ({ version: "1.0.0" }) }),
+      now: 86_400_001,
+    }),
+  ).resolves.toBeNull();
+  await expect(
+    checkForUpdate({
+      currentVersion: "1.0.0",
+      homeDir: "/tmp/cfhub",
+      env: {},
+      fsImpl: memoryFs(),
+      fetchImpl: jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => {
+          throw new Error("invalid response");
+        },
+      }),
+      now: 86_400_001,
+    }),
+  ).resolves.toBeNull();
+});
+
+test("update check handles missing fetch and missing timeout support", async () => {
+  await expect(
+    checkForUpdate({
+      currentVersion: "1.0.0",
+      homeDir: "/tmp/cfhub",
+      env: {},
+      fsImpl: memoryFs(),
+      fetchImpl: null,
+      now: 86_400_001,
+    }),
+  ).resolves.toBeNull();
+  const abortSignal = globalThis.AbortSignal;
+  globalThis.AbortSignal = {};
+  const fetchImpl = jest.fn().mockResolvedValue({ ok: false });
+  try {
+    await expect(
+      checkForUpdate({
+        currentVersion: "1.0.0",
+        homeDir: "/tmp/cfhub",
+        env: {},
+        fsImpl: memoryFs(),
+        fetchImpl,
+        now: 86_400_001,
+      }),
+    ).resolves.toBeNull();
+  } finally {
+    globalThis.AbortSignal = abortSignal;
+  }
+  expect(fetchImpl).toHaveBeenCalledWith("https://registry.npmjs.org/cfhub/latest", {});
+});
+
 test("CLI prints an update notice without delaying command output", async () => {
   const printer = { log: jest.fn(), error: jest.fn() };
   await run({

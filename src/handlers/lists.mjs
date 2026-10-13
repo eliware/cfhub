@@ -16,14 +16,13 @@ export async function handleLists({
   requireValue(accountId, "Missing --account-id or CLOUDFLARE_ACCOUNT_ID", fail);
 
   if (action === "list") {
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
     const response =
       typeof cf.get === "function"
         ? await cf.get(`/accounts/${accountId}/rules/lists`, undefined)
         : null;
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const items = response ? (Array.isArray(response.result) ? response.result : response) : [];
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     if (!response)
       for await (const list of cf.rules.lists.list({ account_id: accountId })) items.push(list);
     return outputJson
@@ -37,7 +36,7 @@ export async function handleLists({
 
   if (action === "get") {
     requireValue(id, "Missing --id", fail);
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const res =
       typeof cf.get === "function"
         ? await cf.get(`/accounts/${accountId}/rules/lists/${id}`, undefined)

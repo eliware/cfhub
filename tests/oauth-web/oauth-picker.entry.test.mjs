@@ -1,4 +1,8 @@
-import { cssOnlyEntry } from "../../src/oauth-web/oauth-picker.entry.mjs";
+import { jest } from "@jest/globals";
+
+jest.unstable_mockModule("../../src/oauth-web/oauth-picker.css", () => ({}));
+const { cssOnlyEntry } = await import("../../src/oauth-web/oauth-picker.entry.mjs");
+
 test("picker entry is CSS only", () => {
   expect(cssOnlyEntry).toBe(true);
 });

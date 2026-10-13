@@ -12,3 +12,10 @@ test("command help covers specific and fallback resources", () => {
   printCommandHelp("unknown", undefined, printer);
   expect(printer.log.mock.calls[2][0]).toContain("<subcommand>");
 });
+
+test("uses the default help printer", () => {
+  const log = jest.spyOn(console, "log").mockImplementation(() => {});
+  printCommandHelp("unknown", "action");
+  expect(log).toHaveBeenCalled();
+  log.mockRestore();
+});

@@ -15,7 +15,7 @@ export async function handleInventory({
     fail(`Unknown inventory action: ${action}`);
     return;
   }
-  /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
   const zonesResponse =
     typeof cf.get === "function"
       ? await cf.get(`/zones?account.id=${accountId}`, undefined)
@@ -26,10 +26,10 @@ export async function handleInventory({
       const [records, ssl] = await Promise.all([
         typeof cf.get === "function"
           ? cf.get(`/zones/${zone.id}/dns_records`, undefined)
-          : /* istanbul ignore next -- legacy injected clients are covered by adapter tests. */ cf.dns.records.list(
-              { zone_id: zone.id },
-            ),
-        cf.get(`/zones/${zone.id}/settings/ssl`, undefined),
+          : cf.dns.records.list({ zone_id: zone.id }),
+        typeof cf.get === "function"
+          ? cf.get(`/zones/${zone.id}/settings/ssl`, undefined)
+          : cf.zones.settings.get(zone.id, "ssl"),
       ]);
       return {
         id: zone.id,

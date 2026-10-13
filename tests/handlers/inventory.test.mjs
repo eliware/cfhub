@@ -77,3 +77,29 @@ test("inventory export combines account zones, DNS, and SSL", async () => {
     expect.objectContaining({ zones: [expect.objectContaining({ records: [] })] }),
   );
 });
+
+test("inventory export uses generic zone and DNS clients", async () => {
+  const toJsonOutput = jest.fn();
+  const cf = {
+    dns: { records: { list: jest.fn().mockResolvedValue({}) } },
+    zones: {
+      list: jest.fn().mockResolvedValue({ result: [{ id: "z2", name: "site.test" }] }),
+      settings: { get: jest.fn().mockResolvedValue({ value: "ssl" }) },
+    },
+  };
+  await handleInventory({
+    cf,
+    action: "export",
+    opts: { "account-id": "account-2" },
+    outputJson: true,
+    toJsonOutput,
+    printer: { log: jest.fn() },
+    fail: jest.fn(),
+  });
+  expect(cf.zones.list).toHaveBeenCalledWith({ account: { id: "account-2" } });
+  expect(cf.dns.records.list).toHaveBeenCalledWith({ zone_id: "z2" });
+  expect(toJsonOutput).toHaveBeenCalledWith({
+    accountId: "account-2",
+    zones: [{ id: "z2", name: "site.test", status: undefined, records: [], ssl: { value: "ssl" } }],
+  });
+});

@@ -16,7 +16,7 @@ export async function handleDnsRecords({
   const zoneId = getZoneId(opts);
   const id = getId(opts);
   requireValue(zoneId, "Missing --zone-id", fail);
-  /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
   const listRecords = () =>
     typeof cf.get === "function"
       ? cf.get(`/zones/${zoneId}/dns_records`, undefined)
@@ -50,7 +50,7 @@ export async function handleDnsRecords({
 
   if (action === "get") {
     requireValue(id, "Missing --id", fail);
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const res =
       typeof cf.get === "function"
         ? await cf.get(`/zones/${zoneId}/dns_records/${id}`, undefined)

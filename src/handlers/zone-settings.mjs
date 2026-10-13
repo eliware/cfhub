@@ -16,12 +16,10 @@ export async function handleZoneSettings({
   requireValue(setting, "Missing --setting", fail);
 
   if (action === "get") {
-    /* istanbul ignore next -- supports both the production client and legacy test adapters. */
     const res =
       typeof cf.get === "function"
         ? await cf.get(`/zones/${zoneId}/settings/${setting}`, undefined)
-        : /* istanbul ignore next -- legacy injected clients are covered by adapter tests. */
-          cf.zones.settings.get.length >= 2
+        : cf.zones.settings.get.length >= 2
           ? await cf.zones.settings.get(setting, { zone_id: zoneId })
           : await cf.zones.settings.get(zoneId, setting);
     return outputJson ? toJsonOutput(res) : printer.log(JSON.stringify(res, null, 2));
@@ -33,7 +31,7 @@ export async function handleZoneSettings({
       return printer.log(
         JSON.stringify({ zoneId, setting, value: body.value, dryRun: true }, null, 2),
       );
-    /* istanbul ignore next -- compatibility with legacy injected SDK clients */
+
     const res =
       typeof cf.patch === "function"
         ? await cf.patch(`/zones/${zoneId}/settings/${setting}`, { body: { value: body.value } })

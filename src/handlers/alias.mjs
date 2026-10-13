@@ -1,5 +1,5 @@
 import { readAliases, writeAliases } from "../aliases.mjs";
-import { printResourceHelp } from "../help.mjs";
+import { printResourceHelp } from "../help/resources.mjs";
 
 export function handleAlias({ args, opts, printer, homeDir, fsImpl }) {
   const stored = readAliases(homeDir, fsImpl);

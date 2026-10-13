@@ -101,3 +101,17 @@ test("browser discovery handles missing defaults and unavailable Puppeteer", asy
     "No supported Chrome",
   );
 });
+
+test("browser discovery uses its defaults and an empty PATH value", async () => {
+  const previous = process.env.CHROME_PATH;
+  process.env.CHROME_PATH = "/missing/default-browser";
+  try {
+    await expect(findBrowser()).rejects.toThrow("CHROME_PATH does not exist");
+  } finally {
+    if (previous === undefined) delete process.env.CHROME_PATH;
+    else process.env.CHROME_PATH = previous;
+  }
+  await expect(
+    findBrowser({ platform: "linux", env: { PATH: undefined }, accessImpl: async () => false }),
+  ).rejects.toThrow("No supported Chrome");
+});
