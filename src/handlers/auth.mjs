@@ -1,5 +1,6 @@
+import { handleAuthProfile } from "./auth-profile.mjs";
+import { handleAuthStatus } from "./auth-status.mjs";
 import { readProfiles, writeProfiles } from "../profiles.mjs";
-import { printTable } from "../output.mjs";
 import { deleteCredential, readCredential, writeCredential } from "../credentials.mjs";
 import { fs } from "../fs.mjs";
 import process from "node:process";
@@ -95,26 +96,6 @@ export async function handleAuth({
   inspectApiTokenImpl = inspectApiToken,
 } = /* istanbul ignore next */ {}) {
   const data = read(profileHome, profileFs);
-  if (action === "list") {
-    const profiles = Object.entries(data.profiles).map(([name, value]) => ({
-      name,
-      active: name === data.active,
-      authMethod: value.authMethod || (resource === "auth" ? "api-token" : "oauth"),
-    }));
-    if (!profiles.length)
-      profiles.push({
-        name: "environment",
-        active: true,
-        authMethod: "not configured",
-      });
-    return outputJson
-      ? toJsonOutput(profiles)
-      : printTable(
-          ["ACTIVE", "NAME", "AUTH METHOD"],
-          profiles.map((profile) => [profile.active ? "*" : "", profile.name, profile.authMethod]),
-          printer.log,
-        );
-  }
   if (action === "login") {
     const name = opts?.profile || "default";
     if (resource === "oauth") {
@@ -203,105 +184,34 @@ export async function handleAuth({
       : "";
     return printer.log(`Saved and activated profile ${name}${discovered}`);
   }
-  if (action === "switch") {
-    const name = opts?.profile;
-    if (!name || !data.profiles[name]) {
-      fail(`Unknown profile: ${name || "(missing --profile)"}`);
-      return;
-    }
-    data.active = name;
-    write(data, profileHome, profileFs);
-    return printer.log(`Activated profile ${name}`);
-  }
-  if (action === "logout") {
-    const name = opts?.profile || data.active;
-    if (!name || !data.profiles[name]) {
-      fail(`Unknown profile: ${name || "(none)"}`);
-      return;
-    }
-    const credential = await readCredentialImpl(name);
-    try {
-      if (credential?.oauthRefreshToken)
-        await revokeOAuthImpl({ token: credential.oauthRefreshToken });
-      else if (credential?.oauthAccessToken)
-        await revokeOAuthImpl({ token: credential.oauthAccessToken });
-    } catch {
-      // Local cleanup must still happen when the remote token is expired.
-    }
-    try {
-      await deleteCredentialImpl(name);
-    } catch {
-      /* local cleanup is best effort */
-    }
-    delete data.profiles[name];
-    if (data.active === name) data.active = Object.keys(data.profiles)[0] || null;
-    write(data, profileHome, profileFs);
-    return printer.log(`Removed profile ${name}`);
-  }
-  if (action === "status") {
-    if (!process.env.CLOUDFLARE_API_TOKEN) {
-      fail("You are not logged into Cloudflare. Run: cfhub auth login");
-      return;
-    }
-    const statusProfile = process.env.CLOUDFLARE_PROFILE || data.active || "environment";
-    const token = process.env.CLOUDFLARE_API_TOKEN;
-    if (token?.startsWith("cfat_")) {
-      const accountId =
-        opts?.["account-id"] ||
-        data.profiles[statusProfile]?.accountId ||
-        process.env.CLOUDFLARE_ACCOUNT_ID;
-      /* istanbul ignore next -- account list response shape depends on Cloudflare account access. */
-      const accounts = await cf.get(accountId ? `/accounts/${accountId}` : "/accounts");
-      const status = {
-        authenticated: true,
-        profile: statusProfile,
-        method: "account-api-token",
-        accountId: accountId || null,
-        accounts: accountId ? undefined : accounts?.result || [],
-      };
-      return outputJson
-        ? toJsonOutput(
-            Object.fromEntries(Object.entries(status).filter(([, value]) => value !== undefined)),
-          )
-        : printer.log(`${status.profile} authenticated with account API token`);
-    }
-    const identity = await cf.get("/user");
-    const status = {
-      authenticated: true,
-      profile: statusProfile,
-      /* istanbul ignore next -- both resources share this handler in production. */
-      method:
-        resource === "oauth" ? "oauth" : data.profiles[statusProfile]?.authMethod || "api-token",
-      id: identity?.result?.id || null,
-      email: identity?.result?.email || null,
-    };
-    return outputJson
-      ? toJsonOutput(status)
-      : printer.log(`${status.profile} authenticated${status.email ? ` as ${status.email}` : ""}`);
-  }
-  if (action === "verify") {
-    if (!process.env.CLOUDFLARE_API_TOKEN) {
-      fail("cfhub auth verify requires CLOUDFLARE_API_TOKEN");
-      return;
-    }
-    const statusProfile = process.env.CLOUDFLARE_PROFILE || data.active || "environment";
-    const token = process.env.CLOUDFLARE_API_TOKEN;
-    const accountId =
-      opts?.["account-id"] ||
-      data.profiles[statusProfile]?.accountId ||
-      process.env.CLOUDFLARE_ACCOUNT_ID;
-    if (token?.startsWith("cfat_") && !accountId) {
-      fail("Account API token verification requires --account-id or CLOUDFLARE_ACCOUNT_ID");
-      return;
-    }
-    const result = await cf.get(
-      token?.startsWith("cfat_") ? `/accounts/${accountId}/tokens/verify` : "/user/tokens/verify",
-    );
-    const verified = {
-      verified: result?.result?.status === "active",
-      status: result?.result?.status || "unknown",
-    };
-    return outputJson ? toJsonOutput(verified) : printer.log(`${verified.status}`);
-  }
+  if (["list", "switch", "logout"].includes(action))
+    return handleAuthProfile({
+      action,
+      resource,
+      opts,
+      data,
+      outputJson,
+      toJsonOutput,
+      printer,
+      fail,
+      write,
+      profileHome,
+      profileFs,
+      readCredentialImpl,
+      revokeOAuthImpl,
+      deleteCredentialImpl,
+    });
+  if (action === "status" || action === "verify")
+    return handleAuthStatus({
+      action,
+      resource,
+      opts,
+      cf,
+      data,
+      outputJson,
+      toJsonOutput,
+      printer,
+      fail,
+    });
   fail(`Unknown auth action: ${action}`);
 }

@@ -16,13 +16,18 @@ const base = () => ({
   fail: jest.fn(),
 });
 
-test("health supports list, get, create, and delete", async () => {
+test("health supports each action in JSON and text output", async () => {
   const ctx = base();
   for (const action of ["list", "get", "create", "delete"]) await handleHealth({ ...ctx, action });
   expect(ctx.cf.get).toHaveBeenCalledWith("/zones/z1/healthchecks", undefined);
   expect(ctx.cf.get).toHaveBeenCalledWith("/zones/z1/healthchecks/h1", undefined);
   expect(ctx.cf.post).toHaveBeenCalledWith("/zones/z1/healthchecks", { body: { type: "https" } });
   expect(ctx.cf.delete).toHaveBeenCalledWith("/zones/z1/healthchecks/h1");
+
+  const text = base();
+  text.outputJson = false;
+  for (const action of ["list", "get", "create", "delete"]) await handleHealth({ ...text, action });
+  expect(text.printer.log).toHaveBeenCalled();
 });
 
 test("health dry-run and unknown action are safe", async () => {
@@ -31,13 +36,6 @@ test("health dry-run and unknown action are safe", async () => {
   await handleHealth({ ...ctx, action: "nope" });
   expect(ctx.cf.post).not.toHaveBeenCalled();
   expect(ctx.fail).toHaveBeenCalledWith("Unknown health action: nope");
-});
-
-test("health text output covers each action", async () => {
-  const ctx = base();
-  ctx.outputJson = false;
-  for (const action of ["list", "get", "create", "delete"]) await handleHealth({ ...ctx, action });
-  expect(ctx.printer.log).toHaveBeenCalled();
 });
 
 test("audit lists account logs", async () => {

@@ -151,3 +151,97 @@ test("lists reports missing values and unknown actions", async () => {
   await handleLists(unknown);
   expect(unknown.fail).toHaveBeenCalledWith("Unknown lists action: unknown");
 });
+describe("handler command integration cases", () => {
+  let fail;
+  let toJsonOutput;
+  let log;
+  beforeEach(() => {
+    fail = jest.fn((msg) => {
+      throw new Error(msg);
+    });
+    toJsonOutput = jest.fn();
+    log = jest.spyOn(console, "log").mockImplementation(() => {});
+  });
+  afterEach(() => log.mockRestore());
+  test("handleLists list/get/unknown and validation", async () => {
+    async function* iterator() {
+      yield { id: "l1", name: "list1" };
+    }
+    const cf = {
+      rules: {
+        lists: {
+          list: jest.fn().mockReturnValue(iterator()),
+          get: jest.fn().mockResolvedValue({ id: "l1" }),
+        },
+      },
+    };
+    await handleLists({
+      cf,
+      action: "list",
+      opts: { "account-id": "acct1" },
+      outputJson: false,
+      toJsonOutput,
+      fail,
+    });
+    await handleLists({
+      cf,
+      action: "get",
+      opts: { "account-id": "acct1", id: "l1" },
+      outputJson: true,
+      toJsonOutput,
+      fail,
+    });
+    await expect(
+      handleLists({
+        cf,
+        action: "bogus",
+        opts: { "account-id": "acct1" },
+        outputJson: false,
+        toJsonOutput,
+        fail,
+      }),
+    ).rejects.toThrow("Unknown lists action: bogus");
+    await expect(
+      handleLists({ cf, action: "list", opts: {}, outputJson: false, toJsonOutput, fail }),
+    ).rejects.toThrow("Missing --account-id or CLOUDFLARE_ACCOUNT_ID");
+  });
+
+  test("handleLists covers text get and JSON list output", async () => {
+    const printer = { log: jest.fn() };
+    const toJsonOutput = jest.fn();
+    const fail = jest.fn((msg) => {
+      throw new Error(msg);
+    });
+    async function* iterator() {
+      yield { id: "l2", name: "list2" };
+    }
+    const cf = {
+      rules: {
+        lists: {
+          list: jest.fn().mockReturnValue(iterator()),
+          get: jest.fn().mockResolvedValue({ id: "l2" }),
+        },
+      },
+    };
+    await handleLists({
+      cf,
+      action: "list",
+      opts: { "account-id": "a" },
+      outputJson: true,
+      printer,
+      toJsonOutput,
+      fail,
+    });
+    await handleLists({
+      cf,
+      action: "get",
+      opts: { "account-id": "a", id: "l2" },
+      outputJson: false,
+      printer,
+      toJsonOutput,
+      fail,
+    });
+    expect(toJsonOutput).toHaveBeenCalledWith([{ id: "l2", name: "list2" }]);
+    expect(printer.log).toHaveBeenCalled();
+  });
+});
