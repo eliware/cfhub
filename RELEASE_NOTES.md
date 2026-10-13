@@ -1,18 +1,23 @@
 # Release Notes
 
-## Unreleased
-
-### Changed
-
-- No changes are pending.
-
 ## 12.0.0 — 2026-10-13
 
+### Added
+
+- Added the `@eliware/common` runtime package and the `@eliware/test` development package.
+- Added guides for setup, profiles, commands, safe writes, OAuth, and local extensions.
+- Added OAuth web assets and browser checks.
+
 ### Changed
 
-- Aligned repository metadata, documentation, and workflows with Convention v12.
-- Added the Eliware common runtime package and validation package.
-- This version is under local review. It is not published.
+- Updated command and OAuth modules while preserving the CLI resource and action model.
+- Aligned package metadata, workflows, and project guidance with Eliware Convention 12.
+- Moved build and test tools into the `bin/` and `test-fixtures/` folders.
+
+### Fixed
+
+- Fixed inventory and zone reports for clients without a generic SDK request method.
+- Fixed OAuth web bundles so the local login pages load their styles and scripts.
 
 ## 1.0.5 — 2026-08-19
 
@@ -25,11 +30,11 @@
 ### Added
 
 - Added Cloudflare Account API token setup guidance.
-- Added dry-run live checks for real-token reads and write previews.
+- Added dry-run checks for real-token reads and write previews.
 
 ### Changed
 
-- Moved supported resource operations to verified Cloudflare API endpoints.
+- Moved resource operations to verified Cloudflare API endpoints.
 - Updated Cloudflare, build, lint, and browser-test dependencies.
 
 ## 1.0.3 — 2026-08-15
@@ -66,5 +71,5 @@
 ### Added
 
 - Added Cloudflare zone, DNS, rules, settings, list, and account commands.
-- Added API-token login, profiles, dry-run writes, and confirmation for deletes.
+- Added API token login, profiles, dry-run writes, and confirmation for deletes.
 - Added JSON output, OAuth login, command help, and local extensions.

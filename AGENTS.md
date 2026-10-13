@@ -2,19 +2,19 @@
 
 ## Project
 
-Build cfhub, a Cloudflare administration CLI. Use Node.js 26 and native ESM.
+Build cfhub, a Cloudflare CLI. Use Node.js 26 and native ESM.
 
 ## Scope and boundaries
 
-Manage Cloudflare resources through the Cloudflare API. Keep credentials private. Do not publish, tag, or push without direct user approval.
+Manage Cloudflare resources through its API. Keep credentials private. Do not publish, tag, or push without direct user approval.
 
 ## Layout
 
-Keep implementation in `src/`. Keep launchers in `bin/`. Keep tests in `tests/`. Keep fixtures in `test-fixtures/`.
+Keep source files in `src/`. Keep the CLI launcher in `bin/`. Keep tests in `tests/`.
 
 ## Development
 
-Read `README.md` before behavior changes. Keep handlers small. Use dependency injection for external services and process behavior. Add tests for behavior changes.
+Read `README.md` before behavior changes. Keep handlers small and focused. Use dependency injection for external services. Add tests for behavior changes.
 
 ## Validation
 
@@ -22,24 +22,24 @@ Run `npm test`, `npm run lint`, `npm run audit`, `npm run format`, `npm run form
 
 ## Security
 
-Require `--force` for destructive actions. Support `--dry-run` for writes where available. Do not expose credentials in output, errors, fixtures, or diffs.
+Require `--force` for destructive actions. Support `--dry-run` for writes where available. Keep credentials out of output, errors, fixtures, and commits.
 
 ## Changes
 
-Update `README.md` when commands or configuration change. Keep changes scoped. Check the result before you report completion.
+Update user docs when commands or settings change. Keep changes scoped. Check your work before you report completion.
 
 ## Application
 
-Run cfhub as a local Node.js CLI. Use Cloudflare API tokens or OAuth profiles. The CLI has no background service.
+Run cfhub as a local CLI. Use Cloudflare API tokens or OAuth profiles.
 
 ## CLI
 
-Run `cfhub --help` for commands. Run `cfhub <command> --help` for command details. Use `--dry-run` before writes. Use `--force` for destructive actions.
+Run `cfhub --help` for commands. Run `cfhub <resource> --help` for actions. Preview writes with `--dry-run`. Confirm destructive actions with `--force`.
 
 ## Web
 
-Use the local OAuth pages in `src/oauth-web/`. Run `npm run build:web` after source style or page changes. Browser checks use Puppeteer.
+Use OAuth pages in `src/oauth-web/`. Run `npm run build:web` after page or style changes.
 
 ## npm publication
 
-Run `npm run pack` before publication review. The CI workflow validates changes. A user must approve each publication.
+Run `npm run pack` before publication review. Get direct user approval before you publish.

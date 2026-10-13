@@ -1,31 +1,35 @@
-# `cfhub` extensions
+# Local extensions
 
-Extensions are local packages installed below `~/.config/cfhub/extensions/<name>`.
-Each package contains a `cfhub-extension.json` manifest:
+An extension adds local commands to cfhub. cfhub loads extensions from `~/.config/cfhub/extensions/<name>`.
+
+## Manifest
+
+Each extension folder must contain `cf-extension.json`. The manifest names the extension and maps command names to module files:
 
 ```json
 {
   "name": "hello",
   "version": "1.0.0",
-  "commands": { "hello": "hello.mjs" }
+  "commands": {
+    "hello": "hello.mjs"
+  }
 }
 ```
 
-The referenced module exports a default function (or `run`/`handler`) that
-receives the normal command context: `cfhub`, `action`, `opts`, `body`, output
-helpers, printer, and failure handling.
+The command module must export a default function, `run` function, or `handler` function. cfhub passes command options and output helpers to that function.
 
-Install and use the example:
+## Install the example
 
 ```sh
 cfhub extension install --path examples/extensions/hello
-cfhub hello --name Eli
 cfhub extension list
 cfhub extension info --name hello
-cfhub extension upgrade --path examples/extensions/hello
-cfhub extension remove --name hello --force
 ```
 
-Extensions are intentionally separate from the core resource list. Kubernetes,
-GitOps, VyOS, and certificate deployment integrations should be shipped as
-separate extensions when those projects are ready.
+Run the installed command by its name. Use command help to see its options.
+
+## Update or remove an extension
+
+Run `cfhub extension upgrade --path <folder>` to copy a new extension version. Run `cfhub extension remove --name <name> --force` to remove an extension.
+
+Install extensions only from sources that you trust. An extension runs as your user and can access files and credentials that your account can access.
