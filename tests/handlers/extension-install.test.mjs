@@ -58,3 +58,26 @@ test("refuses to replace an installed extension", () => {
   expect(fail).toHaveBeenCalledWith("Extension demo is already installed. Use upgrade instead.");
   expect(fsImpl.cpSync).not.toHaveBeenCalled();
 });
+
+test("refuses an extension manifest with a command path traversal", () => {
+  const fail = jest.fn();
+  const cpSync = jest.fn();
+  installExtension({
+    opts: { path: "/source" },
+    printer: { log: jest.fn() },
+    fail,
+    fsImpl: {
+      readFileSync: () =>
+        JSON.stringify({
+          name: "demo",
+          version: "1",
+          commands: { demo: "../../outside.mjs" },
+        }),
+      mkdirSync: jest.fn(),
+      cpSync,
+    },
+    homeDir: "/home",
+  });
+  expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
+  expect(cpSync).not.toHaveBeenCalled();
+});

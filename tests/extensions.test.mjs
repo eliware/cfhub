@@ -15,6 +15,13 @@ test("validates extension manifest fields and optional name", () => {
   expect(validateExtensionManifest(manifest, "hello")).toBe(true);
   expect(validateExtensionManifest(manifest, "other")).toBe(false);
   expect(validateExtensionManifest({ name: "hello" })).toBe(false);
+  expect(validateExtensionManifest({ ...manifest, commands: { hello: "../outside.mjs" } })).toBe(
+    false,
+  );
+  expect(validateExtensionManifest({ ...manifest, commands: { hello: "" } })).toBe(false);
+  expect(validateExtensionManifest({ ...manifest, commands: [] })).toBe(false);
+  expect(validateExtensionManifest({ ...manifest, commands: { hello: 4 } })).toBe(false);
+  expect(validateExtensionManifest({ ...manifest, name: "../outside" })).toBe(false);
 });
 
 test("extension discovery and module loading use the manifest contract", async () => {
@@ -64,4 +71,23 @@ test("extension loader accepts named handlers and null modules", async () => {
     await loadExtensionCommand({ name: "x", commands: { x: "empty.mjs" } }, "x", home),
   ).toBeNull();
   expect(await loadExtensionCommand({ name: "x", commands: {} }, "missing")).toBeNull();
+});
+
+test("extension loader rejects a command path outside its folder", async () => {
+  await expect(
+    loadExtensionCommand({ name: "x", commands: { bad: "../outside.mjs" } }, "bad", os.tmpdir()),
+  ).rejects.toThrow("Unsafe extension command path: bad");
+  await expect(
+    loadExtensionCommand({ name: "x", commands: { bad: "." } }, "bad", os.tmpdir()),
+  ).rejects.toThrow("Unsafe extension command path: bad");
+  await expect(
+    loadExtensionCommand({ name: "../outside", commands: { bad: "run.mjs" } }, "bad", os.tmpdir()),
+  ).rejects.toThrow("Unsafe extension command path: bad");
+  await expect(
+    loadExtensionCommand(
+      { name: "x", commands: { bad: path.resolve("outside.mjs") } },
+      "bad",
+      os.tmpdir(),
+    ),
+  ).rejects.toThrow("Unsafe extension command path: bad");
 });

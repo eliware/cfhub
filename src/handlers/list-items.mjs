@@ -1,6 +1,8 @@
 import { getAccountId, getId } from "./identifiers.mjs";
 import { requireValue } from "./argument-validation.mjs";
 import { printTable } from "../output-table.mjs";
+import { createListItems } from "./list-items-write.mjs";
+import { deleteListItems } from "./list-items-delete.mjs";
 
 export async function handleListItems({
   cf,
@@ -38,38 +40,31 @@ export async function handleListItems({
   }
 
   if (action === "create") {
-    requireValue(body, "Missing --data or --file", fail);
-    if (opts["dry-run"])
-      return printer.log(
-        JSON.stringify({ listId: id, action: "create", body, dryRun: true }, null, 2),
-      );
-
-    const res =
-      typeof cf.post === "function"
-        ? await cf.post(`/accounts/${accountId}/rules/lists/${id}/items`, {
-            body: Array.isArray(body) ? body : [body],
-          })
-        : await cf.rules.lists.items.create(id, {
-            account_id: accountId,
-            body: Array.isArray(body) ? body : [body],
-          });
-    return outputJson ? toJsonOutput(res) : printer.log(JSON.stringify(res, null, 2));
+    return createListItems({
+      cf,
+      accountId,
+      id,
+      body,
+      opts,
+      outputJson,
+      printer,
+      toJsonOutput,
+      fail,
+    });
   }
 
   if (action === "delete") {
-    if (!body || !Array.isArray(body.ids)) fail('Missing --data or --file with {"ids":[...]}');
-    requireValue(opts.force, "Refusing to delete without --force", fail);
-
-    const res =
-      typeof cf.delete === "function"
-        ? await cf.delete(`/accounts/${accountId}/rules/lists/${id}/items`, {
-            body: { items: body.ids.map((itemId) => ({ id: itemId })) },
-          })
-        : await cf.rules.lists.items.delete(id, {
-            account_id: accountId,
-            items: body.ids.map((itemId) => ({ id: itemId })),
-          });
-    return outputJson ? toJsonOutput(res) : printer.log(JSON.stringify(res, null, 2));
+    return deleteListItems({
+      cf,
+      accountId,
+      id,
+      body,
+      opts,
+      outputJson,
+      printer,
+      toJsonOutput,
+      fail,
+    });
   }
 
   fail(`Unknown list-items action: ${action}`);

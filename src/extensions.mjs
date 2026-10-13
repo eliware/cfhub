@@ -21,8 +21,25 @@ export function readExtensionManifest(root, name, fsImpl = fs) {
 
 export function validateExtensionManifest(manifest, name) {
   return Boolean(
-    manifest?.name && (!name || manifest.name === name) && manifest.version && manifest.commands,
+    manifest?.name &&
+    isSafeExtensionName(manifest.name) &&
+    (!name || manifest.name === name) &&
+    manifest.version &&
+    manifest.commands &&
+    typeof manifest.commands === "object" &&
+    !Array.isArray(manifest.commands) &&
+    Object.values(manifest.commands).every(isSafeExtensionCommandPath),
   );
+}
+
+function isSafeExtensionName(name) {
+  return typeof name === "string" && ![".", ".."].includes(name) && !/[\\/]/.test(name);
+}
+
+function isSafeExtensionCommandPath(commandPath) {
+  if (typeof commandPath !== "string" || !commandPath.trim() || path.isAbsolute(commandPath))
+    return false;
+  return !commandPath.replaceAll("\\", "/").split("/").includes("..");
 }
 
 export function discoverExtensions(homeDir = os.homedir(), fsImpl = fs) {
@@ -37,7 +54,15 @@ export function discoverExtensions(homeDir = os.homedir(), fsImpl = fs) {
 export async function loadExtensionCommand(manifest, command, homeDir = os.homedir()) {
   const relative = manifest.commands[command];
   if (!relative) return null;
-  const modulePath = path.resolve(extensionRoot(homeDir), manifest.name, relative);
+  if (!isSafeExtensionName(manifest.name))
+    throw new Error(`Unsafe extension command path: ${command}`);
+  if (!isSafeExtensionCommandPath(relative))
+    throw new Error(`Unsafe extension command path: ${command}`);
+  const extensionDir = path.resolve(extensionRoot(homeDir), manifest.name);
+  const modulePath = path.resolve(extensionDir, relative);
+  const withinExtension = path.relative(extensionDir, modulePath);
+  if (!withinExtension || withinExtension === ".." || withinExtension.startsWith(`..${path.sep}`))
+    throw new Error(`Unsafe extension command path: ${command}`);
   const module = await import(pathToFileURL(modulePath).href);
   return module.default || module.run || module.handler || null;
 }

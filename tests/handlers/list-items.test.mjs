@@ -14,7 +14,7 @@ const context = (action, overrides = {}) => ({
   ...overrides,
 });
 
-test("lists SDK arrays, raw responses, and generic iterator items", async () => {
+test("lists generic and SDK responses", async () => {
   const items = [{ id: "a", value: "value" }, { id: "b", ip: "192.0.2.1" }, { id: "c" }];
   const toJsonOutput = jest.fn();
   const get = jest.fn().mockResolvedValue({ result: items });
@@ -27,7 +27,6 @@ test("lists SDK arrays, raw responses, and generic iterator items", async () => 
     context("list", { cf: { get: jest.fn().mockResolvedValue(raw) }, toJsonOutput: rawOutput }),
   );
   expect(rawOutput).toHaveBeenCalledWith(raw);
-
   async function* values() {
     yield* items;
   }
@@ -45,72 +44,23 @@ test("lists SDK arrays, raw responses, and generic iterator items", async () => 
   expect(log.mock.calls[0][0]).toContain('{"id":"c"}');
 });
 
-test("creates records with SDK and generic clients, arrays, and dry-run", async () => {
-  const post = jest.fn().mockResolvedValue({ ok: "post" });
-  const json = jest.fn();
-  await handleListItems(
-    context("create", { cf: { post }, body: [{ ip: "192.0.2.1" }], toJsonOutput: json }),
-  );
+test("dispatches create and delete actions to their handlers", async () => {
+  const post = jest.fn().mockResolvedValue({});
+  await handleListItems(context("create", { cf: { post }, body: { ip: "192.0.2.1" } }));
   expect(post).toHaveBeenCalledWith("/accounts/acct/rules/lists/list/items", {
     body: [{ ip: "192.0.2.1" }],
   });
-  const create = jest.fn().mockResolvedValue({ ok: "create" });
-  const printer = { log: jest.fn() };
-  await handleListItems(
-    context("create", {
-      cf: { rules: { lists: { items: { create } } } },
-      body: { ip: "192.0.2.2" },
-      outputJson: false,
-      printer,
-    }),
-  );
-  expect(create).toHaveBeenCalledWith("list", { account_id: "acct", body: [{ ip: "192.0.2.2" }] });
-  expect(printer.log).toHaveBeenCalledWith('{\n  "ok": "create"\n}');
-  const dry = { log: jest.fn() };
-  await handleListItems(
-    context("create", {
-      opts: { "account-id": "acct", id: "list", "dry-run": true },
-      body: [],
-      printer: dry,
-    }),
-  );
-  expect(dry.log).toHaveBeenCalledWith(expect.stringContaining('"dryRun": true'));
-  await expect(handleListItems(context("create", { body: null }))).rejects.toThrow(
-    "Missing --data",
-  );
-});
-
-test("deletes list items through SDK and generic clients", async () => {
-  const remove = jest.fn().mockResolvedValue({ ok: true });
-  const toJsonOutput = jest.fn();
+  const remove = jest.fn().mockResolvedValue({});
   await handleListItems(
     context("delete", {
       cf: { delete: remove },
       opts: { "account-id": "acct", id: "list", force: true },
-      body: { ids: ["a", "b"] },
-      toJsonOutput,
+      body: { ids: ["a"] },
     }),
   );
   expect(remove).toHaveBeenCalledWith("/accounts/acct/rules/lists/list/items", {
-    body: { items: [{ id: "a" }, { id: "b" }] },
+    body: { items: [{ id: "a" }] },
   });
-  const removeGeneric = jest.fn().mockResolvedValue({ ok: true });
-  const printer = { log: jest.fn() };
-  await handleListItems(
-    context("delete", {
-      cf: { rules: { lists: { items: { delete: removeGeneric } } } },
-      body: { ids: ["a"] },
-      opts: { "account-id": "acct", id: "list", force: true },
-      outputJson: false,
-      printer,
-    }),
-  );
-  expect(removeGeneric).toHaveBeenCalledWith("list", { account_id: "acct", items: [{ id: "a" }] });
-  expect(printer.log).toHaveBeenCalledWith('{\n  "ok": true\n}');
-  await expect(handleListItems(context("delete", { body: {} }))).rejects.toThrow("Missing --data");
-  await expect(handleListItems(context("delete", { body: { ids: [] } }))).rejects.toThrow(
-    "without --force",
-  );
 });
 
 test("requires account and list IDs and rejects unknown actions", async () => {
@@ -123,18 +73,4 @@ test("requires account and list IDs and rejects unknown actions", async () => {
   await expect(handleListItems(context("other"))).rejects.toThrow(
     "Unknown list-items action: other",
   );
-});
-
-test("normalizes object and array input for SDK and generic create", async () => {
-  const item = { ip: "192.0.2.9" };
-  const post = jest.fn().mockResolvedValue({});
-  await handleListItems(context("create", { cf: { post }, body: item }));
-  await handleListItems(context("create", { cf: { post }, body: [item] }));
-  expect(post).toHaveBeenNthCalledWith(1, "/accounts/acct/rules/lists/list/items", {
-    body: [item],
-  });
-  const create = jest.fn().mockResolvedValue({});
-  const client = { rules: { lists: { items: { create } } } };
-  await handleListItems(context("create", { cf: client, body: [item] }));
-  expect(create).toHaveBeenCalledWith("list", { account_id: "acct", body: [item] });
 });
