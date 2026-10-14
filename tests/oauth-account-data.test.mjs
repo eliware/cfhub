@@ -93,3 +93,20 @@ test("loads every zone page and DNS records for every zone", async () => {
     expect.any(Object),
   );
 });
+
+test("requests DNS data for independent zones in parallel", async () => {
+  const pending = [];
+  const fetchImpl = jest.fn((url) => {
+    if (url.includes("/zones?"))
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ result: [{ id: "one" }, { id: "two" }] }),
+      });
+    return new Promise((resolve) => pending.push(resolve));
+  });
+  const loading = loadOAuthAccountData({ enabled, accessToken: "token", fetchImpl });
+  await new Promise((resolve) => setImmediate(resolve));
+  expect(pending).toHaveLength(2);
+  for (const resolve of pending) resolve({ ok: true, json: async () => ({ result: [] }) });
+  await expect(loading).resolves.toMatchObject({ zones: [{ id: "one" }, { id: "two" }], dns: [] });
+});

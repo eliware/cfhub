@@ -73,3 +73,20 @@ test("handles dry runs and unsupported client methods", async () => {
   ).resolves.toEqual({ done: true });
   expect(fail).toHaveBeenCalledWith("Cloudflare client does not support PUT");
 });
+
+test("performs GET requests when dry-run is enabled", async () => {
+  const get = jest.fn().mockResolvedValue({ result: [{ id: "zone-1" }] });
+  const printer = { log: jest.fn() };
+  await expect(
+    executeApiRequest({
+      cf: { get },
+      requestOptions,
+      body: null,
+      opts: { "dry-run": true },
+      printer,
+      fail: jest.fn(),
+    }),
+  ).resolves.toEqual({ done: false, result: { result: [{ id: "zone-1" }] } });
+  expect(get).toHaveBeenCalledWith("/zones", undefined);
+  expect(printer.log).not.toHaveBeenCalled();
+});

@@ -3,7 +3,7 @@ import { requestWithBackoff } from "../request-backoff.mjs";
 
 export async function executeApiRequest({ cf, requestOptions, body, opts, printer, fail }) {
   const { path, method } = requestOptions;
-  if (opts["dry-run"]) {
+  if (opts["dry-run"] && method !== "GET") {
     printer.log(JSON.stringify({ dryRun: true, method, path, body }, null, 2));
     return { done: true };
   }
