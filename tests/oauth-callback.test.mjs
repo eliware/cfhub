@@ -1,8 +1,8 @@
 import { jest } from "@jest/globals";
 import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
-
 import { createOAuthCallback } from "../src/oauth-callback.mjs";
+import { getOAuthResponse } from "../test-fixtures/unit/oauth-http.mjs";
 
 test("OAuth callback factory is exported", () => {
   expect(createOAuthCallback).toEqual(expect.any(Function));
@@ -31,29 +31,14 @@ test("OAuth login serves a state-protected callback and exchanges the code", asy
   });
   await new Promise((resolve) => setTimeout(resolve, 10));
   const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
-  await new Promise((resolve, reject) =>
-    http
-      .get(
-        `${authorization.searchParams.get("redirect_uri").replace("/oauth/callback", "/wrong")}?state=${authorization.searchParams.get("state")}`,
-        (response) => {
-          expect(response.statusCode).toBe(404);
-          response.resume();
-          response.on("end", resolve);
-        },
-      )
-      .on("error", reject),
-  );
-  await new Promise((resolve, reject) =>
-    http
-      .get(
-        `${authorization.searchParams.get("redirect_uri")}?state=${authorization.searchParams.get("state")}&code=code`,
-        (response) => {
-          response.resume();
-          response.on("end", resolve);
-        },
-      )
-      .on("error", reject),
-  );
+  const wrongRoute = new URL(authorization.searchParams.get("redirect_uri"));
+  wrongRoute.pathname = "/wrong";
+  wrongRoute.searchParams.set("state", authorization.searchParams.get("state"));
+  expect((await getOAuthResponse(wrongRoute)).statusCode).toBe(404);
+  const callback = new URL(authorization.searchParams.get("redirect_uri"));
+  callback.searchParams.set("state", authorization.searchParams.get("state"));
+  callback.searchParams.set("code", "code");
+  await getOAuthResponse(callback);
   await expect(resultPromise).resolves.toMatchObject({
     accessToken: "access",
     refreshToken: "refresh",

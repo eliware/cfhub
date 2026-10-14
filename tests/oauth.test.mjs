@@ -3,6 +3,7 @@ import { EventEmitter } from "node:events";
 import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
 import { verifyOAuthPickerIntegration } from "../test-fixtures/unit/oauth-picker-integration.mjs";
+import { getOAuthResponse } from "../test-fixtures/unit/oauth-http.mjs";
 
 test("OAuth login validates client configuration before opening a browser", async () => {
   await expect(loginOAuth({ clientId: "" })).rejects.toThrow("Missing CFHUB_OAUTH_CLIENT_ID");
@@ -23,17 +24,10 @@ test("OAuth callback reports provider and browser errors", async () => {
   await new Promise((resolve) => setTimeout(resolve, 10));
   browser.emit("error", { message: "no opener" });
   const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
-  await new Promise((resolve, reject) =>
-    http
-      .get(
-        `${authorization.searchParams.get("redirect_uri")}?state=${authorization.searchParams.get("state")}&error=access_denied`,
-        (response) => {
-          response.resume();
-          response.on("end", resolve);
-        },
-      )
-      .on("error", reject),
-  );
+  const callback = new URL(authorization.searchParams.get("redirect_uri"));
+  callback.searchParams.set("state", authorization.searchParams.get("state"));
+  callback.searchParams.set("error", "access_denied");
+  await getOAuthResponse(callback);
   await expect(failure).resolves.toMatchObject({
     message: "Cloudflare authorization failed: access_denied",
   });
@@ -92,17 +86,10 @@ test("OAuth login falls back when the first callback port is busy", async () => 
     });
     await new Promise((resolve) => setTimeout(resolve, 10));
     const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
-    await new Promise((resolve, reject) =>
-      http
-        .get(
-          `${authorization.searchParams.get("redirect_uri")}?state=${authorization.searchParams.get("state")}&code=code`,
-          (response) => {
-            response.resume();
-            response.on("end", resolve);
-          },
-        )
-        .on("error", reject),
-    );
+    const callback = new URL(authorization.searchParams.get("redirect_uri"));
+    callback.searchParams.set("state", authorization.searchParams.get("state"));
+    callback.searchParams.set("code", "code");
+    await getOAuthResponse(callback);
     await expect(promise).resolves.toMatchObject({ accessToken: "access" });
   } finally {
     await new Promise((resolve) => occupied.close(resolve));
@@ -122,17 +109,10 @@ test("OAuth callback renders a generic provider failure", async () => {
   const failure = promise.catch((error) => error);
   await new Promise((resolve) => setTimeout(resolve, 10));
   const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
-  await new Promise((resolve, reject) =>
-    http
-      .get(
-        `${authorization.searchParams.get("redirect_uri")}?state=${authorization.searchParams.get("state")}&error=server_error`,
-        (response) => {
-          response.resume();
-          response.on("end", resolve);
-        },
-      )
-      .on("error", reject),
-  );
+  const callback = new URL(authorization.searchParams.get("redirect_uri"));
+  callback.searchParams.set("state", authorization.searchParams.get("state"));
+  callback.searchParams.set("error", "server_error");
+  await getOAuthResponse(callback);
   await expect(failure).resolves.toMatchObject({
     message: "Cloudflare authorization failed: server_error",
   });
