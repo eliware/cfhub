@@ -1,6 +1,7 @@
 const textAssets = {
   "/oauth-picker.css": ["oauth-web/bundled/oauth-picker.css", "text/css; charset=utf-8"],
   "/oauth-picker.mjs": ["oauth-web/oauth-picker.mjs", "text/javascript; charset=utf-8"],
+  "/oauth-picker-app.mjs": ["oauth-web/oauth-picker-app.mjs", "text/javascript; charset=utf-8"],
   "/picker-groups.mjs": ["oauth-web/picker-groups.mjs", "text/javascript; charset=utf-8"],
   "/picker-events.mjs": ["oauth-web/picker-events.mjs", "text/javascript; charset=utf-8"],
   "/picker-state.mjs": ["oauth-web/picker-state.mjs", "text/javascript; charset=utf-8"],

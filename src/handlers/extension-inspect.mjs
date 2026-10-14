@@ -1,5 +1,5 @@
 import { discoverExtensions } from "../extensions.mjs";
-import { printTable } from "../output-table.mjs";
+import { outputExtensionInfo, outputExtensionList } from "./extension-inspect-view.mjs";
 
 export function inspectExtension({
   action,
@@ -13,13 +13,7 @@ export function inspectExtension({
 }) {
   const manifests = discoverExtensions(homeDir, fsImpl);
   if (action === "list")
-    return outputJson
-      ? toJsonOutput(manifests)
-      : printTable(
-          ["NAME", "VERSION"],
-          manifests.map((manifest) => [manifest.name, manifest.version]),
-          printer.log,
-        );
+    return outputExtensionList({ manifests, outputJson, toJsonOutput, printer });
   if (!opts.name) {
     fail("Missing --name");
     return;
@@ -29,9 +23,5 @@ export function inspectExtension({
     fail(`Unknown extension: ${opts.name}`);
     return;
   }
-  return outputJson
-    ? toJsonOutput(manifest)
-    : printer.log(
-        `${manifest.name} ${manifest.version}\n${manifest.description || "(no description)"}`,
-      );
+  return outputExtensionInfo({ manifest, outputJson, toJsonOutput, printer });
 }

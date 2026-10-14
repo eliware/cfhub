@@ -15,7 +15,7 @@ export function pickerHtml() {
       'src="/oauth-web/eliware-58x58.png"',
       `src="/oauth-web/eliware-58x58.png?v=${VERSION}"`,
     )
-    .replaceAll('src="/oauth-picker.mjs"', `src="/oauth-picker.mjs?v=${VERSION}"`)
+    .replaceAll('src="/oauth-picker-app.mjs"', `src="/oauth-picker-app.mjs?v=${VERSION}"`)
     .replace("__CFHUB_SCOPE_MODEL__", serializeOAuthScopeModel())
     .replaceAll("__COPYRIGHT_YEAR__", copyrightYear())
     .replaceAll("__APP_VERSION__", VERSION);

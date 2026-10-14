@@ -1,6 +1,14 @@
 import { pickerAssetDefinition } from "../src/oauth-picker-asset-map.mjs";
 
 test("maps picker text and image routes to their assets", () => {
+  expect(pickerAssetDefinition("/oauth-picker.mjs")).toMatchObject({
+    asset: "oauth-web/oauth-picker.mjs",
+    binary: false,
+  });
+  expect(pickerAssetDefinition("/oauth-picker-app.mjs")).toMatchObject({
+    asset: "oauth-web/oauth-picker-app.mjs",
+    binary: false,
+  });
   expect(pickerAssetDefinition("/oauth-picker.css")).toEqual({
     asset: "oauth-web/bundled/oauth-picker.css",
     contentType: "text/css; charset=utf-8",

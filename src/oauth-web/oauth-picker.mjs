@@ -19,5 +19,3 @@ export function initializePicker() {
   bindPickerEvents({ categories, ...state, boxes, sessionOptions, render });
   render();
 }
-
-if (typeof window !== "undefined") initializePicker();

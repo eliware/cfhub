@@ -42,6 +42,7 @@ test("picker initialization connects group, event, and render helpers", async ()
   const { initializePicker } = await import(
     `../../src/oauth-web/oauth-picker.mjs?test=${Date.now()}`
   );
+  initializePicker();
   expect(quickSetup.open).toBe(false);
   expect(renderGroups).toHaveBeenCalledTimes(1);
   expect(bindEvents).toHaveBeenCalledWith(
