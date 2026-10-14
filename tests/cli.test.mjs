@@ -37,6 +37,7 @@ test("dispatches to injected handlers and loads env", async () => {
 test("prints help with no args and unknown resource", async () => {
   const log = jest.fn();
   const error = jest.fn();
+  const cfFactory = jest.fn();
   const mod = await import(`../bin/cfhub.mjs?ts=${Date.now() + 1}`);
   await mod.run({
     argv: [],
@@ -48,11 +49,12 @@ test("prints help with no args and unknown resource", async () => {
     argv: ["nope", "list"],
     printer: { log, error },
     fsImpl: { readFileSync: jest.fn(() => "") },
-    cfFactory: jest.fn(),
+    cfFactory,
     loadEnv: jest.fn(),
     exit: jest.fn(),
   });
-  expect(error).not.toHaveBeenCalled();
+  expect(error).toHaveBeenCalledWith(expect.stringContaining('unknown command "nope"'));
+  expect(cfFactory).not.toHaveBeenCalled();
 });
 
 test("formats authorization errors from a handler", async () => {

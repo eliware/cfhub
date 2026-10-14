@@ -5,12 +5,12 @@ const options = () => ({
   name: "old",
   data: { active: "old", profiles: { old: {}, next: {} } },
   readCredentialImpl: jest.fn().mockResolvedValue({ oauthRefreshToken: "refresh" }),
-  revokeOAuthImpl: jest.fn(),
+  revokeOAuthImpl: jest.fn().mockResolvedValue(true),
   deleteCredentialImpl: jest.fn(),
   write: jest.fn(),
   profileHome: "/home",
   profileFs: {},
-  printer: { log: jest.fn() },
+  printer: { log: jest.fn(), error: jest.fn() },
   fail: jest.fn(),
 });
 
@@ -28,6 +28,9 @@ test("continues local cleanup when revocation fails and rejects unknown profiles
   input.readCredentialImpl.mockResolvedValue({ oauthAccessToken: "access" });
   input.revokeOAuthImpl.mockRejectedValue(Error("expired"));
   await logoutAuthProfile(input);
+  expect(input.printer.error).toHaveBeenCalledWith(
+    "Cloudflare could not revoke the OAuth token. The local profile was removed.",
+  );
   expect(input.data.profiles.old).toBeUndefined();
   const unknown = options();
   unknown.name = "missing";
@@ -64,5 +67,15 @@ test("revokes an OAuth access token and removes its credential", async () => {
   await logoutAuthProfile(input);
   expect(input.revokeOAuthImpl).toHaveBeenCalledWith({ token: "access-token" });
   expect(input.deleteCredentialImpl).toHaveBeenCalledWith("old");
+  expect(input.data.profiles.old).toBeUndefined();
+});
+
+test("reports when Cloudflare does not confirm token revocation", async () => {
+  const input = options();
+  input.revokeOAuthImpl.mockResolvedValue(false);
+  await logoutAuthProfile(input);
+  expect(input.printer.error).toHaveBeenCalledWith(
+    "Cloudflare did not confirm OAuth token revocation. The local profile was removed.",
+  );
   expect(input.data.profiles.old).toBeUndefined();
 });

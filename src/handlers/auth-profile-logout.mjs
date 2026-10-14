@@ -17,9 +17,12 @@ export async function logoutAuthProfile({
   const credential = await readCredentialImpl(name);
   try {
     const token = credential?.oauthRefreshToken || credential?.oauthAccessToken;
-    if (token) await revokeOAuthImpl({ token });
+    if (token && !(await revokeOAuthImpl({ token })))
+      printer.error(
+        "Cloudflare did not confirm OAuth token revocation. The local profile was removed.",
+      );
   } catch {
-    // Local cleanup must still happen when the remote token is expired.
+    printer.error("Cloudflare could not revoke the OAuth token. The local profile was removed.");
   }
   try {
     await deleteCredentialImpl(name);

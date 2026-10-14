@@ -8,6 +8,7 @@ test("maps read and write commands to the matching OAuth scopes", () => {
   expect(requiredScopes("auth", "status")).toEqual([]);
   expect(requiredScopes("zones", "unknown")).toEqual(["zone.read"]);
   expect(requiredScopes("cache", "list")).toEqual(["healthcheck.read"]);
+  expect(requiredScopes("lists", "delete", { dryRun: true })).toEqual(["account-rule-lists.read"]);
   expect(requiredScopes("audit", "create")).toEqual([
     "account-settings.read",
     "zone.read",
@@ -21,4 +22,7 @@ test("reports only scopes absent from the active OAuth profile", () => {
   expect(missingScopes("zones", "list", ["zone.read"])).toEqual([]);
   expect(missingScopes("api", "request", [])).toEqual([]);
   expect(missingScopes("zones", "list", undefined)).toEqual([]);
+  expect(missingScopes("lists", "delete", ["account-rule-lists.read"], { dryRun: true })).toEqual(
+    [],
+  );
 });

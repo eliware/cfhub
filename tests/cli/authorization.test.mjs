@@ -81,6 +81,21 @@ test("authorization reports one or many missing API token permissions", async ()
   expect(many.printer.error).toHaveBeenCalledWith(expect.stringContaining("missing permissions:"));
 });
 
+test("allows list deletion previews with read-only grants", async () => {
+  const input = options({
+    resource: "lists",
+    action: "delete",
+    opts: { "dry-run": true },
+    env: {
+      CFHUB_OAUTH_SCOPES: "account-rule-lists.read",
+      CFHUB_API_PERMISSIONS_KNOWN: "1",
+      CFHUB_API_PERMISSIONS: "Account Rule Lists Read",
+    },
+  });
+  await expect(authorizeCommand(input)).resolves.toMatchObject({ allowed: true });
+  expect(input.cfFactory).toHaveBeenCalled();
+});
+
 test("OAuth command actions outside credential management use a client", async () => {
   const input = options({
     resource: "oauth",

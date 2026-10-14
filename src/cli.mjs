@@ -41,6 +41,7 @@ export async function run({
   const authorization = await authorizeCommand({
     resource,
     action,
+    opts,
     env,
     loadEnv,
     projectRoot,

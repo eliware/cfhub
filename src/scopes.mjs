@@ -30,19 +30,19 @@ const moduleByResource = {
 const writeActions = new Set(["apply", "create", "delete", "purge", "revoke", "set", "update"]);
 const modules = new Map(catalog.modules.map((module) => [module.id, module]));
 
-export function requiredScopes(resource, action) {
+export function requiredScopes(resource, action, { dryRun = false } = {}) {
   const module = modules.get(moduleByResource[resource]);
   if (!module || resource === "api" || resource === "auth") return [];
   if (resource === "cache" && action === "purge") return ["cache.purge"];
-  const write = writeActions.has(action);
+  const write = writeActions.has(action) && !dryRun;
   const selected = module.scopes.filter((scope) =>
     write ? scope.endsWith(".write") || scope === "cache.purge" : scope.endsWith(".read"),
   );
   return selected.length ? selected : module.scopes;
 }
 
-export function missingScopes(resource, action, granted) {
-  const required = requiredScopes(resource, action);
+export function missingScopes(resource, action, granted, options) {
+  const required = requiredScopes(resource, action, options);
   if (!required.length || !granted) return [];
   const available = new Set(granted);
   return required.filter((scope) => !available.has(scope));

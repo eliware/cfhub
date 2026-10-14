@@ -10,6 +10,7 @@ import {
 export async function authorizeCommand({
   resource,
   action,
+  opts = {},
   env,
   loadEnv,
   projectRoot,
@@ -25,7 +26,10 @@ export async function authorizeCommand({
   const grantedScopes = env.CFHUB_OAUTH_SCOPES?.split(",")
     .map((scope) => scope.trim())
     .filter(Boolean);
-  const missing = managesCredentialAction ? [] : missingScopes(resource, action, grantedScopes);
+  const permissionOptions = { dryRun: Boolean(opts["dry-run"]) };
+  const missing = managesCredentialAction
+    ? []
+    : missingScopes(resource, action, grantedScopes, permissionOptions);
   if (missing.length) {
     printer.error(missingScopeMessage(missing));
     return { allowed: false, result: exit(1) };
@@ -38,7 +42,7 @@ export async function authorizeCommand({
       : null;
   const missingApi = managesCredentialAction
     ? []
-    : missingApiPermissions(resource, action, apiPermissions);
+    : missingApiPermissions(resource, action, apiPermissions, permissionOptions);
   if (missingApi.length) {
     printer.error(missingApiPermissionMessage(missingApi));
     return { allowed: false, result: exit(1) };

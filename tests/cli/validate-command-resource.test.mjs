@@ -21,8 +21,13 @@ test("reports an unknown resource and suggests a close match", () => {
   expect(exit).toHaveBeenCalledWith(1);
 });
 
-test("does not reject unknown resources without a close suggestion", () => {
-  expect(
-    validateCommandResource({ resource: "zzzzzzzz", printer: { error: jest.fn() } }),
-  ).toBeNull();
+test("rejects unknown resources without a close suggestion", () => {
+  const printer = { error: jest.fn() };
+  const exit = jest.fn((code) => code);
+  expect(validateCommandResource({ resource: "zzzzzzzz", printer, exit })).toEqual({
+    done: true,
+    value: 1,
+  });
+  expect(printer.error).toHaveBeenCalledWith(expect.stringContaining('unknown command "zzzzzzzz"'));
+  expect(exit).toHaveBeenCalledWith(1);
 });

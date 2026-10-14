@@ -8,8 +8,8 @@ const aliases = new Map([
   ["account-rule-lists", "Account Rule Lists"],
 ]);
 
-export function requiredApiPermissions(resource, action) {
-  return requiredScopes(resource, action).map((scope) => {
+export function requiredApiPermissions(resource, action, options) {
+  return requiredScopes(resource, action, options).map((scope) => {
     const [name, mode] = scope.split(".");
     const label =
       aliases.get(name) ||
@@ -18,10 +18,10 @@ export function requiredApiPermissions(resource, action) {
   });
 }
 
-export function missingApiPermissions(resource, action, granted) {
+export function missingApiPermissions(resource, action, granted, options) {
   if (!granted) return [];
   const available = new Set(granted.map((permission) => permission.toLowerCase()));
-  return requiredApiPermissions(resource, action).filter(
+  return requiredApiPermissions(resource, action, options).filter(
     (permission) => !available.has(permission.toLowerCase()),
   );
 }
