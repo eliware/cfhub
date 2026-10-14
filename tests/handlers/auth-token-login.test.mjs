@@ -100,6 +100,24 @@ test("saves a standard-input token with option and environment IDs", async () =>
   expect(args.writeCredentialImpl).toHaveBeenCalledWith("work", { apiToken: "token" });
 });
 
+test("uses injected IDs when it saves a token profile", async () => {
+  const env = { CLOUDFLARE_ACCOUNT_ID: "injected-account", CLOUDFLARE_ZONE_ID: "injected-zone" };
+  const { args, data } = setup({
+    env,
+    readToken: () => "cfat_account-token",
+    inspectApiTokenImpl: jest.fn().mockResolvedValue({
+      permissions: [],
+      permissionsKnown: false,
+      permissionSummary: {},
+    }),
+  });
+  await saveApiTokenLogin(args);
+  expect(data.profiles.work).toMatchObject({
+    accountId: "injected-account",
+    zoneId: "injected-zone",
+  });
+});
+
 test("reports token inspection errors", async () => {
   const inspect = setup({ inspectApiTokenImpl: jest.fn().mockRejectedValue(Error("denied")) });
   await saveApiTokenLogin(inspect.args);

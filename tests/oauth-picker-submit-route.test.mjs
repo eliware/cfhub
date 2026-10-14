@@ -13,6 +13,7 @@ test("filters requested scopes and redirects to authorization", async () => {
     url: new URL("http://localhost/oauth/start"),
     scopePicker: true,
     scopes: ["zone.read"],
+    pickerScopes: ["dns.read"],
     requiredScopes: ["user-details.read"],
     setSelectedScopes: selected,
     makeAuthorization: (scopes, keep) =>
@@ -22,7 +23,7 @@ test("filters requested scopes and redirects to authorization", async () => {
   request.emit("end");
   await new Promise((resolve) => setImmediate(resolve));
   expect(handled).toBe(true);
-  expect(selected).toHaveBeenCalledWith(["user-details.read"]);
+  expect(selected).toHaveBeenCalledWith(["user-details.read", "dns.read"]);
   expect(response.writeHead).toHaveBeenCalledWith(
     302,
     expect.objectContaining({ location: expect.stringContaining("keep=true") }),

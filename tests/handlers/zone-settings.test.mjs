@@ -121,3 +121,19 @@ test("handleZoneSettings validates missing zone, setting, and value", async () =
     }),
   ).rejects.toThrow("Missing JSON body with value");
 });
+
+test("stops a set when the failure handler returns", async () => {
+  const failWithoutThrowing = jest.fn();
+  const update = jest.fn();
+  await handleZoneSettings({
+    cf: { zones: { settings: { update } } },
+    action: "set",
+    opts: { "zone-id": "z1", setting: "dev" },
+    body: {},
+    outputJson: false,
+    toJsonOutput,
+    fail: failWithoutThrowing,
+  });
+  expect(failWithoutThrowing).toHaveBeenCalledWith("Missing JSON body with value");
+  expect(update).not.toHaveBeenCalled();
+});

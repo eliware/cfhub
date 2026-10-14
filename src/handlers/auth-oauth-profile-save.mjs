@@ -9,6 +9,7 @@ export async function saveOAuthProfile({
   profileHome,
   profileFs,
   fail,
+  env = process.env,
 }) {
   const stored = await writeCredentialImpl(name, {
     oauthAccessToken: oauth.accessToken,
@@ -23,8 +24,8 @@ export async function saveOAuthProfile({
   data.profiles[name] = {
     authMethod: "oauth",
     scopes: oauth.scopes || scopes,
-    accountId: opts?.["account-id"] || process.env.CLOUDFLARE_ACCOUNT_ID,
-    zoneId: opts?.["zone-id"] || process.env.CLOUDFLARE_ZONE_ID,
+    accountId: opts?.["account-id"] || env.CLOUDFLARE_ACCOUNT_ID,
+    zoneId: opts?.["zone-id"] || env.CLOUDFLARE_ZONE_ID,
   };
   data.active = name;
   write(data, profileHome, profileFs);

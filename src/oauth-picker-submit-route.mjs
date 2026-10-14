@@ -6,7 +6,7 @@ export function serveOAuthPickerSubmitRoute({
   response,
   url,
   scopePicker,
-  scopes,
+  pickerScopes = [],
   requiredScopes,
   setSelectedScopes,
   makeAuthorization,
@@ -15,7 +15,11 @@ export function serveOAuthPickerSubmitRoute({
   if (!scopePicker || url.pathname !== "/oauth/start" || request.method !== "POST") return false;
   readRequestBody(request)
     .then((form) => {
-      const nextScopes = selectOAuthPickerScopes({ form, scopes, requiredScopes });
+      const nextScopes = selectOAuthPickerScopes({
+        form,
+        requiredScopes,
+        preservedScopes: pickerScopes,
+      });
       setSelectedScopes(nextScopes);
       response.writeHead(302, {
         location: makeAuthorization(nextScopes, form.get("keep-signed-in") === "on").toString(),

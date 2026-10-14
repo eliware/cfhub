@@ -11,6 +11,7 @@ test("combines default, environment, and command scopes without duplicates", () 
     },
   );
   expect(result.clientId).toBe("client");
+  expect(result.pickerScopes).toEqual(["zone.read", "account.read", "zone.write", "dns.read"]);
   expect(result.scopes).toEqual(
     expect.arrayContaining([
       "user-details.read",
@@ -38,4 +39,13 @@ test("uses default client and host values", () => {
 
 test("uses process scopes when options are omitted", () => {
   expect(authOAuthOptions(undefined, {}).scopes).toContain("user-details.read");
+});
+
+test("uses process environment defaults when arguments are omitted", () => {
+  expect(authOAuthOptions()).toMatchObject({
+    clientId: expect.any(String),
+    scopePicker: true,
+    bindHost: expect.any(String),
+    redirectHost: expect.any(String),
+  });
 });

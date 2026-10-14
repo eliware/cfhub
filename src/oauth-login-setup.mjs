@@ -4,7 +4,7 @@ import { createOAuthCallback } from "./oauth-callback.mjs";
 import { launchOAuthBrowser } from "./oauth-browser-launch.mjs";
 
 export function prepareOAuthLogin(
-  { clientId, redirectHost, port, scopePicker, scopes, server, open, print },
+  { clientId, redirectHost, port, scopePicker, scopes, pickerScopes = [], server, open, print },
   {
     createAuthorization = createOAuthAuthorization,
     createCallback = createOAuthCallback,
@@ -23,6 +23,7 @@ export function prepareOAuthLogin(
     state,
     scopePicker,
     scopes,
+    pickerScopes,
     requiredScopes: REQUIRED_OAUTH_SCOPES,
     makeAuthorization,
   });

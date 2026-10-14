@@ -1,5 +1,5 @@
 import { extensionRoot } from "../extensions.mjs";
-import { loadExtensionSource } from "./extension-source.mjs";
+import { extensionPathsOverlap, loadExtensionSource } from "./extension-source.mjs";
 import { extensionDestination } from "./extension-destination.mjs";
 
 export function installExtension({ opts, printer, fail, fsImpl, homeDir }) {
@@ -10,6 +10,10 @@ export function installExtension({ opts, printer, fail, fsImpl, homeDir }) {
   const destination = extensionDestination(root, manifest.name);
   if (!destination) {
     fail("Invalid cfhub extension manifest");
+    return;
+  }
+  if (extensionPathsOverlap(source, destination, fsImpl)) {
+    fail("Extension source must not overlap its install destination");
     return;
   }
   fsImpl.mkdirSync(root, { recursive: true });

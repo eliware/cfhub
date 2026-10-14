@@ -7,6 +7,7 @@ export function createOAuthCallback({
   state,
   scopePicker,
   scopes,
+  pickerScopes = [],
   requiredScopes,
   makeAuthorization,
 }) {
@@ -21,6 +22,7 @@ export function createOAuthCallback({
           url,
           scopePicker,
           scopes,
+          pickerScopes,
           requiredScopes,
           setSelectedScopes: (value) => {
             selectedScopes = value;

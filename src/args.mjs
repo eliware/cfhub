@@ -11,7 +11,9 @@ export function parseArgs(argv) {
     }
     const eq = arg.indexOf("=");
     if (eq !== -1) {
-      opts[arg.slice(2, eq)] = arg.slice(eq + 1);
+      const key = arg.slice(2, eq);
+      const value = arg.slice(eq + 1);
+      opts[key] = key === "dry-run" && ["true", "false"].includes(value) ? value === "true" : value;
       continue;
     }
     const key = arg.slice(2);

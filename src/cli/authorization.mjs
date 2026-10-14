@@ -26,7 +26,8 @@ export async function authorizeCommand({
   const grantedScopes = env.CFHUB_OAUTH_SCOPES?.split(",")
     .map((scope) => scope.trim())
     .filter(Boolean);
-  const permissionOptions = { dryRun: Boolean(opts["dry-run"]) };
+  const dryRun = opts["dry-run"] === true || opts["dry-run"] === "true";
+  const permissionOptions = { dryRun };
   const missing = managesCredentialAction
     ? []
     : missingScopes(resource, action, grantedScopes, permissionOptions);

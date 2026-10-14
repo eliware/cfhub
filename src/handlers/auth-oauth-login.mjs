@@ -11,9 +11,10 @@ export async function saveOAuthLogin({
   profileHome,
   profileFs,
   fail,
+  env = process.env,
 }) {
-  const { scopes, ...oauthOptions } = authOAuthOptions(opts);
-  const oauth = await oauthLogin({ ...oauthOptions, scopes });
+  const { scopes, pickerScopes, ...oauthOptions } = authOAuthOptions(opts, env);
+  const oauth = await oauthLogin({ ...oauthOptions, scopes, pickerScopes });
   return saveOAuthProfile({
     data,
     name,
@@ -25,5 +26,6 @@ export async function saveOAuthLogin({
     profileHome,
     profileFs,
     fail,
+    env,
   });
 }

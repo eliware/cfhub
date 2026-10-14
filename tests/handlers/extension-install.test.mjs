@@ -1,4 +1,6 @@
 import { jest } from "@jest/globals";
+import os from "node:os";
+import path from "node:path";
 import { installExtension } from "../../src/handlers/extension-install.mjs";
 
 test("validates and installs an extension directory", () => {
@@ -120,4 +122,24 @@ test("refuses an extension name that is unsafe on Windows", () => {
   });
   expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
   expect(cpSync).not.toHaveBeenCalled();
+});
+
+test("refuses a source path that overlaps its installation destination", () => {
+  const homeDir = path.join(os.tmpdir(), "cfhub-install-test");
+  const fail = jest.fn();
+  const copy = jest.fn();
+  const fsImpl = {
+    readFileSync: () => JSON.stringify({ name: "demo", version: "1", commands: {} }),
+    mkdirSync: jest.fn(),
+    cpSync: copy,
+  };
+  installExtension({
+    opts: { path: path.join(homeDir, ".config", "cfhub", "extensions", "demo") },
+    printer: { log: jest.fn() },
+    fail,
+    fsImpl,
+    homeDir,
+  });
+  expect(fail).toHaveBeenCalledWith("Extension source must not overlap its install destination");
+  expect(copy).not.toHaveBeenCalled();
 });

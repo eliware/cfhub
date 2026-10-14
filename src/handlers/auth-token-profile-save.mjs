@@ -8,11 +8,12 @@ export function saveTokenProfile({
   write,
   profileHome,
   profileFs,
+  env = process.env,
 }) {
   data.profiles[name] = {
     authMethod: detectedAccountToken ? "account-api-token" : "api-token",
     accountId,
-    zoneId: opts?.["zone-id"] || process.env.CLOUDFLARE_ZONE_ID,
+    zoneId: opts?.["zone-id"] || env.CLOUDFLARE_ZONE_ID,
     apiPermissions: tokenInfo.permissions,
     apiPermissionsKnown: tokenInfo.permissionsKnown,
     apiPermissionSummary: tokenInfo.permissionSummary,

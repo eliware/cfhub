@@ -52,6 +52,7 @@ test("extension discovery and module loading use the manifest contract", async (
   fs.mkdirSync(invalid);
   fs.writeFileSync(path.join(invalid, "cf-extension.json"), "{}");
   expect(() => readExtensionManifest(root, "bad")).toThrow("Invalid cfhub extension manifest");
+  expect(discoverExtensions(home)).toHaveLength(1);
 });
 
 test("extension loader accepts named handlers and null modules", async () => {

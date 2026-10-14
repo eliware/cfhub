@@ -96,6 +96,20 @@ test("allows list deletion previews with read-only grants", async () => {
   expect(input.cfFactory).toHaveBeenCalled();
 });
 
+test("does not treat an explicit false dry-run value as a preview", async () => {
+  const input = options({
+    resource: "lists",
+    action: "delete",
+    opts: { "dry-run": false },
+    env: {
+      CFHUB_OAUTH_SCOPES: "account-rule-lists.read",
+      CFHUB_API_PERMISSIONS_KNOWN: "1",
+      CFHUB_API_PERMISSIONS: "Account Rule Lists Read",
+    },
+  });
+  await expect(authorizeCommand(input)).resolves.toMatchObject({ allowed: false });
+});
+
 test("OAuth command actions outside credential management use a client", async () => {
   const input = options({
     resource: "oauth",

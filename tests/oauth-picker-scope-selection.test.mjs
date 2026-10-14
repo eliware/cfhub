@@ -21,3 +21,13 @@ test("keeps only required scopes when no optional scope is selected", () => {
     }),
   ).toEqual(["user-details.read"]);
 });
+
+test("keeps explicitly requested catalog scopes when the picker form omits them", () => {
+  expect(
+    selectOAuthPickerScopes({
+      form: new URLSearchParams(),
+      requiredScopes: ["user-details.read"],
+      preservedScopes: ["dns.read", "unknown.scope"],
+    }),
+  ).toEqual(["user-details.read", "dns.read"]);
+});

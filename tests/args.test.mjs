@@ -14,6 +14,11 @@ test("supports --key=value syntax", () => {
   });
 });
 
+test("parses explicit dry-run boolean values", () => {
+  expect(parseArgs(["lists", "delete", "--dry-run=false"]).opts["dry-run"]).toBe(false);
+  expect(parseArgs(["lists", "delete", "--dry-run=true"]).opts["dry-run"]).toBe(true);
+});
+
 test("captures flag values and bare flags", () => {
   expect(parseArgs(["list-items", "create", "--account-id", "acct1", "--force"])).toEqual({
     args: ["list-items", "create"],

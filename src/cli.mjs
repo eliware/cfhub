@@ -68,6 +68,7 @@ export async function run({
     log: printer.log,
     exit,
   });
+  common.env = env;
   return dispatchCommand({
     resource,
     action,

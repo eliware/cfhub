@@ -13,6 +13,7 @@ export async function persistApiTokenLogin({
   profileHome,
   profileFs,
   fail,
+  env = process.env,
 }) {
   const stored = await writeCredentialImpl(name, credential);
   if (!stored) {
@@ -29,6 +30,7 @@ export async function persistApiTokenLogin({
     write,
     profileHome,
     profileFs,
+    env,
   });
   return true;
 }

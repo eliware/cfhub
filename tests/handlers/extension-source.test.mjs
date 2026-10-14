@@ -1,5 +1,22 @@
 import { jest } from "@jest/globals";
-import { loadExtensionSource } from "../../src/handlers/extension-source.mjs";
+import {
+  extensionPathsOverlap,
+  loadExtensionSource,
+} from "../../src/handlers/extension-source.mjs";
+
+test("detects equal, nested, and separate extension paths", () => {
+  expect(extensionPathsOverlap("C:/extensions/demo", "C:/extensions/demo")).toBe(true);
+  expect(extensionPathsOverlap("C:/extensions/demo/source", "C:/extensions/demo")).toBe(true);
+  expect(extensionPathsOverlap("C:/source", "C:/extensions/demo")).toBe(false);
+  expect(
+    extensionPathsOverlap("C:/source-link", "C:/extensions/demo", {
+      realpathSync: (value) =>
+        value.endsWith("source-link")
+          ? value.replace("source-link", "extensions/demo/source")
+          : value,
+    }),
+  ).toBe(true);
+});
 
 const validManifest = { name: "demo", version: "1.0.0", commands: {} };
 

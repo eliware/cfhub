@@ -16,6 +16,7 @@ export async function handleAuth(context = {}) {
     fail = () => {},
     profileHome,
     profileFs,
+    env = process.env,
   } = context;
   const {
     read,
@@ -49,6 +50,7 @@ export async function handleAuth(context = {}) {
       write,
       profileHome,
       profileFs,
+      env,
     });
   if (route === "profile")
     return handleAuthProfile({

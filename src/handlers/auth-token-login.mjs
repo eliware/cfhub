@@ -18,6 +18,7 @@ export async function saveApiTokenLogin({
   write,
   profileHome,
   profileFs,
+  env = process.env,
 }) {
   const { interactive, suppliedToken } = await readLoginToken({
     opts,
@@ -35,6 +36,7 @@ export async function saveApiTokenLogin({
     interactive,
     token: credential.apiToken,
     promptAccountId,
+    env,
   });
   if (detectedAccountToken && !accountId) {
     fail(
@@ -62,6 +64,7 @@ export async function saveApiTokenLogin({
     profileHome,
     profileFs,
     fail,
+    env,
   });
   if (!saved) return;
   return reportTokenLogin({ name, tokenInfo, printer });

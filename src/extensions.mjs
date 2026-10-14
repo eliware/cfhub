@@ -48,7 +48,13 @@ export function discoverExtensions(homeDir = os.homedir(), fsImpl = fs) {
   return fsImpl
     .readdirSync(root, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
-    .map((entry) => readExtensionManifest(root, entry.name, fsImpl));
+    .flatMap((entry) => {
+      try {
+        return [readExtensionManifest(root, entry.name, fsImpl)];
+      } catch {
+        return [];
+      }
+    });
 }
 
 export async function loadExtensionCommand(manifest, command, homeDir = os.homedir()) {

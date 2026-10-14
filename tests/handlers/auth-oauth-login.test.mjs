@@ -60,3 +60,30 @@ test("OAuth login combines configured and requested scopes", async () => {
   );
   expect(write).toHaveBeenCalledWith(data, undefined, undefined);
 });
+
+test("OAuth login uses the injected environment for options and profile IDs", async () => {
+  const data = { profiles: {} };
+  const env = {
+    CFHUB_OAUTH_CLIENT_ID: "injected-client",
+    CFHUB_OAUTH_SCOPES: "dns.read",
+    CLOUDFLARE_ACCOUNT_ID: "injected-account",
+    CLOUDFLARE_ZONE_ID: "injected-zone",
+  };
+  const oauthLogin = jest.fn().mockResolvedValue({ accessToken: "t", scopes: ["dns.read"] });
+  await saveOAuthLogin({
+    data,
+    env,
+    opts: {},
+    name: "injected",
+    oauthLogin,
+    writeCredentialImpl: jest.fn().mockResolvedValue(true),
+    write: jest.fn(),
+  });
+  expect(oauthLogin).toHaveBeenCalledWith(
+    expect.objectContaining({ clientId: "injected-client", pickerScopes: ["dns.read"] }),
+  );
+  expect(data.profiles.injected).toMatchObject({
+    accountId: "injected-account",
+    zoneId: "injected-zone",
+  });
+});
