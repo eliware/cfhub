@@ -5,13 +5,14 @@ export async function handleHealth({
   cf,
   action,
   opts,
+  env,
   body,
   outputJson,
   printer,
   toJsonOutput,
   fail,
 }) {
-  const zoneId = getZoneId(opts);
+  const zoneId = getZoneId(opts, env);
   const id = getId(opts);
   requireValue(zoneId, "Missing --zone-id", fail);
   const base = `/zones/${zoneId}/healthchecks`;

@@ -65,6 +65,7 @@ export async function run({
     body,
     outputJson,
     printer: commandPrinter,
+    env,
     log: printer.log,
     exit,
   });

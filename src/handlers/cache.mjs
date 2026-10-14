@@ -5,13 +5,14 @@ export async function handleCache({
   cf,
   action,
   opts,
+  env,
   body,
   outputJson,
   printer,
   toJsonOutput,
   fail,
 }) {
-  const zoneId = getZoneId(opts);
+  const zoneId = getZoneId(opts, env);
   requireValue(zoneId, "Missing --zone-id", fail);
   if (action !== "purge") {
     fail(`Unknown cache action: ${action}`);

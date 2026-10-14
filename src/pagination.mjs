@@ -1,6 +1,8 @@
 export function withPage(path, page) {
-  const separator = path.includes("?") ? "&" : "?";
-  return `${path}${separator}page=${page}&per_page=100`;
+  const url = new URL(path, "https://cfhub.invalid");
+  url.searchParams.set("page", String(page));
+  if (!url.searchParams.has("per_page")) url.searchParams.set("per_page", "100");
+  return `${url.pathname}${url.search}${url.hash}`;
 }
 
 export async function getAllPages(fetchPage, first, { paginate = false } = {}) {

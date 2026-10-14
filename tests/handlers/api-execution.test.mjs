@@ -16,8 +16,28 @@ test("executes a request and collects paginated GET results", async () => {
     printer: { log: jest.fn() },
     fail: jest.fn(),
   });
+  expect(get).toHaveBeenNthCalledWith(1, "/zones?page=1&per_page=100", undefined);
   expect(get).toHaveBeenCalledWith("/zones?page=2&per_page=100", undefined);
   expect(result.result.result).toEqual([{ page: 1 }, { page: 2 }]);
+});
+
+test("keeps API filters and page size when it paginates", async () => {
+  const get = jest
+    .fn()
+    .mockResolvedValueOnce({ result: [], result_info: { total_pages: 2 } })
+    .mockResolvedValue({ result: [], result_info: { total_pages: 2 } });
+  await executeApiRequest({
+    cf: { get },
+    requestOptions: { path: "/zones?name=example.com&page=9&per_page=25", method: "GET" },
+    body: null,
+    opts: { paginate: true },
+    printer: { log: jest.fn() },
+    fail: jest.fn(),
+  });
+  expect(get.mock.calls).toEqual([
+    ["/zones?name=example.com&page=1&per_page=25", undefined],
+    ["/zones?name=example.com&page=2&per_page=25", undefined],
+  ]);
 });
 
 test("passes mutation bodies and propagates request errors", async () => {

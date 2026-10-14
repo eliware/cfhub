@@ -30,3 +30,21 @@ test("settings use the default filesystem adapter", () => {
     fs.rmSync(home, { recursive: true, force: true });
   }
 });
+
+test("malformed settings fall back to defaults", () => {
+  const fsImpl = {
+    existsSync: () => true,
+    readFileSync: () => "{broken",
+  };
+  expect(readSettings("/tmp/cf-malformed-settings", fsImpl)).toEqual({});
+});
+
+test("settings reads rethrow filesystem errors", () => {
+  const fsImpl = {
+    existsSync: () => true,
+    readFileSync: () => {
+      throw new Error("read failed");
+    },
+  };
+  expect(() => readSettings("/tmp/cf-settings-read-error", fsImpl)).toThrow("read failed");
+});

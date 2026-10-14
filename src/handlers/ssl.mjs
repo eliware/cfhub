@@ -5,13 +5,14 @@ export async function handleSsl({
   cf,
   action,
   opts,
+  env,
   body,
   outputJson,
   printer,
   toJsonOutput,
   fail,
 }) {
-  const zoneId = getZoneId(opts);
+  const zoneId = getZoneId(opts, env);
   const setting = opts.setting || "ssl";
   requireValue(zoneId, "Missing --zone-id", fail);
   if (action === "get") {

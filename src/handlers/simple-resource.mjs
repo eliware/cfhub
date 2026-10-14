@@ -6,13 +6,14 @@ export function makeSimpleResource({ name, scope, path }) {
     cf,
     action,
     opts,
+    env,
     body,
     outputJson,
     printer,
     toJsonOutput,
     fail,
   }) {
-    const scopeId = scope === "zone" ? getZoneId(opts) : getAccountId(opts);
+    const scopeId = scope === "zone" ? getZoneId(opts, env) : getAccountId(opts, env);
     requireValue(scopeId, `Missing --${scope}-id`, fail);
     const base = path(scopeId);
     const id = getId(opts);

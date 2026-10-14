@@ -1,10 +1,16 @@
 import { selectOAuthModules } from "../src/oauth-module-selection.mjs";
 
-test("selects modules only when every module scope is granted", () => {
+test("selects modules when their read scopes are granted", () => {
   const modules = [
-    { id: "zones", scopes: ["zone.read"] },
-    { id: "dns", scopes: ["zone.read", "dns.read"] },
+    { id: "zones", scopes: ["zone.read", "zone.write"] },
+    { id: "dns", scopes: ["zone.read", "dns.read", "dns.write"] },
   ];
   expect(selectOAuthModules(modules, ["zone.read"]).map(({ id }) => id)).toEqual(["zones"]);
   expect(selectOAuthModules(modules, ["zone.read", "dns.read"])).toEqual(modules);
+});
+
+test("uses every scope when a module has no read scope", () => {
+  const modules = [{ id: "purge", scopes: ["cache.purge"] }];
+  expect(selectOAuthModules(modules, ["cache.purge"])).toEqual(modules);
+  expect(selectOAuthModules(modules, [])).toEqual([]);
 });

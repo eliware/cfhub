@@ -6,13 +6,14 @@ export async function handleZoneSettings({
   cf,
   action,
   opts,
+  env,
   body,
   outputJson,
   printer = console,
   toJsonOutput,
   fail,
 }) {
-  const zoneId = getZoneId(opts);
+  const zoneId = getZoneId(opts, env);
   const setting = opts.setting;
   requireValue(zoneId, "Missing --zone-id", fail);
   requireValue(setting, "Missing --setting", fail);

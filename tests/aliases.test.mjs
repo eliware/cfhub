@@ -21,3 +21,21 @@ test("aliases and settings tolerate adapters without filesystem methods", () => 
   expect(files.size).toBe(1);
   expect(readAliases("/tmp/cf-no-chmod", { existsSync: () => false })).toEqual({});
 });
+
+test("malformed aliases do not stop command resolution", () => {
+  const fsImpl = {
+    existsSync: () => true,
+    readFileSync: () => "{broken",
+  };
+  expect(readAliases("/tmp/cf-malformed-aliases", fsImpl)).toEqual({});
+});
+
+test("alias reads rethrow filesystem errors", () => {
+  const fsImpl = {
+    existsSync: () => true,
+    readFileSync: () => {
+      throw new Error("read failed");
+    },
+  };
+  expect(() => readAliases("/tmp/cf-alias-read-error", fsImpl)).toThrow("read failed");
+});

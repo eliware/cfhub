@@ -9,7 +9,12 @@ function aliasesPath(homeDir) {
 export function readAliases(homeDir, fsImpl = fs) {
   const path = aliasesPath(homeDir);
   if (typeof fsImpl.existsSync !== "function" || !fsImpl.existsSync(path)) return {};
-  return JSON.parse(fsImpl.readFileSync(path, "utf8"));
+  try {
+    return JSON.parse(fsImpl.readFileSync(path, "utf8"));
+  } catch (error) {
+    if (error instanceof SyntaxError) return {};
+    throw error;
+  }
 }
 export function writeAliases(aliases, homeDir, fsImpl = fs) {
   const path = aliasesPath(homeDir);

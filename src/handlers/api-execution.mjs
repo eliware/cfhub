@@ -14,8 +14,9 @@ export async function executeApiRequest({ cf, requestOptions, body, opts, printe
   }
   const requestPage = (page) =>
     requestWithBackoff(() => request.call(cf, withPage(path, page), undefined));
+  const firstPath = method === "GET" && opts.paginate ? withPage(path, 1) : path;
   const first = await requestWithBackoff(() =>
-    request.call(cf, path, body === null ? undefined : { body }),
+    request.call(cf, firstPath, body === null ? undefined : { body }),
   );
   const result =
     method === "GET" ? await getAllPages(requestPage, first, { paginate: opts.paginate }) : first;

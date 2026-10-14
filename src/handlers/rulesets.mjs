@@ -7,14 +7,15 @@ export async function handleRulesets({
   cf,
   action,
   opts,
+  env,
   body,
   outputJson,
   printer = console,
   toJsonOutput,
   fail,
 }) {
-  const zoneId = getZoneId(opts);
-  const accountId = getAccountId(opts);
+  const zoneId = getZoneId(opts, env);
+  const accountId = getAccountId(opts, env);
   const id = getId(opts);
   requireAnyValue([zoneId, accountId], "Missing --zone-id or --account-id", fail);
 

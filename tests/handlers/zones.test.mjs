@@ -62,6 +62,19 @@ test("zone reads support SDK and generic clients", async () => {
   expect(printer.log).toHaveBeenCalledWith('{\n  "id": "z2"\n}');
 });
 
+test("zone reads use the injected profile environment", async () => {
+  const get = jest.fn().mockResolvedValue({ id: "profile-zone" });
+  await handleZones(
+    context({
+      action: "get",
+      cf: { get },
+      opts: {},
+      env: { CLOUDFLARE_ZONE_ID: "profile-zone" },
+    }),
+  );
+  expect(get).toHaveBeenCalledWith("/zones/profile-zone", undefined);
+});
+
 test("zone report actions stay connected to their report handler", async () => {
   const cf = { get: jest.fn().mockResolvedValue({ result: [] }) };
   const fail = jest.fn();

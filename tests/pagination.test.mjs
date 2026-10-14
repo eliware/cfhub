@@ -4,6 +4,7 @@ import { getAllPages, withPage } from "../src/pagination.mjs";
 test("adds page parameters while preserving query strings", () => {
   expect(withPage("/zones", 2)).toBe("/zones?page=2&per_page=100");
   expect(withPage("/zones?name=x", 2)).toBe("/zones?name=x&page=2&per_page=100");
+  expect(withPage("/zones?name=x&page=8&per_page=25", 2)).toBe("/zones?name=x&page=2&per_page=25");
 });
 
 test("combines requested pages and rejects responses without pagination data", async () => {

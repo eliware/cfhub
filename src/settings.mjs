@@ -9,7 +9,12 @@ function settingsPath(homeDir) {
 export function readSettings(homeDir, fsImpl = fs) {
   const path = settingsPath(homeDir);
   if (typeof fsImpl.existsSync !== "function" || !fsImpl.existsSync(path)) return {};
-  return JSON.parse(fsImpl.readFileSync(path, "utf8"));
+  try {
+    return JSON.parse(fsImpl.readFileSync(path, "utf8"));
+  } catch (error) {
+    if (error instanceof SyntaxError) return {};
+    throw error;
+  }
 }
 export function writeSettings(settings, homeDir, fsImpl = fs) {
   const path = settingsPath(homeDir);

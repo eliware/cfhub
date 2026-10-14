@@ -9,13 +9,14 @@ export async function handleDnsRecords({
   cf,
   action,
   opts,
+  env,
   body,
   outputJson,
   printer = console,
   toJsonOutput,
   fail,
 }) {
-  const zoneId = getZoneId(opts);
+  const zoneId = getZoneId(opts, env);
   const id = getId(opts);
   requireValue(zoneId, "Missing --zone-id", fail);
 

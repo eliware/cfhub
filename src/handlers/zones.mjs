@@ -7,14 +7,15 @@ export async function handleZones({
   cf,
   action,
   opts,
+  env,
   body,
   outputJson,
   printer = console,
   toJsonOutput,
   fail,
 }) {
-  const accountId = getAccountId(opts);
-  const zoneId = getZoneId(opts);
+  const accountId = getAccountId(opts, env);
+  const zoneId = getZoneId(opts, env);
 
   if (action === "list") {
     const res =
@@ -42,7 +43,7 @@ export async function handleZones({
   }
 
   if (action === "audit" || action === "security")
-    return handleZoneReport({ cf, action, opts, outputJson, toJsonOutput, printer, fail });
+    return handleZoneReport({ cf, action, opts, env, outputJson, toJsonOutput, printer, fail });
 
   if (action === "create") {
     requireValue(body, "Missing --data or --file", fail);

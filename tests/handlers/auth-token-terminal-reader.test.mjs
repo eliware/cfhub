@@ -33,3 +33,13 @@ test("returns an empty value and resets terminal mode on interrupt", async () =>
   expect(input.setRawMode.mock.calls).toEqual([[true], [false]]);
   expect(input.pause).toHaveBeenCalledTimes(1);
 });
+
+test("preserves UTF-8 characters split across input chunks", async () => {
+  const input = terminalInput();
+  const output = { write: jest.fn() };
+  const result = readHiddenTerminalInput(input, output);
+  const bytes = Buffer.from("café\r");
+  input.emit("data", bytes.subarray(0, 4));
+  input.emit("data", bytes.subarray(4));
+  await expect(result).resolves.toBe("café");
+});

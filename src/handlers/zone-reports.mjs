@@ -7,12 +7,13 @@ export async function handleZoneReport({
   cf,
   action,
   opts,
+  env,
   outputJson,
   toJsonOutput,
   printer,
   fail,
 }) {
-  const zoneId = getZoneId(opts);
+  const zoneId = getZoneId(opts, env);
   requireValue(zoneId, "Missing --zone-id", fail);
   const report =
     action === "audit"
