@@ -1,6 +1,6 @@
-import { resolveVerifyAccountId } from "./auth-status-verify-account.mjs";
 import { requestTokenVerification } from "./auth-status-verify-request.mjs";
 import { outputTokenVerification } from "./auth-status-verify-output.mjs";
+import { resolveAuthStatusVerifyContext } from "./auth-status-verify-context.mjs";
 
 export async function verifyAuthStatus({
   opts,
@@ -14,21 +14,15 @@ export async function verifyAuthStatus({
   activeProfile,
   environmentAccountId,
 }) {
-  if (!token) {
-    fail("cfhub auth verify requires CLOUDFLARE_API_TOKEN");
-    return;
-  }
-  const statusProfile = activeProfile || data.active || "environment";
-  const accountId = resolveVerifyAccountId({
-    opts,
+  const context = resolveAuthStatusVerifyContext({
+    token,
+    activeProfile,
     data,
-    profile: statusProfile,
+    opts,
     environmentAccountId,
+    fail,
   });
-  if (token.startsWith("cfat_") && !accountId) {
-    fail("Account API token verification requires --account-id or CLOUDFLARE_ACCOUNT_ID");
-    return;
-  }
-  const verified = await requestTokenVerification({ token, accountId, cf });
+  if (!context) return;
+  const verified = await requestTokenVerification({ token, accountId: context.accountId, cf });
   return outputTokenVerification(verified, { outputJson, toJsonOutput, printer });
 }

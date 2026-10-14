@@ -1,5 +1,6 @@
 import { bindPickerCategoryEvents } from "./picker-category-events.mjs";
 import { bindPickerBulkEvents } from "./picker-bulk-events.mjs";
+import { bindPickerCheckboxEvents } from "./picker-checkbox-events.mjs";
 
 export function bindPickerScopeEvents({
   categories,
@@ -10,14 +11,7 @@ export function bindPickerScopeEvents({
   boxes,
   render,
 }) {
-  boxes.forEach((box) =>
-    box.addEventListener("change", () => {
-      if (box.checked) selected.add(box.value);
-      else selected.delete(box.value);
-      if (!box.checked) (owners.get(box.value) || []).forEach((id) => enabledModules.delete(id));
-      render();
-    }),
-  );
+  bindPickerCheckboxEvents({ selected, enabledModules, owners, boxes, render });
   bindPickerCategoryEvents({ categories, required, selected, render });
   bindPickerBulkEvents({ required, selected, boxes, render });
 }

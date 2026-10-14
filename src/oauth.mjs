@@ -1,12 +1,9 @@
 import http from "node:http";
 import { startOAuthServer } from "./oauth-server.mjs";
 import { openBrowser } from "./oauth-browser.mjs";
-import { REQUIRED_OAUTH_SCOPES } from "./oauth-page-metadata.mjs";
 import { exchangeOAuthCode } from "./oauth-exchange.mjs";
 import { DEFAULT_OAUTH_SCOPES } from "./oauth-scopes.mjs";
-import { createOAuthAuthorization } from "./oauth-authorization.mjs";
-import { launchOAuthBrowser } from "./oauth-browser-launch.mjs";
-import { createOAuthCallback } from "./oauth-callback.mjs";
+import { prepareOAuthLogin } from "./oauth-login-setup.mjs";
 import { DEFAULT_OAUTH_PORTS } from "./oauth-api.mjs";
 
 export async function loginOAuth({
@@ -24,36 +21,25 @@ export async function loginOAuth({
 }) {
   if (!clientId) throw new Error("Missing CFHUB_OAUTH_CLIENT_ID");
   const { server, port } = await startOAuthServer({ ports, serverFactory, bindHost });
-  const redirectUri = `http://${redirectHost}:${port}/oauth/callback`;
-  const { verifier, state, makeAuthorization } = createOAuthAuthorization({
+  const setup = prepareOAuthLogin({
     clientId,
-    redirectUri,
-  });
-  print(
-    `Open this URL to ${scopePicker ? "set up cfhub" : "authorize cfhub"}: ${scopePicker ? `http://${redirectHost}:${port}/` : makeAuthorization([...new Set([...REQUIRED_OAUTH_SCOPES, ...scopes])])}`,
-  );
-  const { callback, getSelectedScopes } = createOAuthCallback({
-    server,
-    redirectUri,
-    state,
+    redirectHost,
+    port,
     scopePicker,
     scopes,
-    requiredScopes: REQUIRED_OAUTH_SCOPES,
-    makeAuthorization,
+    server,
+    open,
+    print,
   });
-  const browserUrl = scopePicker
-    ? `http://${redirectHost}:${port}/`
-    : makeAuthorization(getSelectedScopes()).toString();
-  launchOAuthBrowser({ open, browserUrl, print });
   try {
-    const { code, response: callbackResponse } = await callback;
+    const { code, response: callbackResponse } = await setup.callback;
     return await exchangeOAuthCode({
       clientId,
       code,
-      redirectUri,
-      verifier,
+      redirectUri: setup.redirectUri,
+      verifier: setup.verifier,
       callbackResponse,
-      scopes: getSelectedScopes(),
+      scopes: setup.getSelectedScopes(),
       fetchImpl,
     });
   } finally {

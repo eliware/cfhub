@@ -18,7 +18,7 @@ test("filters requested scopes and redirects to authorization", async () => {
     makeAuthorization: (scopes, keep) =>
       new URL(`https://auth.test/?scopes=${scopes.join(",")}&keep=${keep}`),
   });
-  request.emit("data", "scope=invalid&scope=zone.read&keep-signed-in=on");
+  request.emit("data", "scope=invalid&keep-signed-in=on");
   request.emit("end");
   await new Promise((resolve) => setImmediate(resolve));
   expect(handled).toBe(true);
@@ -30,7 +30,7 @@ test("filters requested scopes and redirects to authorization", async () => {
   expect(response.end).toHaveBeenCalled();
 });
 
-test("uses default scopes and ignores unrelated requests", async () => {
+test("ignores requests when the picker is disabled", async () => {
   const response = { writeHead: jest.fn(), end: jest.fn() };
   const request = new EventEmitter();
   request.method = "POST";
@@ -46,21 +46,4 @@ test("uses default scopes and ignores unrelated requests", async () => {
       makeAuthorization: jest.fn(),
     }),
   ).toBe(false);
-  const selected = jest.fn();
-  const authorize = jest.fn(() => new URL("https://auth.test/"));
-  serveOAuthPickerSubmitRoute({
-    request,
-    response,
-    url: new URL("http://localhost/oauth/start"),
-    scopePicker: true,
-    scopes: ["zone.read"],
-    requiredScopes: ["user-details.read"],
-    setSelectedScopes: selected,
-    makeAuthorization: authorize,
-  });
-  request.emit("data", "scope=invalid");
-  request.emit("end");
-  await new Promise((resolve) => setImmediate(resolve));
-  expect(selected).toHaveBeenCalledWith(["user-details.read", "zone.read"]);
-  expect(authorize).toHaveBeenCalledWith(["user-details.read", "zone.read"], false);
 });

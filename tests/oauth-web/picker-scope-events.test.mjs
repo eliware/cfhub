@@ -1,40 +1,35 @@
 import { jest } from "@jest/globals";
 import { bindPickerScopeEvents } from "../../src/oauth-web/picker-scope-events.mjs";
 
-const control = () => ({
+const control = (dataset = {}) => ({
+  dataset,
   handlers: {},
   addEventListener(event, handler) {
     this.handlers[event] = handler;
   },
 });
 
-test("binds individual scope changes", () => {
-  const read = Object.assign(control(), { value: "zone.read", checked: true });
-  const write = Object.assign(control(), { value: "zone.write", checked: false });
-  const unowned = Object.assign(control(), { value: "unknown", checked: false });
+test("wires category and bulk scope controls", () => {
+  const categoryEnable = control({ categoryEnable: "zones" });
+  const allDisable = control();
   globalThis.document = {
-    querySelector: () => control(),
-    querySelectorAll: () => [],
+    querySelector: (selector) => (selector === "[data-all-disable]" ? allDisable : control()),
+    querySelectorAll: (selector) => (selector === "[data-category-enable]" ? [categoryEnable] : []),
   };
-  const selected = new Set(["zone.read", "required"]);
-  const enabledModules = new Set(["zones"]);
-  const required = new Set(["required"]);
+  const selected = new Set();
   const render = jest.fn();
   bindPickerScopeEvents({
-    categories: {},
-    required,
+    categories: { zones: [{ scopes: [{ scope: "zone.read" }] }] },
+    required: new Set(["required"]),
     selected,
-    enabledModules,
-    owners: new Map([["zone.read", ["zones"]]]),
-    boxes: [read, write, unowned],
+    enabledModules: new Set(),
+    owners: new Map(),
+    boxes: [],
     render,
   });
-  read.checked = false;
-  read.handlers.change();
-  expect(enabledModules.has("zones")).toBe(false);
-  write.checked = true;
-  write.handlers.change();
-  unowned.handlers.change();
-  expect(selected).toEqual(new Set(["required", "zone.write"]));
-  expect(render).toHaveBeenCalledTimes(3);
+  categoryEnable.handlers.click();
+  expect(selected.has("zone.read")).toBe(true);
+  allDisable.handlers.click();
+  expect(selected).toEqual(new Set(["required"]));
+  expect(render).toHaveBeenCalledTimes(2);
 });
