@@ -47,3 +47,28 @@ test("ignores requests when the picker is disabled", async () => {
     }),
   ).toBe(false);
 });
+
+test("reports authorization URL errors and rejects the OAuth callback", async () => {
+  const request = new EventEmitter();
+  request.method = "POST";
+  const response = { writeHead: jest.fn(), end: jest.fn() };
+  const error = new Error("invalid OAuth setup");
+  serveOAuthPickerSubmitRoute({
+    request,
+    response,
+    url: new URL("http://localhost/oauth/start"),
+    scopePicker: true,
+    scopes: [],
+    requiredScopes: [],
+    setSelectedScopes: jest.fn(),
+    makeAuthorization: () => {
+      throw error;
+    },
+  });
+  request.emit("end");
+  await new Promise((resolve) => setImmediate(resolve));
+  expect(response.writeHead).toHaveBeenCalledWith(500, {
+    "content-type": "text/plain; charset=utf-8",
+  });
+  expect(response.end).toHaveBeenCalledWith("OAuth setup failed");
+});

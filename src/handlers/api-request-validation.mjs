@@ -13,7 +13,7 @@ export function validateApiRequest({ action, opts, body, fail }) {
   const method = String(opts.method || "GET").toUpperCase();
   if (!METHODS.has(method)) fail(`Unsupported API method: ${method}`);
   else if (method === "GET" && body !== null) fail("GET requests cannot include --data or --file");
-  else if (method === "DELETE" && !opts.force && !opts.dryRun)
+  else if (method === "DELETE" && !opts.force && !opts["dry-run"])
     fail("Refusing DELETE without --force (or use --dry-run)");
   else return { method, path };
   return null;

@@ -53,7 +53,7 @@ test("handles dry runs and unsupported client methods", async () => {
     cf: { get: jest.fn() },
     requestOptions: { path: "/zones/1", method: "DELETE" },
     body: null,
-    opts: { dryRun: true },
+    opts: { "dry-run": true },
     printer,
     fail: jest.fn(),
   });

@@ -23,21 +23,24 @@ export async function handleSsl({
     if (action === "certificates")
       return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
     const packs = Array.isArray(result?.result) ? result.result : [];
-    const coverage = packs
-      .flatMap((pack) =>
-        (pack.hosts || []).map((host) => ({ host, status: pack.status, type: pack.type })),
-      )
-      .reduce((map, item) => ({ ...map, [item.host]: item }), {});
+    const coverage = new Map(
+      packs
+        .flatMap((pack) =>
+          (pack.hosts || []).map((host) => ({ host, status: pack.status, type: pack.type })),
+        )
+        .map((item) => [item.host, item]),
+    );
+    const items = [...coverage.values()];
     return outputJson
       ? toJsonOutput({
-          coverage: Object.values(coverage),
-          complete: Object.values(coverage).every((item) => item.status === "active"),
+          coverage: items,
+          complete: items.every((item) => item.status === "active"),
         })
       : printer.log(
           JSON.stringify(
             {
-              coverage: Object.values(coverage),
-              complete: Object.values(coverage).every((item) => item.status === "active"),
+              coverage: items,
+              complete: items.every((item) => item.status === "active"),
             },
             null,
             2,

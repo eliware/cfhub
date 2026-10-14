@@ -36,6 +36,12 @@ export async function saveApiTokenLogin({
     token: credential.apiToken,
     promptAccountId,
   });
+  if (detectedAccountToken && !accountId) {
+    fail(
+      "Missing account ID for this account API token. Set CLOUDFLARE_ACCOUNT_ID or pass --account-id.",
+    );
+    return;
+  }
   const tokenInfo = await inspectLoginToken({
     token: credential.apiToken,
     accountId,

@@ -72,6 +72,8 @@ export async function handleZones({
   if (action === "delete") {
     requireValue(zoneId, "Missing --zone-id", fail);
     requireValue(opts.force, "Refusing to delete without --force", fail);
+    if (opts["dry-run"])
+      return printer.log(JSON.stringify({ action: "delete", zoneId, dryRun: true }, null, 2));
 
     const res =
       typeof cf.delete === "function"

@@ -13,10 +13,17 @@ export function replaceExtension({ source, destination, root, name, fsImpl }) {
     try {
       fsImpl.renameSync(stagedDestination, destination);
       originalMoved = false;
-    } catch (error) {
-      fsImpl.renameSync(backupDestination, destination);
-      originalMoved = false;
-      throw error;
+    } catch (installError) {
+      try {
+        fsImpl.renameSync(backupDestination, destination);
+        originalMoved = false;
+      } catch (restoreError) {
+        throw new Error(
+          `Extension upgrade failed. Restore the backup at ${backupDestination}. ${restoreError.message}`,
+          { cause: installError },
+        );
+      }
+      throw installError;
     }
   } finally {
     fsImpl.rmSync(stagingRoot, { recursive: true, force: true });

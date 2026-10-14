@@ -31,7 +31,7 @@ test("renders API results with the selected template", async () => {
 test("returns after an API dry run", async () => {
   const ctx = context({
     action: "/zones",
-    opts: { method: "DELETE", dryRun: true },
+    opts: { method: "DELETE", "dry-run": true },
   });
   await handleApi(ctx);
   expect(ctx.cf.get).not.toHaveBeenCalled();

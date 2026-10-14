@@ -65,6 +65,16 @@ test("prompts for an interactive token and account ID", async () => {
   });
 });
 
+test("requires an account ID for a non-interactive account token", async () => {
+  delete process.env.CLOUDFLARE_ACCOUNT_ID;
+  const { args, fail } = setup({ readToken: () => "cfat_account-token" });
+  await saveApiTokenLogin(args);
+  expect(fail).toHaveBeenCalledWith(
+    "Missing account ID for this account API token. Set CLOUDFLARE_ACCOUNT_ID or pass --account-id.",
+  );
+  expect(args.inspectApiTokenImpl).not.toHaveBeenCalled();
+});
+
 test("saves a standard-input token with option and environment IDs", async () => {
   process.env.CLOUDFLARE_ACCOUNT_ID = "env-account";
   process.env.CLOUDFLARE_ZONE_ID = "env-zone";

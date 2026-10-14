@@ -1,4 +1,5 @@
 import { jest } from "@jest/globals";
+import { EventEmitter } from "node:events";
 import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
 import { createOAuthCallback } from "../src/oauth-callback.mjs";
@@ -10,6 +11,31 @@ import {
 
 test("OAuth callback factory is exported", () => {
   expect(createOAuthCallback).toEqual(expect.any(Function));
+});
+
+test("OAuth picker setup errors reject the callback promise", async () => {
+  const server = new EventEmitter();
+  const error = new Error("invalid OAuth setup");
+  const { callback } = createOAuthCallback({
+    server,
+    redirectUri: "http://localhost/oauth/callback",
+    state: "state",
+    scopePicker: true,
+    scopes: [],
+    requiredScopes: [],
+    makeAuthorization: () => {
+      throw error;
+    },
+  });
+  const request = new EventEmitter();
+  request.method = "POST";
+  request.url = "/oauth/start";
+  const response = { writeHead: jest.fn(), end: jest.fn() };
+  const rejected = expect(callback).rejects.toBe(error);
+  server.emit("request", request, response);
+  request.emit("end");
+  await rejected;
+  expect(response.writeHead).toHaveBeenCalledWith(500, expect.any(Object));
 });
 
 test("OAuth login serves a state-protected callback and exchanges the code", async () => {

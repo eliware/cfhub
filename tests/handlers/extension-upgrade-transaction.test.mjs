@@ -62,6 +62,6 @@ test("keeps the backup when restoration fails", () => {
       name: "demo",
       fsImpl,
     }),
-  ).toThrow("restore failed");
+  ).toThrow(/Restore the backup at cfhub-temp-2[\\/]demo/);
   expect(fsImpl.rmSync).not.toHaveBeenCalledWith("cfhub-temp-2", { recursive: true, force: true });
 });

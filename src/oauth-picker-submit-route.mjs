@@ -10,15 +10,22 @@ export function serveOAuthPickerSubmitRoute({
   requiredScopes,
   setSelectedScopes,
   makeAuthorization,
+  onError = () => {},
 }) {
   if (!scopePicker || url.pathname !== "/oauth/start" || request.method !== "POST") return false;
-  readRequestBody(request).then((form) => {
-    const nextScopes = selectOAuthPickerScopes({ form, scopes, requiredScopes });
-    setSelectedScopes(nextScopes);
-    response.writeHead(302, {
-      location: makeAuthorization(nextScopes, form.get("keep-signed-in") === "on").toString(),
+  readRequestBody(request)
+    .then((form) => {
+      const nextScopes = selectOAuthPickerScopes({ form, scopes, requiredScopes });
+      setSelectedScopes(nextScopes);
+      response.writeHead(302, {
+        location: makeAuthorization(nextScopes, form.get("keep-signed-in") === "on").toString(),
+      });
+      response.end();
+    })
+    .catch((error) => {
+      onError(error);
+      response.writeHead(500, { "content-type": "text/plain; charset=utf-8" });
+      response.end("OAuth setup failed");
     });
-    response.end();
-  });
   return true;
 }

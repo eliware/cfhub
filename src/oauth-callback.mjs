@@ -26,6 +26,7 @@ export function createOAuthCallback({
             selectedScopes = value;
           },
           makeAuthorization,
+          onError: reject,
         })
       )
         return;

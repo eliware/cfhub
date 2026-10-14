@@ -164,3 +164,21 @@ test("zone handler rejects unknown actions", async () => {
 });
 
 test("zone deletion supports both client styles and force checks", fixtureCase1);
+
+test("previews zone deletion without calling Cloudflare in dry-run mode", async () => {
+  const remove = jest.fn();
+  const printer = { log: jest.fn() };
+  await handleZones(
+    context({
+      action: "delete",
+      cf: { delete: remove },
+      opts: { "zone-id": "z1", force: true, "dry-run": true },
+      printer,
+      outputJson: false,
+    }),
+  );
+  expect(remove).not.toHaveBeenCalled();
+  expect(printer.log).toHaveBeenCalledWith(
+    JSON.stringify({ action: "delete", zoneId: "z1", dryRun: true }, null, 2),
+  );
+});
