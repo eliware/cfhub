@@ -1,5 +1,7 @@
 import { getAccountId, getZoneId, getId } from "./identifiers.mjs";
-import { requireAnyValue, requireValue } from "./argument-validation.mjs";
+import { requireAnyValue } from "./argument-validation.mjs";
+import { readRulesets } from "./rulesets-read.mjs";
+import { mutateRulesets } from "./rulesets-mutate.mjs";
 
 export async function handleRulesets({
   cf,
@@ -16,71 +18,21 @@ export async function handleRulesets({
   const id = getId(opts);
   requireAnyValue([zoneId, accountId], "Missing --zone-id or --account-id", fail);
 
-  if (action === "list") {
-    const target =
-      typeof cf.get === "function"
-        ? await cf.get(
-            zoneId ? `/zones/${zoneId}/rulesets` : `/accounts/${accountId}/rulesets`,
-            undefined,
-          )
-        : zoneId
-          ? await cf.rulesets.list({ zone_id: zoneId })
-          : await cf.rulesets.list({ account_id: accountId });
-    return outputJson ? toJsonOutput(target) : printer.log(JSON.stringify(target, null, 2));
-  }
-
-  if (action === "get") {
-    requireValue(id, "Missing --id", fail);
-
-    const target =
-      typeof cf.get === "function"
-        ? await cf.get(
-            zoneId ? `/zones/${zoneId}/rulesets/${id}` : `/accounts/${accountId}/rulesets/${id}`,
-            undefined,
-          )
-        : zoneId
-          ? await cf.rulesets.get(id, { zone_id: zoneId })
-          : await cf.rulesets.get(id, { account_id: accountId });
-    return outputJson ? toJsonOutput(target) : printer.log(JSON.stringify(target, null, 2));
-  }
-
-  if (action === "create") {
-    requireValue(body, "Missing --data or --file", fail);
-    if (opts["dry-run"])
-      return printer.log(
-        JSON.stringify({ zoneId, accountId, action: "create", body, dryRun: true }, null, 2),
-      );
-
-    const target =
-      typeof cf.post === "function"
-        ? await cf.post(zoneId ? `/zones/${zoneId}/rulesets` : `/accounts/${accountId}/rulesets`, {
-            body,
-          })
-        : zoneId
-          ? await cf.rulesets.create({ zone_id: zoneId, ...body })
-          : await cf.rulesets.create({ account_id: accountId, ...body });
-    return outputJson ? toJsonOutput(target) : printer.log(JSON.stringify(target, null, 2));
-  }
-
-  if (action === "update") {
-    requireValue(id, "Missing --id", fail);
-    requireValue(body, "Missing --data or --file", fail);
-    if (opts["dry-run"])
-      return printer.log(
-        JSON.stringify({ zoneId, accountId, id, action: "update", body, dryRun: true }, null, 2),
-      );
-
-    const target =
-      typeof cf.put === "function"
-        ? await cf.put(
-            zoneId ? `/zones/${zoneId}/rulesets/${id}` : `/accounts/${accountId}/rulesets/${id}`,
-            { body },
-          )
-        : zoneId
-          ? await cf.rulesets.update(id, { zone_id: zoneId, ...body })
-          : await cf.rulesets.update(id, { account_id: accountId, ...body });
-    return outputJson ? toJsonOutput(target) : printer.log(JSON.stringify(target, null, 2));
-  }
+  const shared = {
+    cf,
+    action,
+    opts,
+    zoneId,
+    accountId,
+    id,
+    body,
+    outputJson,
+    toJsonOutput,
+    printer,
+    fail,
+  };
+  if (action === "list" || action === "get") return readRulesets(shared);
+  if (action === "create" || action === "update") return mutateRulesets(shared);
 
   fail(`Unknown rulesets action: ${action}`);
 }
