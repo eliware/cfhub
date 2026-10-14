@@ -1,6 +1,7 @@
 import { rm } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { waitForProcess } from "../src/process-completion.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const webpackCli = fileURLToPath(
@@ -12,10 +13,11 @@ const webpack = spawn(
   { cwd: root, stdio: "inherit" },
 );
 
-const exitCode = await new Promise((resolve) => {
-  webpack.on("close", resolve);
-});
-if (exitCode !== 0) process.exitCode = exitCode;
+const { error, exitCode } = await waitForProcess(webpack);
+if (error) {
+  console.error(`Could not start webpack: ${error.message}`);
+  process.exitCode = 1;
+} else if (exitCode !== 0) process.exitCode = exitCode || 1;
 else {
   await Promise.all([
     rm(new URL("../src/oauth-web/bundled/oauth-picker.mjs", import.meta.url), { force: true }),

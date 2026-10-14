@@ -3,7 +3,7 @@ import { logoutAuthProfile } from "../../src/handlers/auth-profile-logout.mjs";
 
 const options = () => ({
   name: "old",
-  data: { active: "old", profiles: { old: {}, next: {} } },
+  data: { active: "old", profiles: { old: { authMethod: "oauth" }, next: {} } },
   readCredentialImpl: jest.fn().mockResolvedValue({ oauthRefreshToken: "refresh" }),
   revokeOAuthImpl: jest.fn().mockResolvedValue(true),
   deleteCredentialImpl: jest.fn(),
@@ -78,4 +78,13 @@ test("reports when Cloudflare does not confirm token revocation", async () => {
     "Cloudflare did not confirm OAuth token revocation. The local profile was removed.",
   );
   expect(input.data.profiles.old).toBeUndefined();
+});
+
+test("does not send API-token profile credentials to OAuth revocation", async () => {
+  const input = options();
+  input.data.profiles.old.authMethod = "api-token";
+  input.readCredentialImpl.mockResolvedValue({ oauthAccessToken: "stale-oauth-token" });
+  await logoutAuthProfile(input);
+  expect(input.revokeOAuthImpl).not.toHaveBeenCalled();
+  expect(input.deleteCredentialImpl).toHaveBeenCalledWith("old");
 });

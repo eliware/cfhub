@@ -16,7 +16,10 @@ export async function logoutAuthProfile({
   }
   const credential = await readCredentialImpl(name);
   try {
-    const token = credential?.oauthRefreshToken || credential?.oauthAccessToken;
+    const isOAuthProfile = data.profiles[name].authMethod === "oauth";
+    const token = isOAuthProfile
+      ? credential?.oauthRefreshToken || credential?.oauthAccessToken
+      : undefined;
     if (token && !(await revokeOAuthImpl({ token })))
       printer.error(
         "Cloudflare did not confirm OAuth token revocation. The local profile was removed.",
