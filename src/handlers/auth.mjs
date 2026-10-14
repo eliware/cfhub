@@ -2,6 +2,7 @@ import { handleAuthProfile } from "./auth-profile.mjs";
 import { handleAuthStatus } from "./auth-status.mjs";
 import { handleAuthLogin } from "./auth-login.mjs";
 import { createAuthDependencies } from "./auth-dependencies.mjs";
+import { authActionRoute } from "./auth-action-route.mjs";
 
 export async function handleAuth(context = {}) {
   const {
@@ -30,7 +31,8 @@ export async function handleAuth(context = {}) {
     inspectApiTokenImpl,
   } = createAuthDependencies(context);
   const data = read(profileHome, profileFs);
-  if (action === "login")
+  const route = authActionRoute(action);
+  if (route === "login")
     return handleAuthLogin({
       resource,
       data,
@@ -48,7 +50,7 @@ export async function handleAuth(context = {}) {
       profileHome,
       profileFs,
     });
-  if (["list", "switch", "logout"].includes(action))
+  if (route === "profile")
     return handleAuthProfile({
       action,
       resource,
@@ -65,7 +67,7 @@ export async function handleAuth(context = {}) {
       revokeOAuthImpl,
       deleteCredentialImpl,
     });
-  if (action === "status" || action === "verify")
+  if (route === "status")
     return handleAuthStatus({
       action,
       resource,

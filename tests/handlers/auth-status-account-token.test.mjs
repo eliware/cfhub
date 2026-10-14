@@ -55,3 +55,23 @@ test("account token status resolves saved IDs and empty account lists", async ()
   });
   expect(toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ accounts: [] }));
 });
+
+test("account token status uses the environment account ID", async () => {
+  const previous = process.env.CLOUDFLARE_ACCOUNT_ID;
+  process.env.CLOUDFLARE_ACCOUNT_ID = "environment";
+  const cf = { get: jest.fn().mockResolvedValue({}) };
+  try {
+    await showAccountTokenStatus({
+      statusProfile: "work",
+      opts: {},
+      data: { profiles: {} },
+      cf,
+      outputJson: true,
+      toJsonOutput: jest.fn(),
+    });
+  } finally {
+    if (previous === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID;
+    else process.env.CLOUDFLARE_ACCOUNT_ID = previous;
+  }
+  expect(cf.get).toHaveBeenCalledWith("/accounts/environment");
+});

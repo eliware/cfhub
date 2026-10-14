@@ -29,16 +29,7 @@ test("auth profile helper lists and activates saved profiles", async () => {
   expect(toJsonOutput).toHaveBeenCalledWith([{ name: "work", active: true, authMethod: "oauth" }]);
   await handleAuthProfile({ ...base, action: "switch" });
   expect(data.active).toBe("work");
-  await handleAuthProfile({
-    ...base,
-    action: "logout",
-    opts: {},
-    readCredentialImpl: jest.fn().mockResolvedValue({}),
-  });
-
   expect(write).toHaveBeenCalledWith(data, "/workspace/test-home", {});
-  expect(data.active).toBeNull();
-  expect(data.profiles.work).toBeUndefined();
 });
 
 test("ignores actions outside list, switch, and logout", async () => {

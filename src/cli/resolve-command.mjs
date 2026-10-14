@@ -2,10 +2,10 @@ import { parseArgs } from "../args.mjs";
 import { tokenizeCommand } from "../alias-tokenizer.mjs";
 import { discoverExtensions } from "../extensions.mjs";
 import { readAliases } from "../aliases.mjs";
-import { printCommandHelp } from "../help/commands.mjs";
-import { printResourceHelp } from "../help/resources.mjs";
-import { commandNamesFor, resourceNames, suggestCommand } from "../suggestions.mjs";
 import { resolveExtensionCommand } from "./resolve-extension-command.mjs";
+import { resolveCommandHelp } from "./resolve-command-help.mjs";
+import { validateCommandAction } from "./validate-command-action.mjs";
+import { validateCommandResource } from "./validate-command-resource.mjs";
 
 export async function resolveCommand({ args, opts, printer, homeDir, fsImpl, exit, loadBody }) {
   let [resource, action] = args;
@@ -19,26 +19,15 @@ export async function resolveCommand({ args, opts, printer, homeDir, fsImpl, exi
   const extensionManifest = discoverExtensions(homeDir, fsImpl).find(
     (manifest) => manifest.commands[resource],
   );
-  if (!extensionManifest && !resourceNames.includes(resource)) {
-    const suggestion = suggestCommand("resource", resource);
-    if (suggestion) {
-      printer.error(
-        `unknown command "${resource}" for "cfhub"\n\nDid you mean this?\n\t${suggestion}\n\nUsage: cfhub <command> <subcommand> [flags]`,
-      );
-      return { done: true, value: exit(1) };
-    }
-  }
-  if (opts.help) {
-    return {
-      done: true,
-      value:
-        args.length > 1
-          ? printCommandHelp(resource, action, printer)
-          : printResourceHelp(resource, printer),
-    };
-  }
-  if (args.length === 1 && !extensionManifest)
-    return { done: true, value: printResourceHelp(resource, printer) };
+  const resourceValidation = validateCommandResource({
+    resource,
+    extensionManifest,
+    printer,
+    exit,
+  });
+  if (resourceValidation) return resourceValidation;
+  const help = resolveCommandHelp({ args, opts, resource, action, extensionManifest, printer });
+  if (help) return help;
   if (extensionManifest) {
     return resolveExtensionCommand({
       extensionManifest,
@@ -51,17 +40,7 @@ export async function resolveCommand({ args, opts, printer, homeDir, fsImpl, exi
       loadBody,
     });
   }
-  if (
-    resource !== "api" &&
-    action &&
-    commandNamesFor(resource).length &&
-    !commandNamesFor(resource).includes(action)
-  ) {
-    const suggestion = suggestCommand(resource, action);
-    printer.error(
-      `unknown command "${action}" for "cfhub ${resource}"${suggestion ? `\n\nDid you mean this?\n\t${suggestion}` : ""}\n\nUsage: cfhub ${resource} <command> [flags]`,
-    );
-    return { done: true, value: exit(1) };
-  }
+  const validation = validateCommandAction({ resource, action, printer, exit });
+  if (validation) return validation;
   return { done: false, args, opts, resource, action };
 }

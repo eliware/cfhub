@@ -83,3 +83,23 @@ test("auth coordinator routes login, profile, status, and verify actions", async
   expect(fail).toHaveBeenCalledWith("Unknown auth action: unknown");
   await handleAuth();
 });
+
+test("auth coordinator sends logout through the profile workflow", async () => {
+  const data = { active: "work", profiles: { work: {} } };
+  const write = jest.fn();
+  const log = jest.fn();
+  await handleAuth({
+    action: "logout",
+    opts: {},
+    read: () => data,
+    readCredentialImpl: jest.fn().mockResolvedValue(null),
+    deleteCredentialImpl: jest.fn(),
+    write,
+    printer: { log },
+    profileHome: "/tmp/profiles",
+    profileFs: {},
+  });
+  expect(data).toEqual({ active: null, profiles: {} });
+  expect(write).toHaveBeenCalledWith(data, "/tmp/profiles", {});
+  expect(log).toHaveBeenCalledWith("Removed profile work");
+});

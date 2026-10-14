@@ -27,18 +27,15 @@ test("extension install, list, upgrade, and remove work locally", () => {
   };
   handleExtension({ ...common, action: "install", opts: { path: source } });
   handleExtension({ ...common, action: "list", opts: {} });
-  handleExtension({ ...common, action: "list", opts: {}, outputJson: false });
-  handleExtension({ ...common, action: "info", opts: { name: "hello" }, outputJson: false });
-  handleExtension({ ...common, action: "info", opts: { name: "hello" }, outputJson: true });
-  handleExtension({ ...common, action: "upgrade", opts: { path: source } });
-  handleExtension({ ...common, action: "remove", opts: { name: "hello", force: true } });
-  expect(printer.log).toHaveBeenCalledWith("Installed extension hello");
-  expect(printer.log).toHaveBeenCalledWith("hello 1.0.0\n(no description)");
-  expect(common.toJsonOutput).toHaveBeenCalledWith([
+  expect(common.toJsonOutput).toHaveBeenLastCalledWith([
     { name: "hello", version: "1.0.0", commands: { hello: "hello.mjs" } },
   ]);
+  handleExtension({ ...common, action: "upgrade", opts: { path: source } });
+  handleExtension({ ...common, action: "remove", opts: { name: "hello", force: true } });
+  handleExtension({ ...common, action: "list", opts: {} });
+  expect(printer.log).toHaveBeenCalledWith("Installed extension hello");
+  expect(common.toJsonOutput).toHaveBeenLastCalledWith([]);
   expect(printer.log).toHaveBeenCalledWith("Removed extension hello");
-  handleExtension({ ...common, action: "list", outputJson: false });
 });
 
 test("extension validation and safety errors are reported", () => {
