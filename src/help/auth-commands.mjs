@@ -1,3 +1,5 @@
+import { API_TOKEN_TUTORIAL } from "./auth-token-tutorial.mjs";
+
 export function authCommandHelp(key) {
   const map = {
     "auth login": `Save a Cloudflare API token profile.
@@ -5,8 +7,7 @@ export function authCommandHelp(key) {
 USAGE
   cfhub auth login [flags]
 
-  The interactive flow explains how to create an Account API Token under
-  Manage account > Account API tokens, then asks for the token and Account ID.
+  ${API_TOKEN_TUTORIAL.replaceAll("\n", "\n  ")}
   The token uses hidden input and is stored in the native credential store when available.
   cfhub verifies the token and loads its permission summary when Cloudflare
   exposes the token policy. Use --token-stdin for automation.
