@@ -8,13 +8,18 @@ export async function saveOAuthProfile({
   write,
   profileHome,
   profileFs,
+  fail,
 }) {
-  await writeCredentialImpl(name, {
+  const stored = await writeCredentialImpl(name, {
     oauthAccessToken: oauth.accessToken,
     oauthRefreshToken: oauth.refreshToken,
     expiresIn: oauth.expiresIn,
     expiresAt: oauth.expiresAt,
   });
+  if (!stored) {
+    fail("Could not save OAuth credentials to the OS keychain or private credential file");
+    return false;
+  }
   data.profiles[name] = {
     authMethod: "oauth",
     scopes: oauth.scopes || scopes,
@@ -23,4 +28,5 @@ export async function saveOAuthProfile({
   };
   data.active = name;
   write(data, profileHome, profileFs);
+  return true;
 }

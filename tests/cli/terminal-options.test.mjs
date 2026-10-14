@@ -13,3 +13,9 @@ test("resolves JSON, color, width, and pager settings", () => {
     terminalOptions({ opts: { quiet: true, pager: true }, settings: {}, env: {}, isTTY: false }),
   ).toMatchObject({ pager: null, useTerminal: false });
 });
+
+test("lets an explicit text output selection override the JSON flag", () => {
+  expect(
+    terminalOptions({ opts: { json: true, output: "text" }, settings: {}, env: {}, isTTY: false }),
+  ).toMatchObject({ outputJson: false });
+});

@@ -36,3 +36,16 @@ test("health dry-run and unknown action are safe", async () => {
   expect(ctx.cf.post).not.toHaveBeenCalled();
   expect(ctx.fail).toHaveBeenCalledWith("Unknown health action: nope");
 });
+
+test("health delete dry-run does not call Cloudflare", async () => {
+  const ctx = base();
+  await handleHealth({
+    ...ctx,
+    action: "delete",
+    opts: { "zone-id": "z1", id: "h1", force: true, "dry-run": true },
+  });
+  expect(ctx.cf.delete).not.toHaveBeenCalled();
+  expect(ctx.printer.log).toHaveBeenCalledWith(
+    JSON.stringify({ action: "delete", zoneId: "z1", id: "h1", dryRun: true }, null, 2),
+  );
+});

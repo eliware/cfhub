@@ -38,3 +38,13 @@ test("requires an ID and force before deletion", async () => {
     "Refusing to delete without --force",
   );
 });
+
+test("previews deletion without calling the client in dry-run mode", async () => {
+  const remove = jest.fn();
+  const input = context({ cf: { delete: remove }, opts: { force: true, "dry-run": true } });
+  await deleteDnsRecord(input);
+  expect(remove).not.toHaveBeenCalled();
+  expect(input.printer.log).toHaveBeenCalledWith(
+    JSON.stringify({ action: "delete", zoneId: "zone-1", id: "record-1", dryRun: true }, null, 2),
+  );
+});

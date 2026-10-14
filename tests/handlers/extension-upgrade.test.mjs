@@ -2,11 +2,14 @@ import { jest } from "@jest/globals";
 import { upgradeExtension } from "../../src/handlers/extension-upgrade.mjs";
 
 test("upgrade replaces an existing extension", () => {
+  let tempNumber = 0;
   const fsImpl = {
     readFileSync: () => JSON.stringify({ name: "demo", version: "2", commands: {} }),
     mkdirSync: jest.fn(),
     existsSync: jest.fn(() => true),
     rmSync: jest.fn(),
+    mkdtempSync: jest.fn(() => `cfhub-temp-${++tempNumber}`),
+    renameSync: jest.fn(),
     cpSync: jest.fn(),
   };
   const printer = { log: jest.fn() };
@@ -17,11 +20,47 @@ test("upgrade replaces an existing extension", () => {
     fsImpl,
     homeDir: "/home",
   });
-  expect(fsImpl.rmSync).toHaveBeenCalledWith(expect.stringContaining("demo"), {
+  expect(fsImpl.cpSync).toHaveBeenCalledWith("/source", expect.stringContaining("cfhub-temp-1"), {
     recursive: true,
-    force: true,
   });
+  expect(fsImpl.renameSync).toHaveBeenNthCalledWith(
+    1,
+    expect.stringContaining("demo"),
+    expect.stringContaining("cfhub-temp-2"),
+  );
+  expect(fsImpl.renameSync).toHaveBeenNthCalledWith(
+    2,
+    expect.stringContaining("cfhub-temp-1"),
+    expect.stringContaining("demo"),
+  );
   expect(printer.log).toHaveBeenCalledWith("Upgraded extension demo");
+});
+
+test("keeps the installed extension when staging the new extension fails", () => {
+  let tempNumber = 0;
+  const fsImpl = {
+    readFileSync: () => JSON.stringify({ name: "demo", version: "2", commands: {} }),
+    mkdirSync: jest.fn(),
+    existsSync: jest.fn(() => true),
+    mkdtempSync: jest.fn(() => `cfhub-temp-${++tempNumber}`),
+    renameSync: jest.fn(),
+    rmSync: jest.fn(),
+    cpSync: jest.fn(() => {
+      throw new Error("copy failed");
+    }),
+  };
+  const fail = jest.fn();
+  expect(() =>
+    upgradeExtension({
+      opts: { path: "/source" },
+      printer: { log: jest.fn() },
+      fail,
+      fsImpl,
+      homeDir: "/home",
+    }),
+  ).toThrow("copy failed");
+  expect(fsImpl.renameSync).not.toHaveBeenCalled();
+  expect(fsImpl.rmSync).toHaveBeenCalledWith("cfhub-temp-1", { recursive: true, force: true });
 });
 
 test("upgrade requires an installed extension and valid input", () => {

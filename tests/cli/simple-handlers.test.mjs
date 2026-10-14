@@ -1,5 +1,6 @@
 import { jest } from "@jest/globals";
 import { simpleHandlers } from "../../src/cli/simple-handlers.mjs";
+import { run } from "../../src/cli.mjs";
 
 test("simple handler map covers platform resources", async () => {
   for (const resource of [
@@ -32,7 +33,6 @@ test("simple handler map covers platform resources", async () => {
 });
 
 test("CLI manages aliases and config through the command surface", async () => {
-  const mod = await import(`../../src/cli.mjs?ts=${Date.now() + 12}`);
   const home = `/tmp/cf-cli-settings-${Date.now()}`;
   const files = new Map();
   const fsImpl = {
@@ -44,8 +44,8 @@ test("CLI manages aliases and config through the command surface", async () => {
   };
   const printer = { log: jest.fn(), error: jest.fn() };
   const common = { homeDir: home, fsImpl, printer };
-  await mod.run({ ...common, argv: ["alias", "set", "work", "zone", "list"] });
-  await mod.run({
+  await run({ ...common, argv: ["alias", "set", "work", "zone", "list"] });
+  await run({
     ...common,
     argv: ["work"],
     loadEnv: jest.fn(),
@@ -53,13 +53,12 @@ test("CLI manages aliases and config through the command surface", async () => {
     handlers: { zones: jest.fn() },
     exit: jest.fn(),
   });
-  await mod.run({ ...common, argv: ["config", "set", "pager", "less"] });
-  await mod.run({ ...common, argv: ["config", "get", "pager"] });
+  await run({ ...common, argv: ["config", "set", "pager", "less"] });
+  await run({ ...common, argv: ["config", "get", "pager"] });
   expect(printer.log).toHaveBeenCalledWith("less");
 });
 
 test("CLI dispatches built-in load-balancer and tunnel handlers", async () => {
-  const mod = await import(`../../src/cli.mjs?ts=${Date.now() + 11}`);
   const printer = { log: jest.fn(), error: jest.fn() };
   const cfFactory = jest.fn(() => ({
     get: jest.fn().mockResolvedValue({ ok: true }),
@@ -71,21 +70,20 @@ test("CLI dispatches built-in load-balancer and tunnel handlers", async () => {
     env: {},
     exit: jest.fn(),
   };
-  await mod.run({
+  await run({
     ...common,
     argv: ["load-balancer", "list", "--zone-id", "z1"],
   });
-  await mod.run({ ...common, argv: ["tunnel", "list", "--account-id", "a1"] });
+  await run({ ...common, argv: ["tunnel", "list", "--account-id", "a1"] });
   expect(printer.log).toHaveBeenCalled();
 });
 
 test("CLI dispatches a configured account platform handler", async () => {
-  const mod = await import(`../../src/cli.mjs?ts=${Date.now() + 12}`);
   const printer = { log: jest.fn(), error: jest.fn() };
   const cfFactory = jest.fn(() => ({
     get: jest.fn().mockResolvedValue({ ok: true }),
   }));
-  await mod.run({
+  await run({
     argv: ["workers", "list", "--account-id", "a1"],
     printer,
     loadEnv: jest.fn(),
@@ -97,7 +95,6 @@ test("CLI dispatches a configured account platform handler", async () => {
 });
 
 test("CLI loads an installed extension without Cloudflare credentials", async () => {
-  const mod = await import(`../../src/cli.mjs?ts=${Date.now() + 15}`);
   const fs = await import("node:fs");
   const os = await import("node:os");
   const path = await import("node:path");
@@ -117,7 +114,7 @@ test("CLI loads an installed extension without Cloudflare credentials", async ()
     "export default ({ printer, opts }) => printer.log(`Hello ${opts.name}`)",
   );
   const printer = { log: jest.fn(), error: jest.fn() };
-  await mod.run({
+  await run({
     argv: ["hello", "--name", "Eli"],
     printer,
     fsImpl: fs,

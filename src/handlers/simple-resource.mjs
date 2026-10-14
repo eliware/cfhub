@@ -36,6 +36,10 @@ export function makeSimpleResource({ name, scope, path }) {
     if (action === "delete") {
       requireValue(id, "Missing --id", fail);
       requireValue(opts.force, `Refusing ${name} delete without --force`, fail);
+      if (opts["dry-run"])
+        return printer.log(
+          JSON.stringify({ action, [scope + "Id"]: scopeId, id, dryRun: true }, null, 2),
+        );
       const result = await cf.delete(endpoint);
       return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
     }

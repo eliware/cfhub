@@ -7,7 +7,7 @@ export function terminalOptions({
   env = process.env,
   isTTY = Boolean(process.stdout?.isTTY),
 }) {
-  const outputJson = opts.json || opts.output === "json";
+  const outputJson = opts.output === "text" ? false : opts.json || opts.output === "json";
   const color = terminalColorMode(opts.color ?? settings.color, { isTTY });
   const pagerSetting =
     opts.pager === true ? settings.pager || env.PAGER || "less" : opts.pager || settings.pager;

@@ -43,3 +43,16 @@ test("Origin CA create dry-run and unsafe revoke are blocked", async () => {
   await handleOriginCa({ ...unknown, action: "unknown" });
   expect(unknown.fail).toHaveBeenCalledWith("Unknown origin-ca action: unknown");
 });
+
+test("Origin CA revoke dry-run does not call Cloudflare", async () => {
+  const ctx = base();
+  await handleOriginCa({
+    ...ctx,
+    action: "revoke",
+    opts: { id: "c1", force: true, "dry-run": true },
+  });
+  expect(ctx.cf.delete).not.toHaveBeenCalled();
+  expect(ctx.printer.log).toHaveBeenCalledWith(
+    JSON.stringify({ action: "revoke", id: "c1", dryRun: true }, null, 2),
+  );
+});

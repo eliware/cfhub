@@ -31,6 +31,16 @@ test("simple resource supports CRUD and dry-run", async () => {
   expect(ctx.cf.delete).toHaveBeenCalled();
   await handle({ ...ctx, action: "create", opts: { "zone-id": "z1", "dry-run": true } });
   expect(ctx.cf.post).toHaveBeenCalledTimes(1);
+  const dryDelete = { ...ctx, cf: { ...ctx.cf, delete: jest.fn() }, printer: { log: jest.fn() } };
+  await handle({
+    ...dryDelete,
+    action: "delete",
+    opts: { "zone-id": "z1", id: "r1", force: true, "dry-run": true },
+  });
+  expect(dryDelete.cf.delete).not.toHaveBeenCalled();
+  expect(dryDelete.printer.log).toHaveBeenCalledWith(
+    JSON.stringify({ action: "delete", zoneId: "z1", id: "r1", dryRun: true }, null, 2),
+  );
   const text = { ...ctx, outputJson: false, printer: { log: jest.fn() } };
   await handle({ ...text, action: "list" });
   await handle({ ...text, action: "create" });

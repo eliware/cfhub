@@ -1,6 +1,7 @@
 import { extensionRoot } from "../extensions.mjs";
 import { loadExtensionSource } from "./extension-source.mjs";
 import { extensionDestination } from "./extension-destination.mjs";
+import { replaceExtension } from "./extension-upgrade-transaction.mjs";
 
 export function upgradeExtension({ opts, printer, fail, fsImpl, homeDir }) {
   const loaded = loadExtensionSource({ sourcePath: opts.path, fsImpl, fail });
@@ -17,7 +18,6 @@ export function upgradeExtension({ opts, printer, fail, fsImpl, homeDir }) {
     fail(`Extension ${manifest.name} is not installed. Use install instead.`);
     return;
   }
-  fsImpl.rmSync(destination, { recursive: true, force: true });
-  fsImpl.cpSync(source, destination, { recursive: true });
+  replaceExtension({ source, destination, root, name: manifest.name, fsImpl });
   return printer.log(`Upgraded extension ${manifest.name}`);
 }

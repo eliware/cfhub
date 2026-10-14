@@ -6,7 +6,7 @@ test("adds page parameters while preserving query strings", () => {
   expect(withPage("/zones?name=x", 2)).toBe("/zones?name=x&page=2&per_page=100");
 });
 
-test("combines requested pages and preserves non-array responses", async () => {
+test("combines requested pages and rejects responses without pagination data", async () => {
   const fetchPage = jest.fn(async (page) => ({
     result: [{ page }],
     result_info: { total_pages: 2 },
@@ -25,9 +25,24 @@ test("combines requested pages and preserves non-array responses", async () => {
       { paginate: true },
     ),
   ).toEqual({ result: [], result_info: { total_pages: 1 } });
-  const scalar = { result: "value", result_info: { total_pages: 2, total_count: 5 } };
-  const scalarPage = await getAllPages(async () => ({ result: "next" }), scalar, {
-    paginate: true,
-  });
-  expect(scalarPage.result).toBe("value");
+  await expect(
+    getAllPages(
+      fetchPage,
+      { result: "value", result_info: { total_pages: 2 } },
+      { paginate: true },
+    ),
+  ).rejects.toThrow("The API response does not support pagination");
+  await expect(getAllPages(fetchPage, { result: [] }, { paginate: true })).rejects.toThrow(
+    "The API response does not support pagination",
+  );
+  await expect(
+    getAllPages(fetchPage, { result: [], result_info: { total_pages: 0 } }, { paginate: true }),
+  ).rejects.toThrow("The API response does not support pagination");
+  await expect(
+    getAllPages(
+      async () => ({ result: "next" }),
+      { result: [{ page: 1 }], result_info: { total_pages: 2 } },
+      { paginate: true },
+    ),
+  ).rejects.toThrow("The API response does not support pagination");
 });

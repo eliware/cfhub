@@ -10,10 +10,11 @@ export async function saveOAuthLogin({
   write,
   profileHome,
   profileFs,
+  fail,
 }) {
   const { scopes, ...oauthOptions } = authOAuthOptions(opts);
   const oauth = await oauthLogin({ ...oauthOptions, scopes });
-  await saveOAuthProfile({
+  return saveOAuthProfile({
     data,
     name,
     opts,
@@ -23,5 +24,6 @@ export async function saveOAuthLogin({
     write,
     profileHome,
     profileFs,
+    fail,
   });
 }

@@ -52,7 +52,7 @@ test("OAuth login combines configured and requested scopes", async () => {
     opts: { scopes: ["one,two"], scope: "three", "no-scope-picker": true },
     name: "environment",
     oauthLogin,
-    writeCredentialImpl: jest.fn(),
+    writeCredentialImpl: jest.fn().mockResolvedValue(true),
     write,
   });
   expect(data.profiles.environment).toEqual(

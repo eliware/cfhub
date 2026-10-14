@@ -30,3 +30,16 @@ test("requires ID and force, then prints text output", async () => {
   await handleListsDelete(input);
   expect(input.printer.log).toHaveBeenCalledWith(JSON.stringify({ success: true }, null, 2));
 });
+
+test("previews deletion without calling Cloudflare in dry-run mode", async () => {
+  const input = base({ opts: { force: true, "dry-run": true } });
+  await handleListsDelete(input);
+  expect(input.cf.delete).not.toHaveBeenCalled();
+  expect(input.printer.log).toHaveBeenCalledWith(
+    JSON.stringify(
+      { action: "delete", accountId: "account-1", id: "list-1", dryRun: true },
+      null,
+      2,
+    ),
+  );
+});

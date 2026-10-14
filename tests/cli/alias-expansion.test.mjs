@@ -22,3 +22,13 @@ test("keeps arguments and options when no alias matches", () => {
     opts,
   });
 });
+
+test("preserves spaces in caller arguments when an alias expands", () => {
+  const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), "cf-alias-"));
+  const config = path.join(homeDir, ".config", "cfhub");
+  fs.mkdirSync(config, { recursive: true });
+  fs.writeFileSync(path.join(config, "aliases.json"), JSON.stringify({ say: "zone get" }));
+  expect(
+    expandCommandAlias({ args: ["say", "two words"], opts: {}, homeDir, fsImpl: fs }).args,
+  ).toEqual(["zone", "get", "two words"]);
+});

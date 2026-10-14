@@ -4,12 +4,17 @@ export function withPage(path, page) {
 }
 
 export async function getAllPages(fetchPage, first, { paginate = false } = {}) {
-  if (!paginate || !first?.result_info?.total_pages || first.result_info.total_pages <= 1)
-    return first;
-  const pages = Array.isArray(first.result) ? [...first.result] : first.result;
-  for (let page = 2; page <= first.result_info.total_pages; page++) {
+  if (!paginate) return first;
+  const totalPages = first?.result_info?.total_pages;
+  if (!Array.isArray(first?.result) || !Number.isInteger(totalPages) || totalPages < 1)
+    throw new Error("The API response does not support pagination");
+  if (totalPages === 1) return first;
+  const pages = [...first.result];
+  for (let page = 2; page <= totalPages; page++) {
     const next = await fetchPage(page);
-    if (Array.isArray(pages) && Array.isArray(next?.result)) pages.push(...next.result);
+    if (!Array.isArray(next?.result))
+      throw new Error("The API response does not support pagination");
+    pages.push(...next.result);
   }
   return {
     ...first,
@@ -17,7 +22,7 @@ export async function getAllPages(fetchPage, first, { paginate = false } = {}) {
     result_info: {
       ...first.result_info,
       page: 1,
-      total_count: Array.isArray(pages) ? pages.length : first.result_info.total_count,
+      total_count: pages.length,
     },
   };
 }
