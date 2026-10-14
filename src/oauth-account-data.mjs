@@ -1,17 +1,9 @@
+import { requestOAuthAccountData } from "./oauth-account-request.mjs";
+
 export async function loadOAuthAccountData({ enabled, accessToken, fetchImpl }) {
   const data = { zones: [], dns: [], errors: [] };
-  const get = async (url) => {
-    try {
-      const response = await fetchImpl(`https://api.cloudflare.com/client/v4${url}`, {
-        headers: { authorization: `Bearer ${accessToken}` },
-      });
-      if (!response.ok) return null;
-      return (await response.json())?.result ?? null;
-    } catch (error) {
-      data.errors.push(error.message);
-      return null;
-    }
-  };
+  const get = (url) =>
+    requestOAuthAccountData({ url, accessToken, fetchImpl, errors: data.errors });
   if (enabled.some((module) => module.id === "zones")) {
     data.zones = (await get("/zones?per_page=5")) || [];
   }
