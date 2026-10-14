@@ -11,6 +11,13 @@ test("selects account and user status identity from the token", () => {
   expect(
     selectAuthStatusIdentity({ token: "user", resource: "oauth", data: { active: null } }),
   ).toMatchObject({ kind: "user", profile: "environment", resource: "oauth" });
+  expect(
+    selectAuthStatusIdentity({
+      token: "user",
+      activeProfile: "profile-env",
+      data: { active: "work" },
+    }),
+  ).toMatchObject({ kind: "user", profile: "profile-env" });
 });
 
 test("rejects a missing token before status routing", () => {

@@ -8,6 +8,7 @@ test("token verification uses the matching endpoint", async () => {
     const cf = { get: jest.fn().mockResolvedValue({ result: { status: "active" } }) };
     const toJsonOutput = jest.fn();
     await verifyAuthStatus({
+      token: "cfat_account-token",
       opts: { "account-id": "account" },
       cf,
       data: { active: null, profiles: {} },
@@ -30,6 +31,7 @@ test("verification stops when the API token is absent", async () => {
   const fail = jest.fn();
   try {
     await verifyAuthStatus({
+      token: undefined,
       opts: {},
       cf: { get: jest.fn() },
       data: { active: null, profiles: {} },
@@ -51,6 +53,8 @@ test("token verification reports a missing account ID", async () => {
   delete process.env.CLOUDFLARE_ACCOUNT_ID;
   const fail = jest.fn();
   const input = {
+    token: "cfat_account-token",
+    environmentAccountId: undefined,
     opts: {},
     cf: { get: jest.fn() },
     data: { active: null, profiles: {} },
@@ -81,37 +85,6 @@ test("token verification reports a missing account ID", async () => {
   }
 });
 
-test("account ID resolution follows option, saved profile, and environment order", async () => {
-  const oldToken = process.env.CLOUDFLARE_API_TOKEN;
-  const oldAccount = process.env.CLOUDFLARE_ACCOUNT_ID;
-  process.env.CLOUDFLARE_API_TOKEN = "cfat_account-token";
-  process.env.CLOUDFLARE_ACCOUNT_ID = "environment";
-  const cf = { get: jest.fn().mockResolvedValue({ result: { status: "active" } }) };
-  const args = {
-    cf,
-    data: { active: "work", profiles: { work: { accountId: "saved" } } },
-    outputJson: true,
-    toJsonOutput: jest.fn(),
-    printer: { log: jest.fn() },
-    fail: (message) => {
-      throw new Error(message);
-    },
-  };
-  try {
-    await verifyAuthStatus({ ...args, opts: { "account-id": "option" } });
-    expect(cf.get).toHaveBeenLastCalledWith("/accounts/option/tokens/verify");
-    await verifyAuthStatus({ ...args, opts: {} });
-    expect(cf.get).toHaveBeenLastCalledWith("/accounts/saved/tokens/verify");
-    await verifyAuthStatus({ ...args, data: { active: null, profiles: {} }, opts: {} });
-    expect(cf.get).toHaveBeenLastCalledWith("/accounts/environment/tokens/verify");
-  } finally {
-    if (oldToken === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
-    else process.env.CLOUDFLARE_API_TOKEN = oldToken;
-    if (oldAccount === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID;
-    else process.env.CLOUDFLARE_ACCOUNT_ID = oldAccount;
-  }
-});
-
 test("user token verification reports unknown status as text", async () => {
   const prior = process.env.CLOUDFLARE_API_TOKEN;
   process.env.CLOUDFLARE_API_TOKEN = "user-token";
@@ -119,6 +92,7 @@ test("user token verification reports unknown status as text", async () => {
   const printer = { log: jest.fn() };
   try {
     await verifyAuthStatus({
+      token: "user-token",
       opts: {},
       cf,
       data: { active: null, profiles: {} },

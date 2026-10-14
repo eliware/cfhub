@@ -36,6 +36,25 @@ test("verify routes to the token verification helper", async () => {
   expect(toJsonOutput).toHaveBeenCalledWith({ verified: true, status: "active" });
 });
 
+test("status uses explicit identity values from its caller", async () => {
+  process.env.CLOUDFLARE_API_TOKEN = "cfat-environment-token";
+  process.env.CLOUDFLARE_PROFILE = "environment-profile";
+  const cf = { get: jest.fn().mockResolvedValue({ result: { id: "user-1" } }) };
+  const toJsonOutput = jest.fn();
+  await handleAuthStatus(
+    authStatusContext({
+      token: "user-token",
+      activeProfile: "caller-profile",
+      environmentAccountId: "caller-account",
+      resource: "oauth",
+      cf,
+      toJsonOutput,
+    }),
+  );
+  expect(cf.get).toHaveBeenCalledWith("/user");
+  expect(toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ profile: "caller-profile" }));
+});
+
 test("status helper ignores unknown actions", async () => {
   const cf = { get: jest.fn() };
   await handleAuthStatus(authStatusContext({ action: "unknown", cf }));

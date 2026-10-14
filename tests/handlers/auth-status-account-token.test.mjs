@@ -31,40 +31,18 @@ test("account token status uses account ID and text output", async () => {
   expect(printer.log).toHaveBeenCalledWith("work authenticated with account API token");
 });
 
-test("account token status resolves saved IDs and empty account lists", async () => {
-  const cf = { get: jest.fn().mockResolvedValue({}) };
-  const printer = { log: jest.fn() };
-  await showAccountTokenStatus({
-    statusProfile: "work",
-    opts: {},
-    data: { profiles: { work: { accountId: "saved" } } },
-    cf,
-    outputJson: false,
-    printer,
-  });
-  expect(cf.get).toHaveBeenCalledWith("/accounts/saved");
-
-  const toJsonOutput = jest.fn();
-  await showAccountTokenStatus({
-    statusProfile: "work",
-    opts: {},
-    data: { profiles: {} },
-    cf,
-    outputJson: true,
-    toJsonOutput,
-  });
-  expect(toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ accounts: [] }));
-});
-
-test("account token status uses the environment account ID", async () => {
+test.each([
+  ["saved profile", { work: { accountId: "saved" } }, "environment", "saved"],
+  ["environment fallback", {}, "environment", "environment"],
+])("account token status resolves the %s", async (_name, profiles, environmentId, expectedId) => {
   const previous = process.env.CLOUDFLARE_ACCOUNT_ID;
-  process.env.CLOUDFLARE_ACCOUNT_ID = "environment";
+  process.env.CLOUDFLARE_ACCOUNT_ID = environmentId;
   const cf = { get: jest.fn().mockResolvedValue({}) };
   try {
     await showAccountTokenStatus({
       statusProfile: "work",
       opts: {},
-      data: { profiles: {} },
+      data: { profiles },
       cf,
       outputJson: true,
       toJsonOutput: jest.fn(),
@@ -73,5 +51,18 @@ test("account token status uses the environment account ID", async () => {
     if (previous === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID;
     else process.env.CLOUDFLARE_ACCOUNT_ID = previous;
   }
-  expect(cf.get).toHaveBeenCalledWith("/accounts/environment");
+  expect(cf.get).toHaveBeenCalledWith(`/accounts/${expectedId}`);
+});
+
+test("account token status returns an empty list when the API has no result", async () => {
+  const toJsonOutput = jest.fn();
+  await showAccountTokenStatus({
+    statusProfile: "work",
+    opts: {},
+    data: { profiles: {} },
+    cf: { get: jest.fn().mockResolvedValue({}) },
+    outputJson: true,
+    toJsonOutput,
+  });
+  expect(toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ accounts: [] }));
 });

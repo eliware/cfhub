@@ -1,3 +1,6 @@
+import { resolveVerifyAccountId } from "./auth-status-verify-account.mjs";
+import { requestTokenVerification } from "./auth-status-verify-request.mjs";
+
 export async function verifyAuthStatus({
   opts,
   cf,
@@ -6,27 +9,25 @@ export async function verifyAuthStatus({
   toJsonOutput,
   printer,
   fail,
+  token,
+  activeProfile,
+  environmentAccountId,
 }) {
-  if (!process.env.CLOUDFLARE_API_TOKEN) {
+  if (!token) {
     fail("cfhub auth verify requires CLOUDFLARE_API_TOKEN");
     return;
   }
-  const statusProfile = process.env.CLOUDFLARE_PROFILE || data.active || "environment";
-  const token = process.env.CLOUDFLARE_API_TOKEN;
-  const accountId =
-    opts?.["account-id"] ||
-    data.profiles[statusProfile]?.accountId ||
-    process.env.CLOUDFLARE_ACCOUNT_ID;
+  const statusProfile = activeProfile || data.active || "environment";
+  const accountId = resolveVerifyAccountId({
+    opts,
+    data,
+    profile: statusProfile,
+    environmentAccountId,
+  });
   if (token.startsWith("cfat_") && !accountId) {
     fail("Account API token verification requires --account-id or CLOUDFLARE_ACCOUNT_ID");
     return;
   }
-  const result = await cf.get(
-    token.startsWith("cfat_") ? `/accounts/${accountId}/tokens/verify` : "/user/tokens/verify",
-  );
-  const verified = {
-    verified: result?.result?.status === "active",
-    status: result?.result?.status || "unknown",
-  };
+  const verified = await requestTokenVerification({ token, accountId, cf });
   return outputJson ? toJsonOutput(verified) : printer.log(`${verified.status}`);
 }

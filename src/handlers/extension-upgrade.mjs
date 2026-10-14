@@ -1,16 +1,10 @@
-import { extensionRoot, validateExtensionManifest } from "../extensions.mjs";
+import { extensionRoot } from "../extensions.mjs";
+import { loadExtensionSource } from "./extension-source.mjs";
 
 export function upgradeExtension({ opts, printer, fail, fsImpl, homeDir }) {
-  if (!opts.path) {
-    fail("Missing --path to an extension directory");
-    return;
-  }
-  const source = opts.path;
-  const manifest = JSON.parse(fsImpl.readFileSync(`${source}/cf-extension.json`, "utf8"));
-  if (!validateExtensionManifest(manifest)) {
-    fail("Invalid cfhub extension manifest");
-    return;
-  }
+  const loaded = loadExtensionSource({ sourcePath: opts.path, fsImpl, fail });
+  if (!loaded) return;
+  const { source, manifest } = loaded;
   const root = extensionRoot(homeDir);
   fsImpl.mkdirSync(root, { recursive: true });
   const destination = `${root}/${manifest.name}`;
