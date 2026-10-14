@@ -1,8 +1,4 @@
-import { jest } from "@jest/globals";
-import {
-  resolveAuthStatusIdentity,
-  selectAuthStatusIdentity,
-} from "../../src/handlers/auth-status-identity.mjs";
+import { selectAuthStatusIdentity } from "../../src/handlers/auth-status-identity.mjs";
 
 test("selects account and user status identity from the token", () => {
   expect(
@@ -18,10 +14,4 @@ test("selects account and user status identity from the token", () => {
       data: { active: "work" },
     }),
   ).toMatchObject({ kind: "user", profile: "profile-env" });
-});
-
-test("rejects a missing token before status routing", () => {
-  const fail = jest.fn();
-  expect(resolveAuthStatusIdentity({ token: "", fail })).toBeNull();
-  expect(fail).toHaveBeenCalledWith("You are not logged into Cloudflare. Run: cfhub auth login");
 });

@@ -5,7 +5,13 @@ export function loadExtensionSource({ sourcePath, fsImpl, fail }) {
     fail("Missing --path to an extension directory");
     return null;
   }
-  const manifest = JSON.parse(fsImpl.readFileSync(`${sourcePath}/cf-extension.json`, "utf8"));
+  let manifest;
+  try {
+    manifest = JSON.parse(fsImpl.readFileSync(`${sourcePath}/cf-extension.json`, "utf8"));
+  } catch {
+    fail("Invalid cfhub extension manifest");
+    return null;
+  }
   if (!validateExtensionManifest(manifest)) {
     fail("Invalid cfhub extension manifest");
     return null;

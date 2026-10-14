@@ -24,4 +24,12 @@ test("reports a missing path or invalid manifest", () => {
     }),
   ).toBeNull();
   expect(fail).toHaveBeenLastCalledWith("Invalid cfhub extension manifest");
+  expect(
+    loadExtensionSource({
+      sourcePath: "source",
+      fsImpl: { readFileSync: () => "{" },
+      fail,
+    }),
+  ).toBeNull();
+  expect(fail).toHaveBeenLastCalledWith("Invalid cfhub extension manifest");
 });

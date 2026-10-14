@@ -1,6 +1,7 @@
 import { showAccountTokenStatus } from "./auth-status-account-token.mjs";
 import { showUserTokenStatus } from "./auth-status-user.mjs";
-import { resolveAuthStatusIdentity } from "./auth-status-identity.mjs";
+import { selectAuthStatusIdentity } from "./auth-status-identity.mjs";
+import { requireAuthStatusToken } from "./auth-status-token-required.mjs";
 
 export async function showAuthStatus(context) {
   const {
@@ -15,8 +16,8 @@ export async function showAuthStatus(context) {
     token,
     activeProfile,
   } = context;
-  const identity = resolveAuthStatusIdentity({ token, activeProfile, resource, data, opts, fail });
-  if (!identity) return;
+  if (!requireAuthStatusToken(token, fail)) return;
+  const identity = selectAuthStatusIdentity({ token, activeProfile, resource, data, opts });
   if (identity.kind === "account") {
     return showAccountTokenStatus({
       statusProfile: identity.profile,

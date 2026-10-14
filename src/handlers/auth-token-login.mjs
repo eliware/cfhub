@@ -1,8 +1,8 @@
-import { saveTokenProfile } from "./auth-token-profile-save.mjs";
 import { readLoginToken } from "./auth-token-input.mjs";
 import { resolveTokenAccount } from "./auth-token-account.mjs";
 import { reportTokenLogin } from "./auth-token-login-result.mjs";
 import { inspectLoginToken } from "./auth-token-inspection.mjs";
+import { persistApiTokenLogin } from "./auth-token-persist-login.mjs";
 
 export async function saveApiTokenLogin({
   data,
@@ -43,21 +43,20 @@ export async function saveApiTokenLogin({
     fail,
   });
   if (!tokenInfo) return;
-  const storedInKeychain = await writeCredentialImpl(name, credential);
-  if (!storedInKeychain) {
-    fail("Could not save the API token to the OS keychain or private credential file");
-    return;
-  }
-  saveTokenProfile({
+  const saved = await persistApiTokenLogin({
     data,
     name,
+    credential,
     opts,
     tokenInfo,
     detectedAccountToken,
     accountId,
+    writeCredentialImpl,
     write,
     profileHome,
     profileFs,
+    fail,
   });
+  if (!saved) return;
   return reportTokenLogin({ name, tokenInfo, printer });
 }
