@@ -39,3 +39,20 @@ test("uses requested scopes when OAuth returns no scope list", async () => {
   });
   expect(data.profiles.work.scopes).toEqual(["zone.read"]);
 });
+
+test("writes the profile when the credential store reports failure", async () => {
+  const data = { profiles: {} };
+  const write = jest.fn();
+  await saveOAuthProfile({
+    data,
+    name: "work",
+    opts: {},
+    scopes: ["zone.read"],
+    oauth: { accessToken: "access", refreshToken: "refresh" },
+    writeCredentialImpl: jest.fn().mockResolvedValue(false),
+    write,
+  });
+  expect(data.active).toBe("work");
+  expect(data.profiles.work.authMethod).toBe("oauth");
+  expect(write).toHaveBeenCalledWith(data, undefined, undefined);
+});

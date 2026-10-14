@@ -108,3 +108,14 @@ test("saves API tokens read from standard input", async () => {
   expect(data.profiles.work.authMethod).toBe("api-token");
   expect(args.writeCredentialImpl).toHaveBeenCalledWith("work", { apiToken: "token" });
 });
+
+test("does not ask for an account ID for a user token", async () => {
+  const promptAccountId = jest.fn();
+  const { args, data } = setup({
+    readToken: () => "cfut_user-token",
+    promptAccountId,
+  });
+  await saveApiTokenLogin(args);
+  expect(promptAccountId).not.toHaveBeenCalled();
+  expect(data.profiles.work.authMethod).toBe("api-token");
+});

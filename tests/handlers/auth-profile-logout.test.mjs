@@ -53,3 +53,12 @@ test("removes a profile when the credential store has no entry", async () => {
   expect(input.revokeOAuthImpl).not.toHaveBeenCalled();
   expect(input.data.profiles.old).toBeUndefined();
 });
+
+test("revokes an OAuth access token and removes its credential", async () => {
+  const input = options();
+  input.readCredentialImpl.mockResolvedValue({ oauthAccessToken: "access-token" });
+  await logoutAuthProfile(input);
+  expect(input.revokeOAuthImpl).toHaveBeenCalledWith({ token: "access-token" });
+  expect(input.deleteCredentialImpl).toHaveBeenCalledWith("old");
+  expect(input.data.profiles.old).toBeUndefined();
+});
