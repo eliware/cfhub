@@ -1,23 +1,33 @@
 # Release Notes
 
-## 12.0.0 — 2026-10-13
+## 12.0.0 — 2026-10-14
 
 ### Added
 
-- Added the `@eliware/common` runtime package and the `@eliware/test` development package.
-- Added guides for setup, profiles, commands, safe writes, OAuth, and local extensions.
-- Added OAuth web assets and browser checks.
+- Added commands for Cloudflare account services, audit reports, inventory, health checks, cache, SSL, certificates, and load balancing.
+- Added commands for Tunnels, Workers, Pages, R2, D1, Queues, Stream, Images, Workers AI, and Access.
+- Added a direct API command with request bodies, pagination, JSON selection, and templates.
+- Added command aliases, profiles, settings, and local extension management.
+- Added OAuth scope selection, browser pages, account summaries, profile management, and token refresh support.
+- Added secure credential storage through the operating system keychain or private files.
+- Added user guides, OAuth assets, browser checks, and test fixtures for source modules.
 
 ### Changed
 
-- Updated command and OAuth modules while preserving the CLI resource and action model.
-- Aligned package metadata, workflows, and project guidance with Eliware Convention 12.
-- Moved build and test tools into the `bin/` and `test-fixtures/` folders.
+- Published the package as `@eliware/cfhub` with `@eliware/common` and `@eliware/test`.
+- Required Node.js 26 and aligned package metadata with Eliware Convention 12.
+- Reorganized command, OAuth, output, and web code into focused modules with matching tests.
+- Moved build, test, and live-check tools into `bin/` and `test-fixtures/`.
+- Added CI validation, tagged-release publishing, and deployment workflows.
+- Changed the license from ISC to MIT.
 
 ### Fixed
 
-- Fixed inventory and zone reports for clients without a generic SDK request method.
-- Fixed OAuth web bundles so the local login pages load their styles and scripts.
+- Fixed OAuth profile selection, scope checks, callback handling, token refresh, and local login pages.
+- Fixed API pagination, dry-run behavior, command validation, and destructive-action checks.
+- Fixed extension source checks, path validation, upgrades, and build error reports.
+- Fixed account inventory limits and zone reports for clients without generic API methods.
+- Fixed DNS writes, OAuth forms, browser launch, and web asset loading.
 
 ## 1.0.5 — 2026-08-19
 
