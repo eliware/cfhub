@@ -1,3 +1,5 @@
+import { bindPickerSessionEvents } from "./picker-session-events.mjs";
+
 export function bindPickerModuleEvents({
   enabledModules,
   sessionOptions,
@@ -6,13 +8,7 @@ export function bindPickerModuleEvents({
   disableModule,
   render,
 }) {
-  sessionOptions.forEach((option) =>
-    option.addEventListener("change", () => {
-      sessionOptions.forEach((other) => {
-        other.checked = option.checked;
-      });
-    }),
-  );
+  bindPickerSessionEvents(sessionOptions);
   document.querySelectorAll("[data-module]").forEach((button) =>
     button.addEventListener("click", () => {
       if (enabledModules.has(button.dataset.module)) disableModule(button.dataset.module);

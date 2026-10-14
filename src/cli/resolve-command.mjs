@@ -1,21 +1,13 @@
-import { parseArgs } from "../args.mjs";
-import { tokenizeCommand } from "../alias-tokenizer.mjs";
 import { discoverExtensions } from "../extensions.mjs";
-import { readAliases } from "../aliases.mjs";
+import { expandCommandAlias } from "./alias-expansion.mjs";
 import { resolveExtensionCommand } from "./resolve-extension-command.mjs";
 import { resolveCommandHelp } from "./resolve-command-help.mjs";
 import { validateCommandAction } from "./validate-command-action.mjs";
 import { validateCommandResource } from "./validate-command-resource.mjs";
 
 export async function resolveCommand({ args, opts, printer, homeDir, fsImpl, exit, loadBody }) {
-  let [resource, action] = args;
-  const expansion = readAliases(homeDir, fsImpl)[resource];
-  if (expansion) {
-    const expanded = parseArgs(tokenizeCommand(`${expansion} ${args.slice(1).join(" ")}`.trim()));
-    args = expanded.args;
-    opts = { ...expanded.opts, ...opts };
-    [resource, action] = args;
-  }
+  ({ args, opts } = expandCommandAlias({ args, opts, homeDir, fsImpl }));
+  const [resource, action] = args;
   const extensionManifest = discoverExtensions(homeDir, fsImpl).find(
     (manifest) => manifest.commands[resource],
   );

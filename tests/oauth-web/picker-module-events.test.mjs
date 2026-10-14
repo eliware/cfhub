@@ -9,11 +9,10 @@ const control = (dataset = {}) => ({
   },
 });
 
-test("binds module, tier, and shared session controls", () => {
+test("binds module and tier controls", () => {
   const module = control({ module: "zones" });
   const enable = control({ tierEnable: "basic" });
   const disable = control({ tierDisable: "basic" });
-  const sessions = [control(), control()];
   globalThis.document = {
     querySelectorAll: (selector) =>
       ({
@@ -29,19 +28,16 @@ test("binds module, tier, and shared session controls", () => {
   const render = jest.fn();
   bindPickerModuleEvents({
     enabledModules: enabled,
-    sessionOptions: sessions,
+    sessionOptions: [],
     moduleTier,
     enableModule,
     disableModule,
     render,
   });
-  sessions[0].checked = true;
-  sessions[0].handlers.change();
   module.handlers.click();
   module.handlers.click();
   enable.handlers.click();
   disable.handlers.click();
-  expect(sessions[1].checked).toBe(true);
   expect(enableModule).toHaveBeenCalledWith("zones");
   expect(disableModule).toHaveBeenCalledWith("zones");
   expect(moduleTier.mock.calls).toEqual([

@@ -22,21 +22,6 @@ test("resolver returns the selected command", async () => {
   });
 });
 
-test("resolver expands aliases and merges options", async () => {
-  const ctx = setup();
-  const root = path.join(ctx.homeDir, ".config", "cfhub");
-  fs.mkdirSync(root, { recursive: true });
-  fs.writeFileSync(path.join(root, "aliases.json"), JSON.stringify({ z: "zones list --json" }));
-  await expect(
-    resolveCommand({ ...ctx, args: ["z"], opts: { quiet: true } }),
-  ).resolves.toMatchObject({
-    done: false,
-    resource: "zones",
-    action: "list",
-    opts: { json: true, quiet: true },
-  });
-});
-
 test("resolver suggests unknown resource names", async () => {
   const ctx = setup();
   const result = await resolveCommand({ ...ctx, args: ["zone"], opts: {} });

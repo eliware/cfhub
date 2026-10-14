@@ -1,5 +1,6 @@
 import { resolveVerifyAccountId } from "./auth-status-verify-account.mjs";
 import { requestTokenVerification } from "./auth-status-verify-request.mjs";
+import { outputTokenVerification } from "./auth-status-verify-output.mjs";
 
 export async function verifyAuthStatus({
   opts,
@@ -29,5 +30,5 @@ export async function verifyAuthStatus({
     return;
   }
   const verified = await requestTokenVerification({ token, accountId, cf });
-  return outputJson ? toJsonOutput(verified) : printer.log(`${verified.status}`);
+  return outputTokenVerification(verified, { outputJson, toJsonOutput, printer });
 }
