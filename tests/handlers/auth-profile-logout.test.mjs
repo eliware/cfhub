@@ -33,6 +33,10 @@ test("continues local cleanup when revocation fails and rejects unknown profiles
   unknown.name = "missing";
   await logoutAuthProfile(unknown);
   expect(unknown.fail).toHaveBeenCalledWith("Unknown profile: missing");
+  const unnamed = options();
+  unnamed.name = "";
+  await logoutAuthProfile(unnamed);
+  expect(unnamed.fail).toHaveBeenCalledWith("Unknown profile: (none)");
 });
 
 test("removes local profiles without OAuth tokens and preserves another active profile", async () => {

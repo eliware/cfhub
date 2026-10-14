@@ -1,3 +1,7 @@
+import { syncPickerModuleState } from "./picker-module-sync.mjs";
+import { renderPickerScopeState } from "./picker-render-scope-state.mjs";
+import { renderPickerModuleState } from "./picker-render-module-state.mjs";
+
 export function renderPickerState({
   categories,
   modules,
@@ -7,28 +11,6 @@ export function renderPickerState({
   syncModules = true,
 }) {
   if (syncModules) syncPickerModuleState(modules, state.selected, state.enabledModules);
-  boxes.forEach((box) => {
-    box.checked = state.selected.has(box.value);
-    box.disabled = state.required.has(box.value);
-  });
-  document.querySelector("#scope-count").textContent = state.selected.size;
-  document.querySelectorAll(".login").forEach((button) => {
-    button.disabled = state.selected.size === 0;
-    button.setAttribute("aria-disabled", String(state.selected.size === 0));
-  });
-  document.querySelectorAll(".login-hint").forEach((hint) => {
-    hint.hidden = state.selected.size > 0;
-  });
-  document.querySelectorAll("[data-module]").forEach((button) => {
-    button.classList.toggle("active", state.enabledModules.has(button.dataset.module));
-    button.setAttribute("aria-pressed", String(state.enabledModules.has(button.dataset.module)));
-  });
-  document.querySelectorAll("[data-category-count]").forEach((counter) => {
-    const values = categories[counter.dataset.categoryCount].flatMap((feature) =>
-      feature.scopes.map((scope) => scope.scope),
-    );
-    counter.textContent = `${values.filter((scope) => state.selected.has(scope)).length}/${values.length}`;
-  });
-  moduleCount.textContent = `${state.enabledModules.size}/${modules.length} modules enabled`;
+  renderPickerScopeState({ boxes, state });
+  renderPickerModuleState({ categories, modules, state, moduleCount });
 }
-import { syncPickerModuleState } from "./picker-module-sync.mjs";

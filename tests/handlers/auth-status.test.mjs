@@ -18,22 +18,20 @@ afterEach(() => {
   }
 });
 
-test("status routes to the profile status helper", async () => {
+test.each([
+  [
+    "status",
+    "/user",
+    { authenticated: true, profile: "environment", method: "oauth", id: "user-1", email: null },
+  ],
+  ["verify", "/user/tokens/verify", { verified: true, status: "active" }],
+])("%s routes to the matching status helper", async (action, endpoint, expected) => {
   process.env.CLOUDFLARE_API_TOKEN = "user-token";
-  const cf = { get: jest.fn().mockResolvedValue({ result: { id: "user-1" } }) };
+  const cf = { get: jest.fn().mockResolvedValue({ result: { status: "active", id: "user-1" } }) };
   const toJsonOutput = jest.fn();
-  await handleAuthStatus(authStatusContext({ resource: "oauth", cf, toJsonOutput }));
-  expect(cf.get).toHaveBeenCalledWith("/user");
-  expect(toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ authenticated: true }));
-});
-
-test("verify routes to the token verification helper", async () => {
-  process.env.CLOUDFLARE_API_TOKEN = "user-token";
-  const cf = { get: jest.fn().mockResolvedValue({ result: { status: "active" } }) };
-  const toJsonOutput = jest.fn();
-  await handleAuthStatus(authStatusContext({ action: "verify", cf, toJsonOutput }));
-  expect(cf.get).toHaveBeenCalledWith("/user/tokens/verify");
-  expect(toJsonOutput).toHaveBeenCalledWith({ verified: true, status: "active" });
+  await handleAuthStatus(authStatusContext({ action, resource: "oauth", cf, toJsonOutput }));
+  expect(cf.get).toHaveBeenCalledWith(endpoint);
+  expect(toJsonOutput).toHaveBeenCalledWith(expected);
 });
 
 test("status uses explicit identity values from its caller", async () => {

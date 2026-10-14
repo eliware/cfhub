@@ -1,7 +1,7 @@
 import { jest } from "@jest/globals";
 import { handleAuth } from "../../src/handlers/auth.mjs";
 
-test("auth coordinator routes login, profile, status, and verify actions", async () => {
+test("auth coordinator routes OAuth login", async () => {
   const data = { active: null, profiles: {} };
   const oauthLogin = jest.fn().mockResolvedValue({ accessToken: "access" });
   const writeCredentialImpl = jest.fn().mockResolvedValue(true);
@@ -19,7 +19,12 @@ test("auth coordinator routes login, profile, status, and verify actions", async
     "work",
     expect.objectContaining({ oauthAccessToken: "access" }),
   );
+  expect(data.active).toBe("work");
+  expect(write).toHaveBeenCalledWith(data, undefined, undefined);
+});
 
+test("auth coordinator routes API token login", async () => {
+  const writeCredentialImpl = jest.fn().mockResolvedValue(true);
   await handleAuth({
     action: "login",
     resource: "api-token",
@@ -29,11 +34,14 @@ test("auth coordinator routes login, profile, status, and verify actions", async
     inspectApiTokenImpl: jest
       .fn()
       .mockResolvedValue({ permissions: [], permissionsKnown: false, permissionSummary: {} }),
-    writeCredentialImpl: jest.fn().mockResolvedValue(true),
+    writeCredentialImpl,
     write: jest.fn(),
     printer: { error: jest.fn(), log: jest.fn() },
   });
+  expect(writeCredentialImpl).toHaveBeenCalledWith("default", { apiToken: "token" });
+});
 
+test("auth coordinator routes profile listing", async () => {
   const toJsonOutput = jest.fn();
   await handleAuth({
     action: "list",
@@ -42,46 +50,37 @@ test("auth coordinator routes login, profile, status, and verify actions", async
     toJsonOutput,
   });
   expect(toJsonOutput).toHaveBeenCalledWith([{ name: "work", active: true, authMethod: "oauth" }]);
+});
 
+test.each([
+  ["status", "/user"],
+  ["verify", "/user/tokens/verify"],
+])("auth coordinator routes %s to %s", async (action, endpoint) => {
   const previousToken = process.env.CLOUDFLARE_API_TOKEN;
   process.env.CLOUDFLARE_API_TOKEN = "token";
   try {
     const cf = { get: jest.fn().mockResolvedValue({ result: { status: "active" } }) };
     await handleAuth({
-      action: "status",
+      action,
       resource: "auth",
       cf,
       opts: {},
-      read: () => data,
+      read: () => ({ active: null, profiles: {} }),
       outputJson: true,
-      toJsonOutput,
+      toJsonOutput: jest.fn(),
     });
-    await handleAuth({
-      action: "verify",
-      resource: "auth",
-      cf,
-      opts: {},
-      read: () => data,
-      outputJson: true,
-      toJsonOutput,
-    });
-    expect(cf.get).toHaveBeenNthCalledWith(1, "/user");
-    expect(cf.get).toHaveBeenNthCalledWith(2, "/user/tokens/verify");
+    expect(cf.get).toHaveBeenCalledWith(endpoint);
   } finally {
     if (previousToken === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
     else process.env.CLOUDFLARE_API_TOKEN = previousToken;
   }
+});
 
+test("auth coordinator reports unknown actions", async () => {
   const fail = jest.fn();
-  await handleAuth({ action: "unknown", read: () => data, fail });
-  await handleAuth({
-    action: "logout",
-    opts: {},
-    read: () => ({ active: null, profiles: {} }),
-    fail,
-  });
+  await handleAuth({ action: "unknown", read: () => ({ active: null, profiles: {} }), fail });
   expect(fail).toHaveBeenCalledWith("Unknown auth action: unknown");
-  await handleAuth();
+  await expect(handleAuth()).resolves.toBeUndefined();
 });
 
 test("auth coordinator sends logout through the profile workflow", async () => {
