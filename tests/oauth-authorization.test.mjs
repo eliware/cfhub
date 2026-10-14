@@ -1,9 +1,12 @@
 import { EventEmitter } from "node:events";
 import { jest } from "@jest/globals";
 import { loginOAuth } from "../src/oauth.mjs";
-import http from "node:http";
-
 import { createOAuthAuthorization } from "../src/oauth-authorization.mjs";
+import {
+  getOAuthResponse,
+  makeOAuthCallbackUrl,
+  startOAuthTestLogin,
+} from "../test-fixtures/unit/oauth-http.mjs";
 
 test("OAuth authorization builder is exported", () => {
   expect(createOAuthAuthorization).toEqual(expect.any(Function));
@@ -26,29 +29,13 @@ test("OAuth callback reports token exchange and response errors", async () => {
       "OAuth token response did not include",
     ],
   ]) {
-    const printed = [];
-    const promise = loginOAuth({
-      clientId: "client",
-      ports: [0],
-      open: jest.fn(),
-      print: (value) => printed.push(value),
+    const { promise, authorization } = await startOAuthTestLogin({
       fetchImpl,
+      open: jest.fn(),
       setTimeoutImpl: (callback) => callback(),
     });
-    await new Promise((resolve) => setTimeout(resolve, 10));
-    const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
     const rejection = expect(promise).rejects.toThrow(message);
-    await new Promise((resolve, reject) =>
-      http
-        .get(
-          `${authorization.searchParams.get("redirect_uri")}?state=${authorization.searchParams.get("state")}&code=code`,
-          (response) => {
-            response.resume();
-            response.on("end", resolve);
-          },
-        )
-        .on("error", reject),
-    );
+    await getOAuthResponse(makeOAuthCallbackUrl(authorization, { code: "code" }));
     await rejection;
   }
 });

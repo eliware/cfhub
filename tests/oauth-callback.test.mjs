@@ -2,15 +2,17 @@ import { jest } from "@jest/globals";
 import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
 import { createOAuthCallback } from "../src/oauth-callback.mjs";
-import { getOAuthResponse } from "../test-fixtures/unit/oauth-http.mjs";
+import {
+  getOAuthResponse,
+  makeOAuthCallbackUrl,
+  startOAuthTestLogin,
+} from "../test-fixtures/unit/oauth-http.mjs";
 
 test("OAuth callback factory is exported", () => {
   expect(createOAuthCallback).toEqual(expect.any(Function));
 });
 
 test("OAuth login serves a state-protected callback and exchanges the code", async () => {
-  const printed = [];
-  let closeServer;
   const fetchImpl = jest.fn().mockResolvedValue({
     ok: true,
     json: async () => ({
@@ -19,27 +21,19 @@ test("OAuth login serves a state-protected callback and exchanges the code", asy
       expires_in: 30,
     }),
   });
-  const resultPromise = loginOAuth({
-    clientId: "client",
-    ports: [0],
+  const { printed, promise, authorization, closeServer } = await startOAuthTestLogin({
+    fetchImpl,
     open: () => {
       throw new Error("launcher unavailable");
     },
-    print: (value) => printed.push(value),
-    setTimeoutImpl: (callback) => (closeServer = callback),
-    fetchImpl,
   });
-  await new Promise((resolve) => setTimeout(resolve, 10));
-  const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
   const wrongRoute = new URL(authorization.searchParams.get("redirect_uri"));
   wrongRoute.pathname = "/wrong";
   wrongRoute.searchParams.set("state", authorization.searchParams.get("state"));
   expect((await getOAuthResponse(wrongRoute)).statusCode).toBe(404);
-  const callback = new URL(authorization.searchParams.get("redirect_uri"));
-  callback.searchParams.set("state", authorization.searchParams.get("state"));
-  callback.searchParams.set("code", "code");
+  const callback = makeOAuthCallbackUrl(authorization, { code: "code" });
   await getOAuthResponse(callback);
-  await expect(resultPromise).resolves.toMatchObject({
+  await expect(promise).resolves.toMatchObject({
     accessToken: "access",
     refreshToken: "refresh",
   });
