@@ -68,10 +68,10 @@
     "test:live": "npm run test:live:dry",
     "test:live:dry": "node bin/test-live.mjs --dry",
     "test:live:wet": "node bin/test-live.mjs --wet",
-    "test:e2e:screenshots": "node test-fixtures/e2e/oauth-picker.e2e.mjs",
+    "test:e2e:screenshots": "node test-fixtures/e2e/oauth-picker-success.e2e.mjs && node test-fixtures/e2e/oauth-errors.e2e.mjs",
     "test:e2e:lighthouse": "node test-fixtures/e2e/oauth-picker.lighthouse.mjs",
     "test:e2e:web": "npm run test:e2e:screenshots && npm run test:e2e:lighthouse",
-    "puppeteer": "node test-fixtures/e2e/oauth-picker.e2e.mjs",
+    "puppeteer": "npm run test:e2e:screenshots",
     "lighthouse": "node test-fixtures/e2e/oauth-picker.lighthouse.mjs"
   },
   "engines": {
