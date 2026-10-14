@@ -2,6 +2,8 @@ import { getAccountId } from "./identifiers.mjs";
 import { requireValue } from "./argument-validation.mjs";
 import { collectZoneInventory } from "./inventory-zone.mjs";
 
+const ZONE_BATCH_SIZE = 5;
+
 export async function handleInventory({
   cf,
   action,
@@ -23,7 +25,11 @@ export async function handleInventory({
       ? await cf.get(`/zones?account.id=${accountId}`, undefined)
       : await cf.zones.list({ account: { id: accountId } });
   const zones = Array.isArray(zonesResponse?.result) ? zonesResponse.result : [];
-  const inventory = await Promise.all(zones.map((zone) => collectZoneInventory(cf, zone)));
+  const inventory = [];
+  for (let index = 0; index < zones.length; index += ZONE_BATCH_SIZE) {
+    const batch = zones.slice(index, index + ZONE_BATCH_SIZE);
+    inventory.push(...(await Promise.all(batch.map((zone) => collectZoneInventory(cf, zone)))));
+  }
   const result = { accountId, zones: inventory };
   return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
 }

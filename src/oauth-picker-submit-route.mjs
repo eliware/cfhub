@@ -24,8 +24,9 @@ export function serveOAuthPickerSubmitRoute({
     })
     .catch((error) => {
       onError(error);
-      response.writeHead(500, { "content-type": "text/plain; charset=utf-8" });
-      response.end("OAuth setup failed");
+      const statusCode = error.statusCode || 500;
+      response.writeHead(statusCode, { "content-type": "text/plain; charset=utf-8" });
+      response.end(statusCode === 413 ? "Request body is too large" : "OAuth setup failed");
     });
   return true;
 }

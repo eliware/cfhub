@@ -2,11 +2,12 @@ import path from "node:path";
 
 export function replaceExtension({ source, destination, root, name, fsImpl }) {
   const stagingRoot = fsImpl.mkdtempSync(path.join(root, ".cfhub-extension-stage-"));
-  const backupRoot = fsImpl.mkdtempSync(path.join(root, ".cfhub-extension-backup-"));
+  let backupRoot;
   const stagedDestination = path.join(stagingRoot, name);
-  const backupDestination = path.join(backupRoot, name);
   let originalMoved = false;
   try {
+    backupRoot = fsImpl.mkdtempSync(path.join(root, ".cfhub-extension-backup-"));
+    const backupDestination = path.join(backupRoot, name);
     fsImpl.cpSync(source, stagedDestination, { recursive: true });
     fsImpl.renameSync(destination, backupDestination);
     originalMoved = true;
@@ -26,7 +27,10 @@ export function replaceExtension({ source, destination, root, name, fsImpl }) {
       throw installError;
     }
   } finally {
-    fsImpl.rmSync(stagingRoot, { recursive: true, force: true });
-    if (!originalMoved) fsImpl.rmSync(backupRoot, { recursive: true, force: true });
+    try {
+      fsImpl.rmSync(stagingRoot, { recursive: true, force: true });
+    } finally {
+      if (backupRoot && !originalMoved) fsImpl.rmSync(backupRoot, { recursive: true, force: true });
+    }
   }
 }
