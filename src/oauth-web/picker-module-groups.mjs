@@ -1,3 +1,5 @@
+import { createPickerModuleCard } from "./picker-module-card.mjs";
+
 export function renderPickerModuleGroups(modules, moduleGroups) {
   for (const [tier, title] of [
     ["basic", "Basic modules"],
@@ -10,16 +12,7 @@ export function renderPickerModuleGroups(modules, moduleGroups) {
     modules
       .filter((module) => module.tier === tier)
       .forEach((module) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "module";
-        button.dataset.module = module.id;
-        const name = document.createElement("strong");
-        name.textContent = module.name;
-        const description = document.createElement("small");
-        description.textContent = module.description;
-        button.append(name, description);
-        list.append(button);
+        list.append(createPickerModuleCard(module));
       });
     moduleGroups.append(group);
   }
