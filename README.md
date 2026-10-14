@@ -98,7 +98,19 @@ Run checks from the repository root:
 npm test
 ```
 
-Run `npm run test:e2e:web` for browser checks.
+### Browser checks
+
+Run browser checks for the OAuth pages with `npm run test:e2e:web`.
+
+Install Node.js 26 or later. Run `npm ci` from the repository root. Install Chrome, Edge, or Chromium. Set `CHROME_PATH` to the browser executable when cfhub cannot find it.
+
+Make local ports 8765 through 8769 available. The checks start local OAuth preview servers on these ports. They use a preview client and a mock token response. They do not need Cloudflare credentials.
+
+The screenshot checks capture the OAuth picker, success, cancellation, and expired-request pages. They use desktop, mobile, and mobile landscape viewports. By default, they write PNG files to `artifacts/oauth-screenshots/`. Set `CFHUB_SCREENSHOT_DIR` to change this folder.
+
+The Lighthouse check writes `report.html` and `report.json` to `artifacts/oauth-lighthouse/`. Set `CFHUB_LIGHTHOUSE_DIR` to change this folder. The command prints performance, accessibility, best-practices, and SEO scores.
+
+Confirm success when the command exits with code 0 and prints the screenshot path, report path, and Lighthouse scores.
 
 ## Troubleshooting
 
