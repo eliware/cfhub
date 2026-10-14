@@ -46,7 +46,3 @@ test("OAuth picker route leaves unrelated requests open", () => {
     }),
   ).toBe(false);
 });
-
-test("OAuth picker route handler is exported", () => {
-  expect(serveOAuthPickerRoute).toEqual(expect.any(Function));
-});

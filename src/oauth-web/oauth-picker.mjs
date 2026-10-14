@@ -2,17 +2,20 @@ import { renderPickerGroups } from "./picker-groups.mjs";
 import { bindPickerEvents } from "./picker-events.mjs";
 import { createPickerState } from "./picker-state.mjs";
 import { renderPickerState } from "./picker-render.mjs";
+import { createPickerSetup } from "./picker-setup.mjs";
 
-export function initializePicker() {
-  const { categories, modules, requiredScopes = [] } = window.CFHUB_SCOPE_MODEL;
+export function initializePicker(documentRef = document, windowRef = window) {
+  const {
+    categories,
+    modules,
+    requiredScopes,
+    boxes,
+    sessionOptions,
+    moduleGroups,
+    scopeGroups,
+    moduleCount,
+  } = createPickerSetup(documentRef, windowRef);
   const state = createPickerState(modules, requiredScopes);
-  const boxes = [];
-  const sessionOptions = document.querySelectorAll('input[name="keep-signed-in"]');
-  const moduleGroups = document.querySelector("#module-groups");
-  const scopeGroups = document.querySelector("#scope-groups");
-  const moduleCount = document.querySelector("#module-count");
-  const quickSetup = document.querySelector(".quick-setup");
-  if (window.matchMedia("(max-width: 600px)").matches) quickSetup.open = false;
   const render = (syncModules = true) =>
     renderPickerState({ categories, modules, state, boxes, moduleCount, syncModules });
   renderPickerGroups({ categories, modules, moduleGroups, scopeGroups, boxes });
