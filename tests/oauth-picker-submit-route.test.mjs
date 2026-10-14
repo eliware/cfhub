@@ -22,7 +22,7 @@ test("filters requested scopes and redirects to authorization", async () => {
   request.emit("end");
   await new Promise((resolve) => setImmediate(resolve));
   expect(handled).toBe(true);
-  expect(selected).toHaveBeenCalledWith(["user-details.read", "zone.read"]);
+  expect(selected).toHaveBeenCalledWith(["user-details.read"]);
   expect(response.writeHead).toHaveBeenCalledWith(
     302,
     expect.objectContaining({ location: expect.stringContaining("keep=true") }),

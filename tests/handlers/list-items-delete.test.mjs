@@ -42,5 +42,8 @@ test("supports delete dry runs without a network request", async () => {
 
 test("requires item IDs and force", async () => {
   await expect(deleteListItems(base({ body: {} }))).rejects.toThrow("Missing --data");
+  await expect(deleteListItems(base({ body: { ids: [] } }))).rejects.toThrow(
+    "Expected at least one item ID",
+  );
   await expect(deleteListItems(base({ opts: {} }))).rejects.toThrow("without --force");
 });

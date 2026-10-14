@@ -35,5 +35,6 @@ export function createOAuthCallback({
       else if (!result.handled) resolve({ code: result.code, response });
     }),
   );
+  callback.catch(() => {});
   return { callback, getSelectedScopes: () => selectedScopes };
 }

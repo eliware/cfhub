@@ -16,7 +16,7 @@ export async function handleDnsDiff({
 }) {
   requireValue(body, "Missing desired records in --data or --file", fail);
   const desired = Array.isArray(body) ? body : body.records;
-  requireValue(desired, "Expected an array of desired records", fail);
+  if (!Array.isArray(desired)) fail("Expected an array of desired records");
   const currentResponse = await listRecords();
   const current = Array.isArray(currentResponse?.result) ? currentResponse.result : [];
   const plan = buildDnsPlan(zoneId, desired, current);

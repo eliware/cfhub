@@ -11,7 +11,7 @@ test("filters unknown scopes and keeps required scopes first", () => {
   ).toEqual(["user-details.read", "zone.read"]);
 });
 
-test("uses default scopes when no requested scope is allowed", () => {
+test("keeps only required scopes when no optional scope is selected", () => {
   const form = new URLSearchParams("scope=unknown");
   expect(
     selectOAuthPickerScopes({
@@ -19,5 +19,5 @@ test("uses default scopes when no requested scope is allowed", () => {
       scopes: ["zone.read", "dns.read"],
       requiredScopes: ["user-details.read"],
     }),
-  ).toEqual(["user-details.read", "zone.read", "dns.read"]);
+  ).toEqual(["user-details.read"]);
 });

@@ -1,12 +1,12 @@
 import { escapeOAuthHtml } from "./oauth-html.mjs";
 
 export function successExamples(enabled, zones) {
-  const zone = zones[0]?.name || "example.com";
+  const zone = zones[0]?.id || "<zone_id>";
   return [
-    enabled.some((module) => module.id === "zones") && "cfhub zone list",
-    enabled.some((module) => module.id === "dns") && `cfhub dns record list --zone ${zone}`,
+    enabled.some((module) => module.id === "zones") && "cfhub zones list",
+    enabled.some((module) => module.id === "dns") && `cfhub dns-records list --zone-id ${zone}`,
     enabled.some((module) => module.id === "zone-settings") &&
-      `cfhub zone settings list --zone ${zone}`,
+      `cfhub zone-settings get --zone-id ${zone} --setting <setting>`,
     enabled.some((module) => module.id === "workers") && "cfhub workers list",
   ]
     .filter(Boolean)

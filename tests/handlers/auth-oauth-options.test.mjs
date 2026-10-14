@@ -31,7 +31,7 @@ test("combines default, environment, and command scopes without duplicates", () 
 test("uses default client and host values", () => {
   expect(authOAuthOptions({}, {})).toMatchObject({
     scopePicker: true,
-    bindHost: "0.0.0.0",
+    bindHost: "127.0.0.1",
     redirectHost: "127.0.0.1",
   });
 });

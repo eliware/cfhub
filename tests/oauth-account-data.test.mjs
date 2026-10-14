@@ -70,3 +70,26 @@ test("uses an empty DNS list when the DNS response has no result", async () => {
     loadOAuthAccountData({ enabled, accessToken: "token", fetchImpl }),
   ).resolves.toMatchObject({ zones: [{ id: "zone-1" }], dns: [] });
 });
+
+test("loads every zone page and DNS records for every zone", async () => {
+  const zones = Array.from({ length: 50 }, (_, index) => ({ id: `zone-${index}` }));
+  const fetchImpl = jest.fn(async (url) => {
+    let result = [];
+    if (url.endsWith("zones?per_page=50&page=1")) result = zones;
+    else if (url.endsWith("zones?per_page=50&page=2")) result = [{ id: "zone-last" }];
+    else if (url.includes("zone-0/dns_records")) result = [{ id: "dns-1" }];
+    else if (url.includes("zone-last/dns_records")) result = [{ id: "dns-2" }];
+    return { ok: true, json: async () => ({ result }) };
+  });
+  const data = await loadOAuthAccountData({ enabled, accessToken: "token", fetchImpl });
+  expect(data.zones).toHaveLength(51);
+  expect(data.dns).toEqual([{ id: "dns-1" }, { id: "dns-2" }]);
+  expect(fetchImpl).toHaveBeenCalledWith(
+    "https://api.cloudflare.com/client/v4/zones?per_page=50&page=2",
+    expect.any(Object),
+  );
+  expect(fetchImpl).toHaveBeenCalledWith(
+    "https://api.cloudflare.com/client/v4/zones/zone-last/dns_records?per_page=50&page=1",
+    expect.any(Object),
+  );
+});

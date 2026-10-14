@@ -12,6 +12,7 @@ export async function deleteListItems({
   fail,
 }) {
   if (!body || !Array.isArray(body.ids)) fail('Missing --data or --file with {"ids":[...]}');
+  requireValue(body.ids.length, "Expected at least one item ID", fail);
   requireValue(opts.force, "Refusing to delete without --force", fail);
   if (opts["dry-run"])
     return printer.log(

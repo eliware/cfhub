@@ -7,12 +7,12 @@ test("success page shows escaped account data, module status, and examples", () 
     scopes: ["zone.read"],
     summary: {
       enabled: [{ id: "zones", name: "Zones" }],
-      zones: [{ name: "example.com" }],
+      zones: [{ id: "zone-id", name: "example.com" }],
       dns: [],
     },
   });
   expect(page).toContain("Acme &lt;Cloud&gt;");
-  expect(page).toContain("cfhub zone list");
+  expect(page).toContain("cfhub zones list");
   expect(page).toContain("Requires:");
 });
 
@@ -23,11 +23,15 @@ test("success page lists enabled modules and their command examples", () => {
   const page = successPage({
     account: { email: "user@example.com" },
     scopes: ["zone.read"],
-    summary: { enabled, zones: [{ name: "example.org" }], dns: [{ name: "www.example.org" }] },
+    summary: {
+      enabled,
+      zones: [{ id: "zone-id", name: "example.org" }],
+      dns: [{ name: "www.example.org" }],
+    },
   });
   expect(page).toContain("user@example.com");
-  expect(page).toContain("cfhub dns record list --zone example.org");
-  expect(page).toContain("cfhub zone settings list --zone example.org");
+  expect(page).toContain("cfhub dns-records list --zone-id zone-id");
+  expect(page).toContain("cfhub zone-settings get --zone-id zone-id --setting &lt;setting&gt;");
   expect(page).toContain("cfhub workers list");
   expect(page).toContain("Enabled · ready for its selected scopes.");
 });

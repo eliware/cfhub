@@ -15,7 +15,7 @@ export function authOAuthOptions(opts = {}, env = process.env) {
     clientId: env.CFHUB_OAUTH_CLIENT_ID || DEFAULT_OAUTH_CLIENT_ID,
     scopes: [...new Set([...DEFAULT_OAUTH_SCOPES, ...configuredScopes, ...requestedScopes])],
     scopePicker: !opts["no-scope-picker"],
-    bindHost: env.CFHUB_OAUTH_BIND_HOST || "0.0.0.0",
+    bindHost: env.CFHUB_OAUTH_BIND_HOST || "127.0.0.1",
     redirectHost: env.CFHUB_OAUTH_REDIRECT_HOST || "127.0.0.1",
   };
 }

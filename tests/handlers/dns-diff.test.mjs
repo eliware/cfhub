@@ -61,6 +61,23 @@ test("validates the desired record body", async () => {
   );
 });
 
+test("applies an empty desired state", async () => {
+  const remove = jest.fn();
+  const toJsonOutput = jest.fn();
+  await handleDnsDiff(
+    context({
+      action: "apply",
+      opts: { force: true },
+      body: { records: [] },
+      cf: { delete: remove },
+      listRecords: jest.fn().mockResolvedValue({ result: [{ id: "old" }] }),
+      toJsonOutput,
+    }),
+  );
+  expect(remove).toHaveBeenCalledWith("/zones/zone-1/dns_records/old");
+  expect(toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ applied: true }));
+});
+
 test("requires force before applying record changes", async () => {
   const record = { type: "A", name: "new", content: "192.0.2.4" };
   await expect(handleDnsDiff(context({ action: "apply", body: [record] }))).rejects.toThrow(
