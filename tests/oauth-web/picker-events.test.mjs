@@ -71,4 +71,5 @@ test("picker event wiring registers each control handler", () => {
       Object.values(item.handlers).every((handler) => typeof handler === "function"),
     ),
   ).toBe(true);
+  expect(session.handlers.change).toEqual(expect.any(Function));
 });

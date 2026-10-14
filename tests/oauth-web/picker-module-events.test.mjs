@@ -28,7 +28,6 @@ test("binds module and tier controls", () => {
   const render = jest.fn();
   bindPickerModuleEvents({
     enabledModules: enabled,
-    sessionOptions: [],
     moduleTier,
     enableModule,
     disableModule,

@@ -65,7 +65,7 @@ test("prompts for an interactive token and account ID", async () => {
   });
 });
 
-test("uses option and environment account and zone IDs", async () => {
+test("saves a standard-input token with option and environment IDs", async () => {
   process.env.CLOUDFLARE_ACCOUNT_ID = "env-account";
   process.env.CLOUDFLARE_ZONE_ID = "env-zone";
   const { args, data, write } = setup({
@@ -86,6 +86,8 @@ test("uses option and environment account and zone IDs", async () => {
   );
   expect(args.printer.log).toHaveBeenCalled();
   expect(write).toHaveBeenCalledWith(data, "home", args.profileFs);
+  expect(data.active).toBe("work");
+  expect(args.writeCredentialImpl).toHaveBeenCalledWith("work", { apiToken: "token" });
 });
 
 test("reports token inspection and credential storage errors", async () => {
@@ -99,14 +101,6 @@ test("reports token inspection and credential storage errors", async () => {
     "Could not save the API token to the OS keychain or private credential file",
   );
   expect(storage.write).not.toHaveBeenCalled();
-});
-
-test("saves API tokens read from standard input", async () => {
-  const { args, data } = setup();
-  await saveApiTokenLogin(args);
-  expect(data.active).toBe("work");
-  expect(data.profiles.work.authMethod).toBe("api-token");
-  expect(args.writeCredentialImpl).toHaveBeenCalledWith("work", { apiToken: "token" });
 });
 
 test("does not ask for an account ID for a user token", async () => {
