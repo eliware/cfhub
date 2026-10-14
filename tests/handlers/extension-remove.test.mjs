@@ -26,3 +26,17 @@ test("removes a named extension with force", () => {
   });
   expect(printer.log).toHaveBeenCalledWith("Removed extension demo");
 });
+
+test("rejects an unsafe name before removing an extension", () => {
+  const fail = jest.fn();
+  const fsImpl = { rmSync: jest.fn() };
+  removeExtension({
+    opts: { name: "../outside", force: true },
+    printer: { log: jest.fn() },
+    fail,
+    fsImpl,
+    homeDir: "/home",
+  });
+  expect(fail).toHaveBeenCalledWith("Invalid extension name");
+  expect(fsImpl.rmSync).not.toHaveBeenCalled();
+});

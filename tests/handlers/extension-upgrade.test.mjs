@@ -75,3 +75,21 @@ test("refuses an upgrade manifest with a command path traversal", () => {
   expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
   expect(rmSync).not.toHaveBeenCalled();
 });
+
+test("refuses an extension name that is unsafe on Windows", () => {
+  const fail = jest.fn();
+  const rmSync = jest.fn();
+  upgradeExtension({
+    opts: { path: "source" },
+    printer: { log: jest.fn() },
+    fail,
+    fsImpl: {
+      readFileSync: () => JSON.stringify({ name: "C:drive", version: "1", commands: {} }),
+      mkdirSync: jest.fn(),
+      rmSync,
+    },
+    homeDir: "home",
+  });
+  expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
+  expect(rmSync).not.toHaveBeenCalled();
+});

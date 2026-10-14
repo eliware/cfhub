@@ -1,3 +1,4 @@
+import { EventEmitter } from "node:events";
 import { jest } from "@jest/globals";
 import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
@@ -135,4 +136,3 @@ test("OAuth login accepts a callback server without an address object", async ()
   );
   await expect(promise).resolves.toMatchObject({ accessToken: "access" });
 });
-import { EventEmitter } from "node:events";

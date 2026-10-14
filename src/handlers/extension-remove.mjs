@@ -1,4 +1,5 @@
 import { extensionRoot } from "../extensions.mjs";
+import { extensionDestination } from "./extension-destination.mjs";
 
 export function removeExtension({ opts, printer, fail, fsImpl, homeDir }) {
   if (!opts.name) {
@@ -9,6 +10,11 @@ export function removeExtension({ opts, printer, fail, fsImpl, homeDir }) {
     fail("Refusing extension removal without --force");
     return;
   }
-  fsImpl.rmSync(`${extensionRoot(homeDir)}/${opts.name}`, { recursive: true, force: true });
+  const destination = extensionDestination(extensionRoot(homeDir), opts.name);
+  if (!destination) {
+    fail("Invalid extension name");
+    return;
+  }
+  fsImpl.rmSync(destination, { recursive: true, force: true });
   return printer.log(`Removed extension ${opts.name}`);
 }
