@@ -1,4 +1,4 @@
-import { projectAuthProfiles } from "./auth-profile-view.mjs";
+import { outputAuthProfiles } from "./auth-profile-view.mjs";
 import { logoutAuthProfile } from "./auth-profile-logout.mjs";
 import { switchAuthProfile } from "./auth-profile-switch.mjs";
 
@@ -19,14 +19,7 @@ export async function handleAuthProfile({
   deleteCredentialImpl,
 }) {
   if (action === "list") {
-    const profiles = projectAuthProfiles(data, resource);
-    return outputJson
-      ? toJsonOutput(profiles)
-      : printTable(
-          ["ACTIVE", "NAME", "AUTH METHOD"],
-          profiles.map((profile) => [profile.active ? "*" : "", profile.name, profile.authMethod]),
-          printer.log,
-        );
+    return outputAuthProfiles({ data, resource, outputJson, toJsonOutput, printer });
   }
   if (action === "switch")
     return switchAuthProfile({ opts, data, write, profileHome, profileFs, printer, fail });
@@ -46,4 +39,3 @@ export async function handleAuthProfile({
     });
   }
 }
-import { printTable } from "../output-table.mjs";

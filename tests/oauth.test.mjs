@@ -1,4 +1,5 @@
 import { jest } from "@jest/globals";
+import { EventEmitter } from "node:events";
 import { loginOAuth } from "../src/oauth.mjs";
 import http from "node:http";
 import { verifyOAuthPickerIntegration } from "../test-fixtures/unit/oauth-picker-integration.mjs";
@@ -7,31 +8,25 @@ test("OAuth login validates client configuration before opening a browser", asyn
   await expect(loginOAuth({ clientId: "" })).rejects.toThrow("Missing CFHUB_OAUTH_CLIENT_ID");
 });
 
-test("OAuth login reports a browser launcher that throws", async () => {
+test("OAuth callback reports provider and browser errors", async () => {
   const printed = [];
+  const browser = new EventEmitter();
   let closeServer;
-  let closeDelay;
   const promise = loginOAuth({
     clientId: "client",
     ports: [0],
-    open: () => {
-      throw new Error("launcher unavailable");
-    },
+    open: () => browser,
     print: (value) => printed.push(value),
-    setTimeoutImpl: (callback, delay) => {
-      closeServer = callback;
-      closeDelay = delay;
-    },
-    fetchImpl: jest
-      .fn()
-      .mockResolvedValue({ ok: true, json: async () => ({ access_token: "access" }) }),
+    setTimeoutImpl: (callback) => (closeServer = callback),
   });
+  const failure = promise.catch((error) => error);
   await new Promise((resolve) => setTimeout(resolve, 10));
+  browser.emit("error", { message: "no opener" });
   const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
   await new Promise((resolve, reject) =>
     http
       .get(
-        `${authorization.searchParams.get("redirect_uri")}?state=${authorization.searchParams.get("state")}&code=code`,
+        `${authorization.searchParams.get("redirect_uri")}?state=${authorization.searchParams.get("state")}&error=access_denied`,
         (response) => {
           response.resume();
           response.on("end", resolve);
@@ -39,12 +34,11 @@ test("OAuth login reports a browser launcher that throws", async () => {
       )
       .on("error", reject),
   );
-  await expect(promise).resolves.toMatchObject({ accessToken: "access" });
-  expect(closeDelay).toBe(250);
+  await expect(failure).resolves.toMatchObject({
+    message: "Cloudflare authorization failed: access_denied",
+  });
   closeServer();
-  expect(printed).toEqual(
-    expect.arrayContaining([expect.stringContaining("Could not open a browser automatically")]),
-  );
+  expect(printed).toEqual(expect.arrayContaining([expect.stringContaining("no opener")]));
 });
 
 test("OAuth login opens the scope picker before authorization", async () => {

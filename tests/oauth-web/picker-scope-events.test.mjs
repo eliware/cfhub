@@ -11,6 +11,7 @@ const control = () => ({
 test("binds individual scope changes", () => {
   const read = Object.assign(control(), { value: "zone.read", checked: true });
   const write = Object.assign(control(), { value: "zone.write", checked: false });
+  const unowned = Object.assign(control(), { value: "unknown", checked: false });
   globalThis.document = {
     querySelector: () => control(),
     querySelectorAll: () => [],
@@ -25,7 +26,7 @@ test("binds individual scope changes", () => {
     selected,
     enabledModules,
     owners: new Map([["zone.read", ["zones"]]]),
-    boxes: [read, write],
+    boxes: [read, write, unowned],
     render,
   });
   read.checked = false;
@@ -33,6 +34,7 @@ test("binds individual scope changes", () => {
   expect(enabledModules.has("zones")).toBe(false);
   write.checked = true;
   write.handlers.change();
+  unowned.handlers.change();
   expect(selected).toEqual(new Set(["required", "zone.write"]));
-  expect(render).toHaveBeenCalledTimes(2);
+  expect(render).toHaveBeenCalledTimes(3);
 });

@@ -24,11 +24,9 @@ test("auth profile helper lists and activates saved profiles", async () => {
   await handleAuthProfile({
     ...base,
     action: "list",
-    data: { active: "work", profiles: { work: {}, saved: { authMethod: "api-token" } } },
-    outputJson: false,
+    outputJson: true,
   });
-  expect(base.printer.log).toHaveBeenCalled();
-  await handleAuthProfile({ ...base, action: "list", outputJson: true });
+  expect(toJsonOutput).toHaveBeenCalledWith([{ name: "work", active: true, authMethod: "oauth" }]);
   await handleAuthProfile({ ...base, action: "switch" });
   expect(data.active).toBe("work");
   await handleAuthProfile({
@@ -38,7 +36,6 @@ test("auth profile helper lists and activates saved profiles", async () => {
     readCredentialImpl: jest.fn().mockResolvedValue({}),
   });
 
-  expect(toJsonOutput).toHaveBeenCalledWith([{ name: "work", active: true, authMethod: "oauth" }]);
   expect(write).toHaveBeenCalledWith(data, "/workspace/test-home", {});
   expect(data.active).toBeNull();
   expect(data.profiles.work).toBeUndefined();

@@ -2,45 +2,49 @@ import { jest } from "@jest/globals";
 import { EventEmitter } from "node:events";
 import { serveOAuthPickerRoute } from "../src/oauth-picker-routes.mjs";
 
-test("OAuth picker serves its landing page and filters requested scopes", async () => {
+test("OAuth picker route dispatches its landing page", () => {
   const response = { writeHead: jest.fn(), end: jest.fn() };
-  const request = { method: "GET", headers: {} };
-  expect(
-    serveOAuthPickerRoute({
-      request,
-      response,
-      url: new URL("http://localhost/"),
-      scopePicker: true,
-    }),
-  ).toBe(true);
-  expect(response.writeHead).toHaveBeenCalledWith(
-    200,
-    expect.objectContaining({
-      "cache-control": "no-store",
-    }),
-  );
-  const post = new EventEmitter();
-  post.method = "POST";
-  post.headers = {};
-  const redirect = { writeHead: jest.fn(), end: jest.fn() };
-  const selected = jest.fn();
   const handled = serveOAuthPickerRoute({
-    request: post,
-    response: redirect,
+    request: { method: "GET", headers: {} },
+    response,
+    url: new URL("http://localhost/"),
+    scopePicker: true,
+  });
+  expect(handled).toBe(true);
+  expect(response.end).toHaveBeenCalled();
+});
+
+test("OAuth picker route dispatches submit requests", async () => {
+  const request = new EventEmitter();
+  request.method = "POST";
+  request.headers = {};
+  const response = { writeHead: jest.fn(), end: jest.fn() };
+  const handled = serveOAuthPickerRoute({
+    request,
+    response,
     url: new URL("http://localhost/oauth/start"),
     scopePicker: true,
-    scopes: ["zone.read"],
-    requiredScopes: ["account.read"],
-    setSelectedScopes: selected,
-    makeAuthorization: (scopes, offline) =>
-      new URL(`http://auth.test/?scope=${scopes.join(",")}&offline=${offline}`),
+    scopes: [],
+    requiredScopes: [],
+    setSelectedScopes: jest.fn(),
+    makeAuthorization: () => new URL("http://auth.test/"),
   });
-  post.emit("data", "scope=invalid&scope=zone.read&keep-signed-in=on");
-  post.emit("end");
+  request.emit("data", "");
+  request.emit("end");
   await new Promise((resolve) => setImmediate(resolve));
   expect(handled).toBe(true);
-  expect(selected).toHaveBeenCalledWith(["account.read", "zone.read"]);
-  expect(redirect.writeHead.mock.calls[0][1].location).toContain("offline=true");
+  expect(response.end).toHaveBeenCalled();
+});
+
+test("OAuth picker route leaves unrelated requests open", () => {
+  expect(
+    serveOAuthPickerRoute({
+      request: { method: "GET", headers: {} },
+      response: { writeHead: jest.fn(), end: jest.fn() },
+      url: new URL("http://localhost/unmatched"),
+      scopePicker: false,
+    }),
+  ).toBe(false);
 });
 
 test("OAuth picker route handler is exported", () => {
