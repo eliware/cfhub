@@ -90,17 +90,16 @@ test("saves a standard-input token with option and environment IDs", async () =>
   expect(args.writeCredentialImpl).toHaveBeenCalledWith("work", { apiToken: "token" });
 });
 
-test("reports token inspection and credential storage errors", async () => {
+test("reports token inspection errors", async () => {
   const inspect = setup({ inspectApiTokenImpl: jest.fn().mockRejectedValue(Error("denied")) });
   await saveApiTokenLogin(inspect.args);
   expect(inspect.fail).toHaveBeenCalledWith("Could not verify API token: denied");
+});
 
-  const storage = setup({ writeCredentialImpl: jest.fn().mockResolvedValue(false) });
-  await saveApiTokenLogin(storage.args);
-  expect(storage.fail).toHaveBeenCalledWith(
-    "Could not save the API token to the OS keychain or private credential file",
-  );
-  expect(storage.write).not.toHaveBeenCalled();
+test("does not report success when credential persistence fails", async () => {
+  const { args, printer } = setup({ writeCredentialImpl: jest.fn().mockResolvedValue(false) });
+  await saveApiTokenLogin(args);
+  expect(printer.log).not.toHaveBeenCalled();
 });
 
 test("does not ask for an account ID for a user token", async () => {

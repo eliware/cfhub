@@ -1,4 +1,5 @@
 import { terminalColorMode, terminalWidth } from "../terminal-format.mjs";
+import { requiresTerminalOutput } from "./terminal-use-policy.mjs";
 
 export function terminalOptions({
   opts,
@@ -14,13 +15,7 @@ export function terminalOptions({
     outputJson || opts["no-pager"] || opts.quiet || pagerSetting === "never"
       ? null
       : pagerSetting || null;
-  const useTerminal = Boolean(
-    pager ||
-    opts.color !== undefined ||
-    opts.width !== undefined ||
-    settings.color ||
-    settings.width,
-  );
+  const useTerminal = requiresTerminalOutput({ pager, opts, settings });
   return {
     outputJson,
     color,

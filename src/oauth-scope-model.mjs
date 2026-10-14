@@ -4,11 +4,6 @@ import moduleCatalog from "../data/cloudflare-oauth-modules.json" with { type: "
 
 const categories = scopeCategories;
 const modules = moduleCatalog.modules;
-export const ALLOWED_OAUTH_SCOPES = new Set(
-  Object.values(categories).flatMap((features) =>
-    features.flatMap((feature) => feature.scopes.map((scope) => scope.scope)),
-  ),
-);
 
 export function serializeOAuthScopeModel(
   model = { categories, modules, requiredScopes: REQUIRED_OAUTH_SCOPES },
