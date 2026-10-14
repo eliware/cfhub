@@ -1,6 +1,6 @@
 {
   "name": "@eliware/cfhub",
-  "version": "12.0.0",
+  "version": "12.0.1",
   "type": "module",
   "description": "Cloudflare administration and automation CLI with GitHub CLI-style commands, profiles, safe writes, and direct API access.",
   "keywords": [
@@ -70,7 +70,7 @@
     "css-minimizer-webpack-plugin": "^8.0.0",
     "lighthouse": "^13.4.1",
     "mini-css-extract-plugin": "^2.10.2",
-    "puppeteer": "^25.8.0",
+    "puppeteer": "^25.14.0",
     "webpack": "^5.109.2",
     "webpack-cli": "^7.2.2"
   },

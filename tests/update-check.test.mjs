@@ -28,7 +28,7 @@ test("update check caches once per interval and reports newer versions", async (
   await expect(checkForUpdate(options)).resolves.toBe("2.0.0");
   await expect(checkForUpdate({ ...options, now: 86_401_000 })).resolves.toBe("2.0.0");
   expect(fetchImpl).toHaveBeenCalledTimes(1);
-  expect(updateNotice("2.0.0", "1.1.3")).toMatch(/npm install/);
+  expect(updateNotice("2.0.0", "1.1.3")).toContain("npm install --global @eliware/cfhub@latest");
 });
 
 test("update check respects opt-out, current versions, bad responses, and failures", async () => {
@@ -127,7 +127,7 @@ test("update check handles missing fetch and missing timeout support", async () 
   } finally {
     globalThis.AbortSignal = abortSignal;
   }
-  expect(fetchImpl).toHaveBeenCalledWith("https://registry.npmjs.org/cfhub/latest", {});
+  expect(fetchImpl).toHaveBeenCalledWith("https://registry.npmjs.org/@eliware%2Fcfhub/latest", {});
 });
 
 test("CLI prints an update notice without delaying command output", async () => {

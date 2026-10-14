@@ -1,5 +1,11 @@
 # Release Notes
 
+## 12.0.1 — 2026-10-14
+
+### Fixed
+
+- Fixed update checks and install instructions to use the scoped `@eliware/cfhub` package.
+
 ## 12.0.0 — 2026-10-14
 
 ### Added

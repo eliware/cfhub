@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import { newerVersion } from "./version-comparison.mjs";
 import { readUpdateCache, updateCachePath, writeUpdateCache } from "./update-cache.mjs";
 
-const PACKAGE_URL = "https://registry.npmjs.org/cfhub/latest";
+const PACKAGE_URL = "https://registry.npmjs.org/@eliware%2Fcfhub/latest";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export async function checkForUpdate({
@@ -38,6 +38,6 @@ export async function checkForUpdate({
 
 export function updateNotice(latestVersion, currentVersion) {
   return latestVersion
-    ? `A newer cfhub version is available: ${latestVersion} (installed: ${currentVersion})\nRun: npm install --global cfhub@latest`
+    ? `A newer cfhub version is available: ${latestVersion} (installed: ${currentVersion})\nRun: npm install --global @eliware/cfhub@latest`
     : null;
 }
