@@ -1,7 +1,6 @@
 import { jest } from "@jest/globals";
 import { run } from "../src/cli.mjs";
 import { fixtureCase1 } from "../test-fixtures/unit/cli-defaults.mjs";
-
 test("CLI prints its version without loading configuration", async () => {
   const printer = { log: jest.fn(), error: jest.fn() };
   await run({ argv: ["--version"], printer, loadEnv: jest.fn(), cfFactory: jest.fn() });
@@ -17,7 +16,7 @@ test("dispatches to injected handlers and loads env", async () => {
   const loadEnv = jest.fn();
   const zones = jest.fn().mockResolvedValue(undefined);
 
-  const mod = await import(`../bin/cfhub.mjs?ts=${Date.now()}`);
+  const mod = await import("../bin/cfhub.mjs?ts=1");
   await mod.run({
     argv: ["zones", "list", "--json", "--data", "{}"],
     cfFactory,
@@ -38,7 +37,7 @@ test("prints help with no args and unknown resource", async () => {
   const log = jest.fn();
   const error = jest.fn();
   const cfFactory = jest.fn();
-  const mod = await import(`../bin/cfhub.mjs?ts=${Date.now() + 1}`);
+  const mod = await import("../bin/cfhub.mjs?ts=2");
   await mod.run({
     argv: [],
     printer: { log, error },
@@ -58,7 +57,7 @@ test("prints help with no args and unknown resource", async () => {
 });
 
 test("formats authorization errors from a handler", async () => {
-  const mod = await import(`../bin/cfhub.mjs?ts=${Date.now() + 300}`);
+  const mod = await import("../bin/cfhub.mjs?ts=3");
   const printer = { log: jest.fn(), error: jest.fn() };
   const exit = jest.fn();
   await mod.run({
@@ -79,7 +78,7 @@ test("formats authorization errors from a handler", async () => {
 });
 
 test("handles resource help, unknown actions, missing scopes, and raw errors", async () => {
-  const mod = await import(`../src/cli.mjs?ts=${Date.now() + 400}`);
+  const mod = await import("../src/cli.mjs?ts=4");
   const printer = { log: jest.fn(), error: jest.fn() };
   const exit = jest.fn();
   await mod.run({

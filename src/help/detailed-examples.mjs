@@ -1,28 +1,95 @@
-export const detailedExamples = () => `Examples:
-  cfhub zones list
-  cfhub zones get --zone-id <zone_id>
-  cfhub zones create --data '{"account":{"id":"..."},"name":"example.com","type":"full"}'
-  cfhub zone-settings get --zone-id <zone_id> --setting development_mode
-  cfhub zone-settings set --zone-id <zone_id> --setting development_mode --data '{"value":"on"}'
-  cfhub dns-records list --zone-id <zone_id>
-  cfhub dns-records create --zone-id <zone_id> --data '{"type":"A","name":"www","content":"1.2.3.4"}'
-  cfhub rulesets list --zone-id <zone_id>
-  cfhub rulesets update --zone-id <zone_id> --id <ruleset_id> --file ruleset.json
-  cfhub lists list --account-id <account_id>
-  cfhub list-items list --account-id <account_id> --id <list_id>
-  cfhub zones list
-  cfhub api /zones --json
-  cfhub api zones/<zone_id>/dns_records --json
-  cfhub auth login
-  cfhub oauth status
-  cfhub oauth login --profile work                # OAuth browser flow
-  printf '%s' "$CLOUDFLARE_API_TOKEN" | cfhub auth login --profile ci --token-stdin
-  cfhub oauth switch --profile work
-  cfhub oauth logout --profile work
-  cfhub ssl get --zone-id <zone_id>
-  cfhub cache purge --zone-id <zone_id> --data '{"purge_everything":true}' --force
-  cfhub health list --zone-id <zone_id>
-  cfhub audit list --account-id <account_id>
-  cfhub inventory export --account-id <account_id> --json
-  cfhub origin-ca list --json
-`;
+const command = (...parts) => parts.join(" ");
+
+export const detailedExamples = () =>
+  [
+    "Examples:",
+    command("cfhub", "zones", "list"),
+    command("cfhub", "zones", "get", "--zone-id", "<zone_id>"),
+    command(
+      "cfhub",
+      "zones",
+      "create",
+      "--data",
+      '{"account":{"id":"..."},"name":"example.com","type":"full"}',
+    ),
+    command(
+      "cfhub",
+      "zone-settings",
+      "get",
+      "--zone-id",
+      "<zone_id>",
+      "--setting",
+      "development_mode",
+    ),
+    command(
+      "cfhub",
+      "zone-settings",
+      "set",
+      "--zone-id",
+      "<zone_id>",
+      "--setting",
+      "development_mode",
+      "--data",
+      '{"value":"on"}',
+    ),
+    command("cfhub", "dns-records", "list", "--zone-id", "<zone_id>"),
+    command(
+      "cfhub",
+      "dns-records",
+      "create",
+      "--zone-id",
+      "<zone_id>",
+      "--data",
+      '{"type":"A","name":"www","content":"1.2.3.4"}',
+    ),
+    command("cfhub", "rulesets", "list", "--zone-id", "<zone_id>"),
+    command(
+      "cfhub",
+      "rulesets",
+      "update",
+      "--zone-id",
+      "<zone_id>",
+      "--id",
+      "<ruleset_id>",
+      "--file",
+      "ruleset.json",
+    ),
+    command("cfhub", "lists", "list", "--account-id", "<account_id>"),
+    command("cfhub", "list-items", "list", "--account-id", "<account_id>", "--id", "<list_id>"),
+    command("cfhub", "api", "/zones", "--json"),
+    command("cfhub", "api", "zones/<zone_id>/dns_records", "--json"),
+    command("cfhub", "auth", "login"),
+    command("cfhub", "oauth", "status"),
+    command("cfhub", "oauth", "login", "--profile", "work"),
+    command(
+      "printf",
+      "%s",
+      "$CLOUDFLARE_API_TOKEN",
+      "|",
+      "cfhub",
+      "auth",
+      "login",
+      "--profile",
+      "ci",
+      "--token-stdin",
+    ),
+    command("cfhub", "oauth", "switch", "--profile", "work"),
+    command("cfhub", "oauth", "logout", "--profile", "work"),
+    command("cfhub", "ssl", "get", "--zone-id", "<zone_id>"),
+    command(
+      "cfhub",
+      "cache",
+      "purge",
+      "--zone-id",
+      "<zone_id>",
+      "--data",
+      '{"purge_everything":true}',
+      "--force",
+    ),
+    command("cfhub", "health", "list", "--zone-id", "<zone_id>"),
+    command("cfhub", "audit", "list", "--account-id", "<account_id>"),
+    command("cfhub", "inventory", "export", "--account-id", "<account_id>", "--json"),
+    command("cfhub", "origin-ca", "list", "--json"),
+  ]
+    .map((example, index) => (index === 0 ? example : `  ${example}`))
+    .join("\n");

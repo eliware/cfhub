@@ -1,12 +1,12 @@
 import { spawn } from "node:child_process";
-import { flushTerminalPager } from "./terminal-pager.mjs";
-import { styleTerminalText } from "./terminal-format.mjs";
+import { flushTerminalPager } from "./terminal/pager.mjs";
+import { styleTerminalText } from "./terminal/format.mjs";
 export {
   fitTerminal,
   styleTerminalText,
   terminalColorMode,
   terminalWidth,
-} from "./terminal-format.mjs";
+} from "./terminal/format.mjs";
 
 export function createTerminalOutput({
   printer = console,

@@ -1,10 +1,10 @@
 import http from "node:http";
-import { startOAuthServer } from "./oauth-server.mjs";
-import { openBrowser } from "./oauth-browser.mjs";
-import { exchangeOAuthCode } from "./oauth-exchange.mjs";
-import { DEFAULT_OAUTH_SCOPES } from "./oauth-scopes.mjs";
-import { prepareOAuthLogin } from "./oauth-login-setup.mjs";
-import { DEFAULT_OAUTH_PORTS } from "./oauth-api.mjs";
+import { startOAuthServer } from "./oauth/server.mjs";
+import { openBrowser } from "./oauth/browser.mjs";
+import { exchangeOAuthCode } from "./oauth/exchange.mjs";
+import { DEFAULT_OAUTH_SCOPES } from "./oauth/scopes.mjs";
+import { prepareOAuthLogin } from "./oauth/login-setup.mjs";
+import { DEFAULT_OAUTH_PORTS } from "./oauth/api.mjs";
 
 export async function loginOAuth({
   clientId,

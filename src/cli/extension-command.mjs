@@ -1,5 +1,5 @@
 import { handleExtension } from "../handlers/extension.mjs";
-import { toJsonOutput } from "../output-printers.mjs";
+import { toJsonOutput } from "../output/printers.mjs";
 
 export function runExtensionCommand({ action, opts, printer, fsImpl, homeDir }) {
   return handleExtension({

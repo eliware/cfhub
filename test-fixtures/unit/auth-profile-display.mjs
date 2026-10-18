@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals";
-import { handleAuthProfile } from "../../src/handlers/auth-profile.mjs";
+import { handleAuthProfile } from "../../src/handlers/auth/profile.mjs";
 import { profileOptions } from "../auth-profile-options.mjs";
 
 export async function fixtureCase1() {

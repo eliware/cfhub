@@ -1,7 +1,7 @@
 import { getAccountId, getZoneId } from "./identifiers.mjs";
 import { requireValue } from "./argument-validation.mjs";
-import { printTable } from "../output-table.mjs";
-import { handleZoneReport } from "./zone-reports.mjs";
+import { printTable } from "../output/table.mjs";
+import { handleZoneReport } from "./zone/reports.mjs";
 
 export async function handleZones({
   cf,

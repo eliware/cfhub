@@ -42,7 +42,7 @@ test.each([
   [{ action: "" }, "requires a path"],
   [{ action: "https://example.com" }, "relative"],
   [{ opts: { method: "TRACE" } }, "Unsupported"],
-  [{ body: {}, opts: {} }, "GET requests"],
+  [{ body: {}, opts: {} }, "Read requests"],
   [{ opts: { method: "DELETE" } }, "DELETE"],
 ])("rejects invalid API request %#", async (overrides, message) => {
   const ctx = context(overrides);

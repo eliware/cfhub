@@ -77,7 +77,7 @@ Preview a DNS write:
 cfhub dns-records create --zone-id <zone_id> --data '{"type":"A","name":"www","content":"192.0.2.1"}' --dry-run
 ```
 
-Read [docs/README.md](docs/README.md) for setup, profile, command, output, and extension guides. Read [specs/README.md](specs/README.md) for product rules. Read [RELEASE_NOTES.md](RELEASE_NOTES.md) for version history.
+Read [docs/README.md](docs/README.md) for setup, profile, command, output, and extension guides. Read [specs/README.md](specs/README.md) for project rules. Read [RELEASE_NOTES.md](RELEASE_NOTES.md) for version history.
 
 ## Development
 
@@ -102,9 +102,9 @@ npm test
 
 Run browser checks for the OAuth pages with `npm run test:e2e:web`.
 
-Install Node.js 26 or later. Run `npm ci` from the repository root. Install Chrome, Edge, or Chromium. Set `CHROME_PATH` to the browser executable when cfhub cannot find it.
+Install Node.js 26 or later. Run `npm ci` from the repository root. Install Chrome, Edge, or Chromium. Set `CHROME_PATH` to the browser executable if cfhub cannot find it.
 
-Make local ports 8765 through 8769 available. The checks start local OAuth preview servers on these ports. They use a preview client and a mock token response. They do not need Cloudflare credentials.
+Make local TCP ports 8765 through 8769 available. The checks start OAuth preview servers on these ports. They use a preview client and a mock token response. They do not require Cloudflare credentials.
 
 The screenshot checks capture the OAuth picker, success, cancellation, and expired-request pages. They use desktop, mobile, and mobile landscape viewports. By default, they write PNG files to `artifacts/oauth-screenshots/`. Set `CFHUB_SCREENSHOT_DIR` to change this folder.
 
@@ -154,7 +154,7 @@ Run `npm run build:web` after OAuth page or style changes. The command writes bu
 
 ## Deployment
 
-cfhub does not run a hosted web service. The OAuth server runs on your computer during login.
+cfhub runs as a local CLI. The OAuth server runs on your computer during login.
 
 ## Support
 

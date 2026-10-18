@@ -30,7 +30,7 @@ export function tokenizeCommand(command) {
     token += character;
   }
   if (escaped) token += "\\";
-  if (quote) throw new Error("Unterminated quote in command alias");
+  if (quote) throw new Error("The command alias has an unclosed quotation mark");
   if (token) tokens.push(token);
   return tokens;
 }

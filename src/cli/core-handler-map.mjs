@@ -1,9 +1,9 @@
 import { handleZones } from "../handlers/zones.mjs";
-import { handleZoneSettings } from "../handlers/zone-settings.mjs";
-import { handleDnsRecords } from "../handlers/dns-records.mjs";
+import { handleZoneSettings } from "../handlers/zone/settings.mjs";
+import { handleDnsRecords } from "../handlers/dns/records.mjs";
 import { handleRulesets } from "../handlers/rulesets.mjs";
 import { handleLists } from "../handlers/lists.mjs";
-import { handleListItems } from "../handlers/list-items.mjs";
+import { handleListItems } from "../handlers/list/items.mjs";
 import { handleApi } from "../handlers/api.mjs";
 import { handleAuth } from "../handlers/auth.mjs";
 import { handleSsl } from "../handlers/ssl.mjs";

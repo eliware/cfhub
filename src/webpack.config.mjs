@@ -4,9 +4,9 @@ import { fileURLToPath } from "node:url";
 
 export default {
   entry: {
-    "oauth-picker": "./src/oauth-web/oauth-picker.entry.mjs",
-    "oauth-result": "./src/oauth-web/oauth-result.entry.mjs",
-    "oauth-success": "./src/oauth-web/oauth-success.entry.mjs",
+    "oauth-picker": "./src/oauth-web/picker.entry.mjs",
+    "oauth-result": "./src/oauth-web/result.entry.mjs",
+    "oauth-success": "./src/oauth-web/success.entry.mjs",
   },
   output: {
     filename: "[name].mjs",

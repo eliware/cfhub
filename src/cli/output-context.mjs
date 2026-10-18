@@ -1,8 +1,8 @@
 import { VERSION } from "../version.mjs";
 import { createTerminalOutput } from "../terminal.mjs";
-import { terminalOptions } from "./terminal-options.mjs";
+import { terminalOptions } from "./terminal/options.mjs";
 import { dashboardUrl } from "./dashboard-url.mjs";
-import { checkForUpdate } from "../update-check.mjs";
+import { checkForUpdate } from "../update/check.mjs";
 import { showUpdateNotice } from "./update-notice.mjs";
 
 export function createOutputContext({ opts, printer, homeDir, env, fsImpl, updateCheck }) {

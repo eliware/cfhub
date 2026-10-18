@@ -1,6 +1,6 @@
 {
   "name": "@eliware/cfhub",
-  "version": "12.0.1",
+  "version": "13.0.0",
   "type": "module",
   "description": "Cloudflare administration and automation CLI with GitHub CLI-style commands, profiles, safe writes, and direct API access.",
   "keywords": [
@@ -43,7 +43,7 @@
     "audit": "eliware-test --audit",
     "format": "eliware-test --format",
     "format:check": "eliware-test --format-check",
-    "build": "webpack --config src/webpack.config.mjs --mode production --output-path dist",
+    "build": "webpack --config webpack.config.mjs",
     "build:web": "node bin/build-web.mjs",
     "pack": "eliware-test --pack",
     "test:gaps": "node bin/test-gaps.mjs",
@@ -53,6 +53,7 @@
     "test:e2e:screenshots": "node test-fixtures/e2e/oauth-picker-success.e2e.mjs && node test-fixtures/e2e/oauth-errors.e2e.mjs",
     "test:e2e:lighthouse": "node test-fixtures/e2e/oauth-picker.lighthouse.mjs",
     "test:e2e:web": "npm run test:e2e:screenshots && npm run test:e2e:lighthouse",
+    "screenshots": "npm run test:e2e:screenshots",
     "puppeteer": "npm run test:e2e:screenshots",
     "lighthouse": "node test-fixtures/e2e/oauth-picker.lighthouse.mjs"
   },
@@ -61,17 +62,17 @@
   },
   "dependencies": {
     "@eliware/common": "^12.0.1",
-    "cloudflare": "^7.1.0"
+    "cloudflare": "^7.1.0",
+    "lighthouse": "^13.4.1",
+    "puppeteer": "^25.14.0"
   },
   "devDependencies": {
     "@eliware/test": "^12.0.0",
     "chrome-launcher": "^1.2.1",
     "css-loader": "^7.1.4",
     "css-minimizer-webpack-plugin": "^8.0.0",
-    "lighthouse": "^13.4.1",
     "mini-css-extract-plugin": "^2.10.2",
-    "puppeteer": "^25.14.0",
-    "webpack": "^5.109.2",
+    "webpack": "^5.112.0",
     "webpack-cli": "^7.2.2"
   },
   "jest": {

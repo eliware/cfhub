@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 import { createOutputContext } from "../../src/cli/output-context.mjs";
-
 test("output context is exported", () => {
   expect(createOutputContext).toEqual(expect.any(Function));
 });
@@ -15,7 +14,8 @@ test("output context prints update notices and contains check failures", async (
     fsImpl: { existsSync: () => false },
   };
   createOutputContext({ ...common, updateCheck: jest.fn().mockResolvedValue("99.0.0") });
-  await new Promise((resolve) => setImmediate(resolve));
+  await Promise.resolve();
+  await Promise.resolve();
   expect(printer.error).toHaveBeenCalledWith(expect.stringContaining("99.0.0"));
 
   printer.error.mockClear();
@@ -23,7 +23,8 @@ test("output context prints update notices and contains check failures", async (
     ...common,
     updateCheck: jest.fn().mockRejectedValue(new Error("offline")),
   });
-  await new Promise((resolve) => setImmediate(resolve));
+  await Promise.resolve();
+  await Promise.resolve();
   expect(printer.error).not.toHaveBeenCalled();
 });
 
@@ -42,8 +43,8 @@ test("quiet output context suppresses command log output", () => {
 });
 
 test("CLI supports a bare pager flag with and without saved pager settings", async () => {
-  const mod = await import(`../../src/cli.mjs?ts=${Date.now() + 17}`);
-  const home = `/tmp/cf-cli-pager-${Date.now()}`;
+  const mod = await import("../../src/cli.mjs?ts=17");
+  const home = "/tmp/cf-cli-pager-test";
   const printer = { log: jest.fn(), error: jest.fn() };
   const fsImpl = {
     existsSync: () => false,
@@ -91,7 +92,7 @@ test("CLI supports a bare pager flag with and without saved pager settings", asy
 });
 
 test("CLI prints dashboard links before dispatch", async () => {
-  const mod = await import(`../../src/cli.mjs?ts=${Date.now() + 13}`);
+  const mod = await import("../../src/cli.mjs?ts=13");
   const printer = { log: jest.fn(), error: jest.fn() };
   const common = {
     printer,
@@ -113,7 +114,7 @@ test("CLI prints dashboard links before dispatch", async () => {
 });
 
 test("CLI renders templates through injected handlers", async () => {
-  const mod = await import(`../../src/cli.mjs?ts=${Date.now() + 14}`);
+  const mod = await import("../../src/cli.mjs?ts=14");
   const printer = { log: jest.fn(), error: jest.fn() };
   await mod.run({
     argv: ["zones", "list", "--template", "{{.name}}"],

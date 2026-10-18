@@ -1,5 +1,12 @@
 # Release Notes
 
+## 13.0.0 — 2026-10-17
+
+### Changed
+
+- Updated package metadata and repository workflows for Convention 13.
+- Updated webpack and related lockfile packages.
+
 ## 12.0.1 — 2026-10-14
 
 ### Fixed
@@ -15,7 +22,7 @@
 - Added a direct API command with request bodies, pagination, JSON selection, and templates.
 - Added command aliases, profiles, settings, and local extension management.
 - Added OAuth scope selection, browser pages, account summaries, profile management, and token refresh support.
-- Added secure credential storage through the operating system keychain or private files.
+- Added credential storage through the operating system keychain or private files.
 - Added user guides, OAuth assets, browser checks, and test fixtures for source modules.
 
 ### Changed
@@ -61,7 +68,7 @@
 
 ### Changed
 
-- Updated product branding and links from `cf` to `cfhub`.
+- Updated project branding and links from `cf` to `cfhub`.
 - Improved OAuth layout, styles, compression, caching, and asset versioning.
 
 ## 1.0.2 — 2026-08-14
@@ -69,23 +76,9 @@
 ### Added
 
 - Added optional OAuth `offline_access` support.
-- Added secure storage for OAuth refresh tokens and expiry data.
+- Added storage for OAuth refresh tokens and expiry data.
 
 ### Changed
 
 - Improved session controls and the OAuth picker layout.
 - Updated Puppeteer to 25.7.0.
-
-## 1.0.1 — 2026-08-12
-
-### Changed
-
-- Updated product branding and project links from `cf` to `cfhub`.
-
-## 1.0.0 — 2026-08-12
-
-### Added
-
-- Added Cloudflare zone, DNS, rules, settings, list, and account commands.
-- Added API token login, profiles, dry-run writes, and confirmation for deletes.
-- Added JSON output, OAuth login, command help, and local extensions.

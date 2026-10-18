@@ -5,7 +5,7 @@ test("command help covers specific and fallback resources", () => {
   const printer = { log: jest.fn() };
   printCommandHelp("auth", "login", printer);
   expect(printer.log.mock.calls[0][0]).toContain("USAGE");
-  expect(printer.log.mock.calls[0][0]).toContain("hidden input");
+  expect(printer.log.mock.calls[0][0]).toContain("hides the token during entry");
 
   printCommandHelp("unknown", "action", printer);
   expect(printer.log.mock.calls[1][0]).toContain("Use 'cfhub unknown --help'");

@@ -1,4 +1,4 @@
-import { updateNotice } from "../update-check.mjs";
+import { updateNotice } from "../update/check.mjs";
 
 export async function showUpdateNotice({
   updateCheck,

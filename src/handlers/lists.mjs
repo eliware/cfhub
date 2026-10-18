@@ -1,8 +1,8 @@
 import { getAccountId, getId } from "./identifiers.mjs";
 import { requireValue } from "./argument-validation.mjs";
-import { handleListsRead } from "./lists-read.mjs";
-import { handleListsWrite } from "./lists-write.mjs";
-import { handleListsDelete } from "./lists-delete.mjs";
+import { handleListsRead } from "./lists/read.mjs";
+import { handleListsWrite } from "./lists/write.mjs";
+import { handleListsDelete } from "./lists/delete.mjs";
 
 export async function handleLists(context) {
   const { cf, action, opts, body, outputJson, printer = console, toJsonOutput, fail } = context;

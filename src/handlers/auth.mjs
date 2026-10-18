@@ -1,8 +1,8 @@
-import { handleAuthProfile } from "./auth-profile.mjs";
-import { handleAuthStatus } from "./auth-status.mjs";
-import { handleAuthLogin } from "./auth-login.mjs";
-import { createAuthDependencies } from "./auth-dependencies.mjs";
-import { authActionRoute } from "./auth-action-route.mjs";
+import { handleAuthProfile } from "./auth/profile.mjs";
+import { handleAuthStatus } from "./auth/status.mjs";
+import { handleAuthLogin } from "./auth/login.mjs";
+import { createAuthDependencies } from "./auth/dependencies.mjs";
+import { authActionRoute } from "./auth/action-route.mjs";
 
 export async function handleAuth(context = {}) {
   const {

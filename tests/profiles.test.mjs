@@ -1,18 +1,34 @@
 import { jest } from "@jest/globals";
-import * as fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import {
-  activeProfile,
-  applyActiveProfile,
+  activeProfile as selectActiveProfile,
+  applyActiveProfile as applyProfile,
   profilesPath,
-  readProfiles,
-  writeProfiles,
+  readProfiles as loadProfiles,
+  writeProfiles as saveProfiles,
 } from "../src/profiles.mjs";
-import { deleteCredential, readCredential, writeCredential } from "../src/credential-store.mjs";
+import { deleteCredential, readCredential, writeCredential } from "../src/identity/store.mjs";
+import { createMemoryFs } from "../test-fixtures/unit/memory-fs.mjs";
+
+const fs = createMemoryFs();
+
+function activeProfile(env, homeDir) {
+  return selectActiveProfile(env, homeDir, fs);
+}
+
+function readProfiles(homeDir) {
+  return loadProfiles(homeDir, fs);
+}
+
+function writeProfiles(data, homeDir) {
+  return saveProfiles(data, homeDir, fs);
+}
+
+function applyActiveProfile(env, homeDir, fsImpl = fs, effects) {
+  return applyProfile(env, homeDir, fsImpl, effects);
+}
 
 test("profile application exports known API permissions", async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-permissions-"));
+  const home = "/tmp/cfhub-home/profile-permissions";
   writeProfiles(
     {
       active: "work",
@@ -29,7 +45,7 @@ test("profile application exports known API permissions", async () => {
 });
 
 test("profile selection honors explicit profile and missing storage", async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-empty-"));
+  const home = "/tmp/cfhub-home/profile-empty";
   expect(readProfiles(home)).toEqual({ active: null, profiles: {} });
   expect(activeProfile({ CLOUDFLARE_PROFILE: "none" }, home)).toBeNull();
   expect(await applyActiveProfile({ CLOUDFLARE_ACCOUNT_ID: "existing" }, home)).toBeNull();
@@ -47,7 +63,7 @@ test("profile selection honors explicit profile and missing storage", async () =
 });
 
 test("profile application preserves explicit environment values", async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-values-"));
+  const home = "/tmp/cfhub-home/profile-values";
   writeProfiles(
     { active: "work", profiles: { work: { apiToken: "token", accountId: "a1" } } },
     home,
@@ -61,7 +77,7 @@ test("profile application preserves explicit environment values", async () => {
 });
 
 test("profile application removes profiles when OAuth refresh fails", async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-oauth-"));
+  const home = "/tmp/cfhub-home/profile-oauth";
   writeProfiles({ active: "work", profiles: { work: {} } }, home);
   const credential = { oauthRefreshToken: "refresh", oauthAccessToken: "old", expiresAt: 100 };
   const readCredential = jest.fn().mockResolvedValue(credential);
@@ -97,7 +113,7 @@ test("profile application removes profiles when OAuth refresh fails", async () =
 });
 
 test("refreshed OAuth credentials take precedence over legacy profile access tokens", async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-legacy-oauth-"));
+  const home = "/tmp/cfhub-home/profile-legacy-oauth";
   writeProfiles(
     { active: "work", profiles: { work: { apiToken: "expired", accountId: "a1" } } },
     home,
@@ -111,7 +127,7 @@ test("refreshed OAuth credentials take precedence over legacy profile access tok
 });
 
 test("default credential writer persists refreshed OAuth credentials to disk", async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-disk-refresh-"));
+  const home = "/tmp/cfhub-home/profile-disk-refresh";
   writeProfiles({ active: "work", profiles: { work: {} } }, home);
   await applyActiveProfile({}, home, fs, {
     readCredential: jest
@@ -129,7 +145,7 @@ test("default credential writer persists refreshed OAuth credentials to disk", a
 });
 
 test("default credential writer persists through the configured credential adapter", async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-keychain-"));
+  const home = "/tmp/cfhub-home/profile-keychain";
   writeProfiles({ active: "keychain-test", profiles: { "keychain-test": {} } }, home);
   await applyActiveProfile({}, home, fs, {
     readCredential: jest
@@ -147,7 +163,7 @@ test("default credential writer persists through the configured credential adapt
 });
 
 test("expired OAuth credentials without refresh tokens are logged out", async () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-profile-expired-"));
+  const home = "/tmp/cfhub-home/profile-expired";
   writeProfiles({ active: "work", profiles: { work: {}, other: {} } }, home);
   const deleteCredential = jest.fn().mockResolvedValue(true);
   const result = await applyActiveProfile({}, home, fs, {

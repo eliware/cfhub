@@ -1,7 +1,7 @@
 import { getAccountId, getZoneId, getId } from "./identifiers.mjs";
 import { requireAnyValue } from "./argument-validation.mjs";
-import { readRulesets } from "./rulesets-read.mjs";
-import { mutateRulesets } from "./rulesets-mutate.mjs";
+import { readRulesets } from "./rulesets/read.mjs";
+import { mutateRulesets } from "./rulesets/mutate.mjs";
 
 export async function handleRulesets({
   cf,

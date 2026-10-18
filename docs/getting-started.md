@@ -25,7 +25,7 @@ Use an API token for direct setup:
 cfhub auth login
 ```
 
-Follow the prompts. Give the token only the Cloudflare permissions that your commands need. Use `cfhub oauth login` for OAuth access.
+Follow the prompts. Give the token only the Cloudflare permissions that your commands require. Use `cfhub oauth login` for OAuth access.
 
 ## Run commands
 
@@ -49,7 +49,7 @@ cfhub dns-records create --zone-id <zone_id> --data '{"type":"A","name":"www","c
 
 Use `cfhub auth status` to check access. Use `cfhub auth verify` to test the saved token.
 
-## Get help
+## Help
 
 Run `cfhub --help` to list command groups. Run `cfhub <resource> --help` for actions. Run `cfhub <resource> <action> --help` for action options.
 

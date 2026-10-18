@@ -1,8 +1,7 @@
 import { jest } from "@jest/globals";
-import * as fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import { readSettings, writeSettings } from "../src/settings.mjs";
+import { createMemoryFs } from "../test-fixtures/unit/memory-fs.mjs";
+import { mockNodeFs } from "../test-fixtures/unit/mock-node-fs.mjs";
 
 test("settings persist and read through filesystem adapters", () => {
   const files = new Map();
@@ -21,14 +20,10 @@ test("settings persist and read through filesystem adapters", () => {
   writeSettings({}, "/tmp/cf-settings-no-chmod", { mkdirSync: () => {}, writeFileSync: () => {} });
 });
 
-test("settings use the default filesystem adapter", () => {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cfhub-settings-"));
-  try {
-    writeSettings({ pager: "less" }, home);
-    expect(readSettings(home)).toEqual({ pager: "less" });
-  } finally {
-    fs.rmSync(home, { recursive: true, force: true });
-  }
+test("settings write and read through the memory filesystem", () => {
+  const fsImpl = createMemoryFs();
+  writeSettings({ pager: "less" }, "/tmp/cfhub-home/test", fsImpl);
+  expect(readSettings("/tmp/cfhub-home/test", fsImpl)).toEqual({ pager: "less" });
 });
 
 test("malformed settings fall back to defaults", () => {
@@ -47,4 +42,14 @@ test("settings reads rethrow filesystem errors", () => {
     },
   };
   expect(() => readSettings("/tmp/cf-settings-read-error", fsImpl)).toThrow("read failed");
+});
+
+test("settings helpers use the default filesystem adapter", async () => {
+  await jest.resetModules();
+  const fsImpl = mockNodeFs(jest);
+  const { readSettings, writeSettings } = await import("../src/settings.mjs");
+  expect(readSettings("/mock-home")).toEqual({});
+  writeSettings({ pager: "less" }, "/mock-home");
+  expect(fsImpl.existsSync).toHaveBeenCalled();
+  expect(fsImpl.renameSync).toHaveBeenCalled();
 });

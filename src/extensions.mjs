@@ -57,7 +57,16 @@ export function discoverExtensions(homeDir = os.homedir(), fsImpl = fs) {
     });
 }
 
-export async function loadExtensionCommand(manifest, command, homeDir = os.homedir()) {
+export function importExtensionModule(url) {
+  return import(url);
+}
+
+export async function loadExtensionCommand(
+  manifest,
+  command,
+  homeDir = os.homedir(),
+  loadModule = importExtensionModule,
+) {
   const relative = manifest.commands[command];
   if (!relative) return null;
   if (!isSafeExtensionName(manifest.name))
@@ -69,6 +78,6 @@ export async function loadExtensionCommand(manifest, command, homeDir = os.homed
   const withinExtension = path.relative(extensionDir, modulePath);
   if (!withinExtension || withinExtension === ".." || withinExtension.startsWith(`..${path.sep}`))
     throw new Error(`Unsafe extension command path: ${command}`);
-  const module = await import(pathToFileURL(modulePath).href);
+  const module = await loadModule(pathToFileURL(modulePath).href);
   return module.default || module.run || module.handler || null;
 }

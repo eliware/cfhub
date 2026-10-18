@@ -44,8 +44,8 @@
     },
     {
       "id": "rules-security",
-      "name": "Rules & security",
-      "description": "Inspect and manage rulesets and zone security baselines.",
+      "name": "Rules and zone protection",
+      "description": "Inspect and manage rulesets and zone protection baselines.",
       "scopes": [
         "account-rulesets.read",
         "account-rulesets.write",
@@ -64,7 +64,7 @@
     {
       "id": "cache-health",
       "name": "Cache & health",
-      "description": "Purge cache and manage zone health checks.",
+      "description": "Remove cached content and manage zone health checks.",
       "scopes": ["cache.purge", "healthcheck.read", "healthcheck.write"],
       "tier": "basic"
     },
@@ -77,8 +77,8 @@
     },
     {
       "id": "origin-ca",
-      "name": "Origin CA",
-      "description": "List, create, and revoke Origin CA certificates.",
+      "name": "CA certificates",
+      "description": "List, create, and revoke CA certificates.",
       "scopes": ["ssl-and-certificates.read", "ssl-and-certificates.write"],
       "tier": "basic"
     },

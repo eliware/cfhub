@@ -1,7 +1,7 @@
 import os from "node:os";
 import * as fs from "node:fs";
-import { inspectExtension } from "./extension-inspect.mjs";
-import { mutateExtension } from "./extension-mutate.mjs";
+import { inspectExtension } from "./extension/inspect.mjs";
+import { mutateExtension } from "./extension/mutate.mjs";
 
 export function handleExtension({
   action,

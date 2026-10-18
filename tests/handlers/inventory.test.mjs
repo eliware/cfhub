@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 import { handleInventory } from "../../src/handlers/inventory.mjs";
-
 test("inventory export combines account zones, DNS, and SSL", async () => {
   const toJsonOutput = jest.fn();
   const ctx = {
@@ -117,7 +116,7 @@ test("limits concurrent zones and keeps inventory order", async () => {
       active += 1;
       maximum = Math.max(maximum, active);
       return new Promise((resolve) =>
-        setImmediate(() => {
+        queueMicrotask(() => {
           active -= 1;
           resolve(path.endsWith("dns_records") ? { result: [] } : { value: "strict" });
         }),

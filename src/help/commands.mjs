@@ -1,4 +1,4 @@
-import { authCommandHelp } from "./auth-commands.mjs";
+import { authCommandHelp } from "./auth/commands.mjs";
 import { resourceCommandHelp } from "./resource-commands.mjs";
 import { localCommandHelp } from "./local-commands.mjs";
 

@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { resolve, sep } from "node:path";
 import os from "node:os";
 import { parseEnvFile } from "./env-file-parser.mjs";
 
@@ -20,7 +21,7 @@ export function loadProjectEnv(
   homeDir = os.homedir(),
 ) {
   loadUserEnv(homeDir, env, fsImpl);
-  const rootUrl = new URL(`file://${projectRoot.replaceAll("\\", "/")}/`);
+  const rootUrl = pathToFileURL(`${resolve(projectRoot)}${sep}`);
   return loadEnvFile(fileURLToPath(new URL(".env", rootUrl)), env, fsImpl);
 }
 

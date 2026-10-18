@@ -4,7 +4,7 @@ OAuth lets cfhub access Cloudflare through a browser login. Run `cfhub oauth log
 
 ## Callback addresses
 
-Register these callback addresses with your OAuth client:
+Add these callback addresses to your OAuth client:
 
 ```text
 http://127.0.0.1:8765/oauth/callback
@@ -14,11 +14,11 @@ http://127.0.0.1:8768/oauth/callback
 http://127.0.0.1:8769/oauth/callback
 ```
 
-cfhub tries these ports in order. The callback path is `/oauth/callback`.
+cfhub tries these TCP ports in order. The callback path is `/oauth/callback`.
 
-Set `CFHUB_OAUTH_CLIENT_ID` to use a different client ID. Set `CFHUB_OAUTH_BIND_HOST` to change the local bind host. Set `CFHUB_OAUTH_REDIRECT_HOST` to change the host in the callback address.
+Set `CFHUB_OAUTH_CLIENT_ID` to use a different client ID. Set `CFHUB_OAUTH_BIND_HOST` to select the local callback address. Set `CFHUB_OAUTH_REDIRECT_HOST` to select the host in the callback address.
 
-If an integration supplies custom ports, register the callback address for each port that it can select. If an integration supplies port `0`, register the actual port that the server selects.
+If an integration supplies custom TCP-port numbers, add the callback address for each number it can select. If it supplies TCP-port number `0`, add the number that the server selects.
 
 ## Scopes
 
@@ -70,7 +70,7 @@ access.read
 access.write
 ```
 
-Set `CFHUB_OAUTH_SCOPES` to a comma-separated list when you need a different set. Request only scopes that your commands need. Cloudflare must allow each scope on the client.
+Set `CFHUB_OAUTH_SCOPES` to a comma-separated list when you require a different set. Request only scopes that your commands require. Cloudflare must allow each scope on the client.
 
 ## Manage OAuth access
 

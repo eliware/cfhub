@@ -1,22 +1,24 @@
 import { jest } from "@jest/globals";
-import * as fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { handleExtension } from "../../src/handlers/extension.mjs";
+import { createMemoryFs } from "../../test-fixtures/unit/memory-fs.mjs";
 
 function setup() {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "cf-ext-"));
-  const source = fs.mkdtempSync(path.join(os.tmpdir(), "cf-ext-source-"));
-  fs.writeFileSync(
-    path.join(source, "cf-extension.json"),
-    JSON.stringify({ name: "hello", version: "1.0.0", commands: { hello: "hello.mjs" } }),
-  );
-  fs.writeFileSync(path.join(source, "hello.mjs"), "export default () => {}");
-  return { home, source };
+  const home = path.resolve("virtual-home");
+  const source = path.resolve("virtual-source/hello");
+  const fsImpl = createMemoryFs({
+    [`${source}/cf-extension.json`]: JSON.stringify({
+      name: "hello",
+      version: "1.0.0",
+      commands: { hello: "hello.mjs" },
+    }),
+    [`${source}/hello.mjs`]: "source",
+  });
+  return { home, source, fsImpl };
 }
 
 test("extension install, list, upgrade, and remove work locally", () => {
-  const { home, source } = setup();
+  const { home, source, fsImpl } = setup();
   const printer = { log: jest.fn() };
   const common = {
     outputJson: true,
@@ -24,6 +26,7 @@ test("extension install, list, upgrade, and remove work locally", () => {
     printer,
     fail: jest.fn(),
     homeDir: home,
+    fsImpl,
   };
   handleExtension({ ...common, action: "install", opts: { path: source } });
   handleExtension({ ...common, action: "list", opts: {} });
@@ -39,7 +42,7 @@ test("extension install, list, upgrade, and remove work locally", () => {
 });
 
 test("extension validation and safety errors are reported", () => {
-  const { home, source } = setup();
+  const { home, source, fsImpl } = setup();
   const fail = jest.fn();
   const common = {
     action: "list",
@@ -49,12 +52,13 @@ test("extension validation and safety errors are reported", () => {
     printer: { log: jest.fn() },
     fail,
     homeDir: home,
+    fsImpl,
   };
   handleExtension({ ...common, action: "install" });
   handleExtension({ ...common, action: "remove", opts: { name: "hello" } });
   handleExtension({ ...common, action: "remove", opts: {} });
-  const invalid = fs.mkdtempSync(path.join(os.tmpdir(), "cf-ext-invalid-"));
-  fs.writeFileSync(path.join(invalid, "cf-extension.json"), "{}");
+  const invalid = "/source/invalid";
+  fsImpl.writeFileSync(`${invalid}/cf-extension.json`, "{}");
   handleExtension({ ...common, action: "install", opts: { path: invalid } });
   handleExtension({ ...common, action: "unknown", opts: {} });
   handleExtension({ ...common, action: "info", opts: { name: "missing" } });
@@ -68,5 +72,12 @@ test("extension validation and safety errors are reported", () => {
     toJsonOutput: jest.fn(),
     printer: { log: jest.fn() },
     fail: jest.fn(),
+    fsImpl,
   });
+});
+
+test("extension handler uses default filesystem and home values for unknown actions", () => {
+  const fail = jest.fn();
+  handleExtension({ action: "unknown", opts: {}, fail });
+  expect(fail).toHaveBeenCalledWith("Unknown extension action: unknown");
 });

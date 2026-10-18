@@ -1,12 +1,12 @@
 import os from "node:os";
 import * as fs from "node:fs";
-import { deleteCredential, readCredential, writeCredential } from "./credential-store.mjs";
-import { refreshOAuth } from "./oauth-api.mjs";
-import { activeProfile } from "./profile-store.mjs";
-import { removeExpiredProfile } from "./profile-expiry.mjs";
-import { applyProfileEnvironment } from "./profile-environment.mjs";
+import { deleteCredential, readCredential, writeCredential } from "./identity/store.mjs";
+import { refreshOAuth } from "./oauth/api.mjs";
+import { activeProfile } from "./profile/store.mjs";
+import { removeExpiredProfile } from "./profile/expiry.mjs";
+import { applyProfileEnvironment } from "./profile/environment.mjs";
 
-export { activeProfile, profilesPath, readProfiles, writeProfiles } from "./profile-store.mjs";
+export { activeProfile, profilesPath, readProfiles, writeProfiles } from "./profile/store.mjs";
 
 export async function applyActiveProfile(
   env = process.env,
@@ -56,8 +56,8 @@ export async function applyActiveProfile(
         ...activeCredential,
       });
     } catch {
-      // A rejected refresh token cannot recover the old access token. Remove
-      // the unusable local credential so the next login starts cleanly.
+      // A rejected refresh token cannot restore the previous access token.
+      // Remove the invalid local credential before a new login.
       await removeExpiredProfile(profile.name, homeDir, fsImpl, credentialDeleter);
       return null;
     }

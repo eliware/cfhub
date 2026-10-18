@@ -21,5 +21,5 @@ test("tokenizes quoted, escaped, and spaced alias arguments", () => {
 });
 
 test("rejects an incomplete quoted argument", () => {
-  expect(() => tokenizeCommand('dns list --name "example.com')).toThrow("Unterminated quote");
+  expect(() => tokenizeCommand('dns list --name "example.com')).toThrow("unclosed quotation mark");
 });

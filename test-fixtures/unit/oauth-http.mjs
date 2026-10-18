@@ -1,18 +1,29 @@
 import http from "node:http";
 import { loginOAuth } from "../../src/oauth.mjs";
 
-export async function startOAuthTestLogin({ fetchImpl, open, setTimeoutImpl }) {
+export async function startOAuthTestLogin({ fetchImpl, open, setTimeoutImpl, options = {} }) {
   const printed = [];
   let closeServer = () => {};
+  let resolveStarted;
+  const started = new Promise((resolve) => {
+    resolveStarted = resolve;
+  });
   const promise = loginOAuth({
+    ...options,
     clientId: "client",
-    ports: [0],
-    open,
+    ports: options.ports || [0],
+    open: (...args) => {
+      try {
+        return open(...args);
+      } finally {
+        resolveStarted();
+      }
+    },
     print: (value) => printed.push(value),
     fetchImpl,
     setTimeoutImpl: setTimeoutImpl ?? ((callback) => (closeServer = callback)),
   });
-  await new Promise((resolve) => setTimeout(resolve, 10));
+  await started;
   const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
   return { printed, promise, authorization, closeServer: () => closeServer() };
 }
@@ -25,15 +36,26 @@ export function makeOAuthCallbackUrl(authorization, values = {}) {
 }
 
 export function getOAuthResponse(url) {
+  return requestOAuthResponse(url);
+}
+
+export function requestOAuthResponse(url, { method = "GET", headers, body: payload } = {}) {
   return new Promise((resolve, reject) =>
     http
-      .get(url, (response) => {
-        let body = "";
+      .request(url, { method, headers }, (response) => {
+        let responseBody = "";
         response.on("data", (chunk) => {
-          body += chunk;
+          responseBody += chunk;
         });
-        response.on("end", () => resolve({ statusCode: response.statusCode, body }));
+        response.on("end", () =>
+          resolve({
+            statusCode: response.statusCode,
+            headers: response.headers,
+            body: responseBody,
+          }),
+        );
       })
-      .on("error", reject),
+      .on("error", reject)
+      .end(payload),
   );
 }

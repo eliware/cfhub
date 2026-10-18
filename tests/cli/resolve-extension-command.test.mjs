@@ -54,3 +54,37 @@ test("extension invocation reports a missing handler", async () => {
   expect(result).toEqual({ done: true, value: undefined });
   expect(printer.error).toHaveBeenCalledWith("Extension command is not loadable: sample");
 });
+
+test("extension invocation uses default command and JSON helpers", async () => {
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const missing = await resolveExtensionCommand({
+    extensionManifest: { name: "sample", commands: {} },
+    resource: "missing",
+    action: "run",
+    opts: {},
+    printer,
+    homeDir: "home",
+    fsImpl: {},
+    loadBody: jest.fn(),
+  });
+  expect(missing.done).toBe(true);
+  const handled = await resolveExtensionCommand({
+    extensionManifest: { name: "sample" },
+    resource: "sample",
+    action: "run",
+    opts: { json: true },
+    printer,
+    homeDir: "home",
+    fsImpl: {},
+    loadBody: jest.fn(),
+    loadCommand: async (manifest, resource, homeDir) => {
+      expect([manifest.name, resource, homeDir]).toEqual(["sample", "sample", "home"]);
+      return (context) => {
+        context.toJsonOutput({ ok: true });
+        return "handled";
+      };
+    },
+  });
+  expect(handled.value).toBe("handled");
+  expect(printer.log).toHaveBeenCalledWith(JSON.stringify({ ok: true }, null, 2));
+});

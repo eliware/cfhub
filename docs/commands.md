@@ -1,6 +1,6 @@
 # Command reference
 
-Run `cfhub --help` for a live list of commands. Run `cfhub <resource> --help` for supported actions. Cloudflare APIs can change, so use command help for current flags.
+Run `cfhub --help` to list commands. Run `cfhub <resource> --help` to list actions. Use command help for flags.
 
 ## Cloudflare resources
 
@@ -15,9 +15,9 @@ Run `cfhub --help` for a live list of commands. Run `cfhub <resource> --help` fo
 | `ssl`                                                             | `get`, `set`, `certificates`, `coverage`                         |
 | `origin-ca`                                                       | `list`, `create`, `revoke`                                       |
 | `load-balancer`                                                   | `list`, `get`, `create`, `update`, `delete`                      |
-| `tunnel`                                                          | Resource actions; run command help for details.                  |
+| `tunnel`                                                          | Resource actions. Run command help for details.                  |
 | `workers`                                                         | `list`, `get`, `create`, `update`, `delete`                      |
-| `pages`, `r2`, `d1`, `queues`, `stream`, `images`, `ai`, `access` | Resource actions; run command help for details.                  |
+| `pages`, `r2`, `d1`, `queues`, `stream`, `images`, `ai`, `access` | Resource actions. Run command help for details.                  |
 
 ## Local commands
 
@@ -26,11 +26,11 @@ Run `cfhub --help` for a live list of commands. Run `cfhub <resource> --help` fo
 | `auth`      | Add and manage API token profiles. |
 | `oauth`     | Add and manage OAuth profiles.     |
 | `api`       | Call a Cloudflare API path.        |
-| `audit`     | Review recent resource changes.    |
+| `audit`     | Inspect recent resource changes.   |
 | `inventory` | Export account inventory.          |
 | `extension` | Manage local command extensions.   |
 | `alias`     | Manage command aliases.            |
-| `config`    | Read and change cfhub settings.    |
+| `config`    | Read and change cfhub options.     |
 
 ## API calls
 
@@ -41,7 +41,7 @@ cfhub api /zones --json
 cfhub api /zones/<zone_id>/dns_records --json
 ```
 
-Use `--data` to pass a JSON body. Use `--file` to read a request body from a file. The API command supports GET, POST, PUT, PATCH, and DELETE. Run `cfhub api --help` for method and safety options.
+Use `--data` to pass a JSON body. Use `--file` to read a request body from a file. The API command supports `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`. Run `cfhub api --help` for method options.
 
 ## Common flags
 
@@ -51,7 +51,7 @@ Use `--data` to pass a JSON body. Use `--file` to read a request body from a fil
 | `--output json\|text`    | Select output format.                      |
 | `--jq <filter>`          | Select values from JSON output.            |
 | `--template <text>`      | Format output with a template.             |
-| `--account-id <id>`      | Set the account for a command.             |
+| `--account-id <id>`      | Set the account ID used by this command.   |
 | `--zone-id <id>`         | Set the zone for a command.                |
 | `--dry-run`              | Preview a supported write.                 |
 | `--force`                | Confirm a destructive action.              |

@@ -19,7 +19,7 @@ export async function handleCache({
     return;
   }
   requireValue(body, "Missing --data or --file", fail);
-  requireValue(opts.force || opts["dry-run"], "Refusing cache purge without --force", fail);
+  requireValue(opts.force || opts["dry-run"], "Refusing cache removal without --force", fail);
   if (opts["dry-run"])
     return printer.log(JSON.stringify({ zoneId, action, body, dryRun: true }, null, 2));
   const result = await cf.post(`/zones/${zoneId}/purge_cache`, { body });

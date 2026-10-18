@@ -1,4 +1,4 @@
-import { toJsonOutput } from "../output-printers.mjs";
+import { toJsonOutput } from "../output/printers.mjs";
 import { selectJson } from "../json-selection.mjs";
 import { renderTemplate } from "../template-rendering.mjs";
 

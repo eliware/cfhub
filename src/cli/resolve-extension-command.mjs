@@ -1,5 +1,5 @@
 import { loadExtensionCommand } from "../extensions.mjs";
-import { toJsonOutput as printJson } from "../output-printers.mjs";
+import { toJsonOutput as printJson } from "../output/printers.mjs";
 
 export async function resolveExtensionCommand({
   extensionManifest,
