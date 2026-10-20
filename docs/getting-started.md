@@ -27,6 +27,8 @@ cfhub auth login
 
 Follow the prompts. Give the token only the Cloudflare permissions that your commands require. Use `cfhub oauth login` for OAuth access.
 
+Use `cfhub auth login --profile work` to save access under a different profile. Use `cfhub auth login --token-stdin` to read a token from standard input in automation.
+
 ## Run commands
 
 List zones:
@@ -47,7 +49,7 @@ Preview a write before you apply it:
 cfhub dns-records create --zone-id <zone_id> --data '{"type":"A","name":"www","content":"192.0.2.1"}' --dry-run
 ```
 
-Use `cfhub auth status` to check access. Use `cfhub auth verify` to test the saved token.
+Use `cfhub auth status` to check the active identity. Use `cfhub auth verify` to test the active API token.
 
 ## Help
 

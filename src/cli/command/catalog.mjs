@@ -59,7 +59,7 @@ export const GLOBAL_FLAGS = [
   ["--width", "Set terminal width."],
   ["--verbose", "Include diagnostic details."],
   ["--paginate", "Fetch all supported pages."],
-  ["--web", "Open a Cloudflare dashboard link."],
+  ["--web", "Print a Cloudflare dashboard link."],
   ["--force", "Confirm destructive actions."],
   ["--dry-run", "Show changes without writing."],
   ["--account-id", "Cloudflare account ID."],

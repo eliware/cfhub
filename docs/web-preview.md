@@ -23,9 +23,9 @@ Set `WEB_URL` to select a different preview address. Set `SCREENSHOT_PATH` to se
 
 ## Run Lighthouse
 
-Run `npm run lighthouse` in a second terminal. The command writes a JSON report to `artifacts/lighthouse.json`.
+Run `npm run lighthouse` in a second terminal. The command writes a JSON report to `artifacts/lighthouse.json`. It checks `http://127.0.0.1:1120`.
 
-Set `WEB_HOST` or `WEB_PORT` before you start the preview server. These variables select its listening address.
+Set `WEB_HOST` or `WEB_PORT` before you start the preview server. These variables select its listening address. Set `WEB_URL` before you capture screenshots to use a different address.
 
 ## Run the OAuth browser checks
 

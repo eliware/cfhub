@@ -17,4 +17,6 @@ test("command reference renders every global flag and API usage", () => {
   for (const [flag, description] of GLOBAL_FLAGS)
     expect(reference).toContain(`| \`${flag}\` | ${description} |`);
   expect(reference).toContain("cfhub api /zones --json");
+  expect(reference).toContain("[Command actions](command-actions.md)");
+  expect(reference).toContain("The method defaults to GET.");
 });

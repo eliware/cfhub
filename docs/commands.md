@@ -2,6 +2,7 @@
 
 Run `cfhub --help` to list commands. Run `cfhub <command> --help` to list actions.
 Use action help to list flags.
+See [Command actions](command-actions.md) for the full action list.
 
 ## Commands
 
@@ -54,7 +55,7 @@ Use action help to list flags.
 | `--width`      | Set terminal width.                              |
 | `--verbose`    | Include diagnostic details.                      |
 | `--paginate`   | Fetch all supported pages.                       |
-| `--web`        | Open a Cloudflare dashboard link.                |
+| `--web`        | Print a Cloudflare dashboard link.               |
 | `--force`      | Confirm destructive actions.                     |
 | `--dry-run`    | Show changes without writing.                    |
 | `--account-id` | Cloudflare account ID.                           |
@@ -73,7 +74,9 @@ cfhub api /zones --json
 cfhub api /zones/<zone_id>/dns_records --json
 ```
 
-Use `--data` for a JSON body. Use `--file` to read a body from a file.
-The API command supports GET, POST, PUT, PATCH, and DELETE.
+The method defaults to GET. Set `--method` to GET, POST, PUT, PATCH, or DELETE.
+Pass a JSON request body with `--data` or `--file`.
+GET requests reject bodies, and DELETE requires `--force` or `--dry-run`.
+Pass `--paginate` to fetch all pages from supported GET requests.
 
 Shell completions use the command and flag names in this reference.

@@ -4,7 +4,7 @@ OAuth lets cfhub access Cloudflare through a browser login. Run `cfhub oauth log
 
 ## Callback addresses
 
-Add these callback addresses to your OAuth client:
+If you use your own OAuth client, add these callback addresses to it:
 
 ```text
 http://127.0.0.1:1120/oauth/callback
@@ -16,13 +16,17 @@ http://127.0.0.1:1124/oauth/callback
 
 cfhub tries these TCP ports in order. The callback path is `/oauth/callback`.
 
-Set `CFHUB_OAUTH_CLIENT_ID` to use a different client ID. Set `CFHUB_OAUTH_BIND_HOST` to select the local callback address. Set `CFHUB_OAUTH_REDIRECT_HOST` to select the host in the callback address.
+Set `CFHUB_OAUTH_CLIENT_ID` to use a different client ID. Set `CFHUB_OAUTH_BIND_HOST` to select the local listener address. Set `CFHUB_OAUTH_REDIRECT_HOST` to select the host in the callback address. Keep the redirect host reachable from the browser.
 
-If an integration supplies custom TCP-port numbers, add the callback address for each number it can select. If it supplies TCP-port number `0`, add the number that the server selects.
+Keep the callback ports available during login. The login command tries the ports in order when a port is busy.
 
 ## Scopes
 
-The built-in client asks for these scopes by default:
+The scope picker opens by default. Select the permissions required by your commands. The picker always requests `user-details.read` and `zone.read`.
+
+Set `CFHUB_OAUTH_SCOPES`, or pass `--scope` or `--scopes`, to add and preselect scopes. These options do not replace the required scopes. Select more permissions in the picker before you authorize.
+
+Pass `--no-scope-picker` to skip the picker. In that mode, cfhub requests the built-in scopes that follow, plus any scopes that you configured:
 
 ```text
 account-settings.read
@@ -70,7 +74,9 @@ access.read
 access.write
 ```
 
-Set `CFHUB_OAUTH_SCOPES` to a comma-separated list when you require a different set. Request only scopes that your commands require. Cloudflare must allow each scope on the client.
+Request only scopes that your commands require. Cloudflare must allow each scope on the OAuth client.
+
+Select **Keep me logged in** in the picker to request the `offline_access` scope. This option is off by default. The OAuth client must support refresh tokens.
 
 ## Manage OAuth access
 
