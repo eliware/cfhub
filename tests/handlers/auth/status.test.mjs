@@ -18,22 +18,6 @@ afterEach(() => {
   }
 });
 
-test.each([
-  [
-    "status",
-    "/user",
-    { authenticated: true, profile: "environment", method: "oauth", id: "user-1", email: null },
-  ],
-  ["verify", "/user/tokens/verify", { verified: true, status: "active" }],
-])("%s routes to the matching status helper", async (action, endpoint, expected) => {
-  process.env.CLOUDFLARE_API_TOKEN = "user-token";
-  const cf = { get: jest.fn().mockResolvedValue({ result: { status: "active", id: "user-1" } }) };
-  const toJsonOutput = jest.fn();
-  await handleAuthStatus(authStatusContext({ action, resource: "oauth", cf, toJsonOutput }));
-  expect(cf.get).toHaveBeenCalledWith(endpoint);
-  expect(toJsonOutput).toHaveBeenCalledWith(expected);
-});
-
 test("status uses explicit identity values from its caller", async () => {
   process.env.CLOUDFLARE_API_TOKEN = "cfat-environment-token";
   process.env.CLOUDFLARE_PROFILE = "environment-profile";

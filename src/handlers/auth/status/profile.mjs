@@ -14,6 +14,7 @@ export async function showAuthStatus(context) {
     fail,
     token,
     activeProfile,
+    environmentAccountId,
   } = context;
   if (!requireAuthStatusToken(token, fail)) return;
   const identity = selectAuthStatusIdentity({ token, activeProfile, resource, data, opts });
@@ -22,6 +23,7 @@ export async function showAuthStatus(context) {
       statusProfile: identity.profile,
       opts,
       data,
+      environmentAccountId,
       cf,
       outputJson,
       toJsonOutput,

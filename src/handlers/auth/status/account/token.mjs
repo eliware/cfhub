@@ -1,18 +1,22 @@
+import { resolveAccountTokenId } from "./id.mjs";
 import { createAccountTokenStatus } from "./view.mjs";
 
 export async function showAccountTokenStatus({
   statusProfile,
   opts,
   data,
+  environmentAccountId,
   cf,
   outputJson,
   toJsonOutput,
   printer,
 }) {
-  const accountId =
-    opts?.["account-id"] ||
-    data.profiles[statusProfile]?.accountId ||
-    process.env.CLOUDFLARE_ACCOUNT_ID;
+  const accountId = resolveAccountTokenId({
+    opts,
+    profiles: data.profiles,
+    profile: statusProfile,
+    environmentAccountId,
+  });
   const accounts = await cf.get(accountId ? `/accounts/${accountId}` : "/accounts");
   const status = createAccountTokenStatus({ statusProfile, accountId, accounts });
   return outputJson

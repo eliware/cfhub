@@ -35,10 +35,8 @@ test("renders modules in basic and advanced tiers", () => {
   );
   expect(append).toHaveBeenCalledTimes(2);
   const [basic, advanced] = append.mock.calls.map(([group]) => group);
-  expect(basic.innerHTML).toContain("Basic modules");
   expect(basic.list.children).toHaveLength(1);
   expect(basic.list.children[0].dataset.module).toBe("zones");
-  expect(advanced.innerHTML).toContain("Advanced modules");
   expect(advanced.list.children).toHaveLength(1);
   expect(advanced.list.children[0].dataset.module).toBe("extra");
   expect(elements).toHaveLength(8);

@@ -32,24 +32,21 @@ test("account token status uses account ID and text output", async () => {
 });
 
 test.each([
-  ["saved profile", { work: { accountId: "saved" } }, "environment", "saved"],
-  ["environment fallback", {}, "environment", "environment"],
-])("account token status resolves the %s", async (_name, profiles, environmentId, expectedId) => {
-  const previous = process.env.CLOUDFLARE_ACCOUNT_ID;
-  process.env.CLOUDFLARE_ACCOUNT_ID = environmentId;
-  const cf = { get: jest.fn().mockResolvedValue({}) };
-  try {
+  ["saved profile", { work: { accountId: "saved" } }, undefined, "saved"],
+  ["injected environment", {}, "environment", "environment"],
+])(
+  "account token status resolves the %s",
+  async (_name, profiles, environmentAccountId, expectedId) => {
+    const cf = { get: jest.fn().mockResolvedValue({}) };
     await showAccountTokenStatus({
       statusProfile: "work",
       opts: {},
       data: { profiles },
+      environmentAccountId,
       cf,
       outputJson: true,
       toJsonOutput: jest.fn(),
     });
-  } finally {
-    if (previous === undefined) delete process.env.CLOUDFLARE_ACCOUNT_ID;
-    else process.env.CLOUDFLARE_ACCOUNT_ID = previous;
-  }
-  expect(cf.get).toHaveBeenCalledWith(`/accounts/${expectedId}`);
-});
+    expect(cf.get).toHaveBeenCalledWith(`/accounts/${expectedId}`);
+  },
+);
