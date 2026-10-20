@@ -1,7 +1,6 @@
 import { exchangeOAuthToken } from "./token-exchange.mjs";
 import { loadOAuthAccountSummary } from "./account/summary.mjs";
-
-const htmlContentType = `text/html${String.fromCharCode(59)} charset=utf-8`;
+import { writeOAuthTokenFailure, writeOAuthTokenSuccess } from "./callback/token-response.mjs";
 
 export async function exchangeOAuthCode({
   clientId,
@@ -25,8 +24,7 @@ export async function exchangeOAuthCode({
       scopes,
       fetchImpl,
     });
-    callbackResponse.writeHead(200, { "content-type": htmlContentType });
-    callbackResponse.end(page);
+    writeOAuthTokenSuccess(callbackResponse, page);
     return {
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
@@ -36,10 +34,7 @@ export async function exchangeOAuthCode({
       account,
     };
   } catch (error) {
-    callbackResponse.writeHead(400, { "content-type": htmlContentType });
-    callbackResponse.end(
-      "<!doctype html><title>cfhub authorization failed</title><p>Cloudflare authorization could not be completed. You may close this window and try again.</p>",
-    );
+    writeOAuthTokenFailure(callbackResponse);
     throw error;
   }
 }

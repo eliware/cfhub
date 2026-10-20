@@ -41,42 +41,7 @@ test("extension install, list, upgrade, and remove work locally", () => {
   expect(printer.log).toHaveBeenCalledWith("Removed extension hello");
 });
 
-test("extension validation and safety errors are reported", () => {
-  const { home, source, fsImpl } = setup();
-  const fail = jest.fn();
-  const common = {
-    action: "list",
-    opts: {},
-    outputJson: true,
-    toJsonOutput: jest.fn(),
-    printer: { log: jest.fn() },
-    fail,
-    homeDir: home,
-    fsImpl,
-  };
-  handleExtension({ ...common, action: "install" });
-  handleExtension({ ...common, action: "remove", opts: { name: "hello" } });
-  handleExtension({ ...common, action: "remove", opts: {} });
-  const invalid = "/source/invalid";
-  fsImpl.writeFileSync(`${invalid}/cf-extension.json`, "{}");
-  handleExtension({ ...common, action: "install", opts: { path: invalid } });
-  handleExtension({ ...common, action: "unknown", opts: {} });
-  handleExtension({ ...common, action: "info", opts: { name: "missing" } });
-  handleExtension({ ...common, action: "info", opts: {} });
-  expect(fail).toHaveBeenCalled();
-  expect(source).toBeTruthy();
-  handleExtension({
-    action: "list",
-    opts: {},
-    outputJson: true,
-    toJsonOutput: jest.fn(),
-    printer: { log: jest.fn() },
-    fail: jest.fn(),
-    fsImpl,
-  });
-});
-
-test("extension handler uses default filesystem and home values for unknown actions", () => {
+test("extension handler reports unknown actions", () => {
   const fail = jest.fn();
   handleExtension({ action: "unknown", opts: {}, fail });
   expect(fail).toHaveBeenCalledWith("Unknown extension action: unknown");

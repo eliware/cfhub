@@ -16,8 +16,10 @@ const context = (overrides = {}) => ({
 
 test("creates context fields and writes JSON output", () => {
   const log = jest.fn();
-  const result = createCommandContext(context({ log }));
+  const env = { CFHUB_OAUTH_SCOPES: "zone.read" };
+  const result = createCommandContext(context({ env, log }));
   expect(result).toMatchObject({ resource: "zones", action: "list", outputJson: true });
+  expect(result.env).toBe(env);
   result.toJsonOutput({ ok: true });
   expect(log).toHaveBeenCalledWith('{\n  "ok": true\n}');
 });

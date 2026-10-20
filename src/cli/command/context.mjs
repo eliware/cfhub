@@ -10,6 +10,7 @@ export function createCommandContext({
   body,
   outputJson,
   printer,
+  env,
   log,
   exit,
 }) {
@@ -25,6 +26,7 @@ export function createCommandContext({
     body,
     outputJson,
     printer,
+    env,
     toJsonOutput: (value) =>
       opts.template
         ? log(renderTemplate(selectJson(value, opts.jq), opts.template))

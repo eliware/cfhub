@@ -41,6 +41,27 @@ test("OAuth success page tolerates an unavailable account response", async () =>
   closeServer();
 });
 
+test("OAuth token exchange writes a failure response before rejecting", async () => {
+  const callbackResponse = { writeHead: jest.fn(), end: jest.fn() };
+  await expect(
+    exchangeOAuthCode({
+      clientId: "client",
+      code: "code",
+      redirectUri: "http://127.0.0.1/callback",
+      verifier: "verifier",
+      callbackResponse,
+      scopes: [],
+      fetchImpl: jest.fn().mockRejectedValue(Error("exchange failed")),
+    }),
+  ).rejects.toThrow("exchange failed");
+  expect(callbackResponse.writeHead).toHaveBeenCalledWith(400, {
+    "content-type": "text/html; charset=utf-8",
+  });
+  expect(callbackResponse.end).toHaveBeenCalledWith(
+    expect.stringContaining("authorization failed"),
+  );
+});
+
 test("OAuth callback rejects invalid state and provider errors", async () => {
   for (const providerError of [false, true]) {
     const { promise, authorization, closeServer } = await startOAuthTestLogin({

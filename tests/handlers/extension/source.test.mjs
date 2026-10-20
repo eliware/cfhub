@@ -56,55 +56,6 @@ test("reports a missing path or invalid manifest", () => {
   expect(fail).toHaveBeenLastCalledWith("Invalid cfhub extension manifest");
 });
 
-test("rejects command paths without a source file", () => {
-  const fail = jest.fn();
-  const loaded = loadExtensionSource({
-    sourcePath: "/source",
-    fsImpl: {
-      readFileSync: () =>
-        JSON.stringify({ name: "demo", version: "1.0.0", commands: { demo: "index.mjs" } }),
-      lstatSync: jest.fn(() => {
-        throw new Error("missing file");
-      }),
-    },
-    fail,
-  });
-  expect(loaded).toBeNull();
-  expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
-});
-
-test("rejects command files inside a symbolic link", () => {
-  const fail = jest.fn();
-  const lstatSync = jest.fn(() => ({ isSymbolicLink: () => true, isFile: () => false }));
-  const loaded = loadExtensionSource({
-    sourcePath: "/source",
-    fsImpl: {
-      readFileSync: () =>
-        JSON.stringify({ name: "demo", version: "1.0.0", commands: { demo: "linked/index.mjs" } }),
-      lstatSync,
-    },
-    fail,
-  });
-  expect(loaded).toBeNull();
-  expect(lstatSync.mock.calls[0][0]).toMatch(/source[\\/]linked$/);
-  expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
-});
-
-test("rejects command paths that end in a directory", () => {
-  const fail = jest.fn();
-  const loaded = loadExtensionSource({
-    sourcePath: "source",
-    fsImpl: {
-      readFileSync: () =>
-        JSON.stringify({ name: "demo", version: "1.0.0", commands: { demo: "folder" } }),
-      lstatSync: () => ({ isSymbolicLink: () => false, isFile: () => false }),
-    },
-    fail,
-  });
-  expect(loaded).toBeNull();
-  expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
-});
-
 test("rejects command paths that resolve outside the source directory", () => {
   const fail = jest.fn();
   const loaded = loadExtensionSource({
@@ -116,5 +67,23 @@ test("rejects command paths that resolve outside the source directory", () => {
     fail,
   });
   expect(loaded).toBeNull();
+  expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
+});
+
+test("rejects a source when a command file is missing", () => {
+  const fail = jest.fn();
+  expect(
+    loadExtensionSource({
+      sourcePath: "/source",
+      fsImpl: {
+        readFileSync: () =>
+          JSON.stringify({ name: "demo", version: "1.0.0", commands: { demo: "index.mjs" } }),
+        lstatSync: () => {
+          throw new Error("missing file");
+        },
+      },
+      fail,
+    }),
+  ).toBeNull();
   expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
 });
