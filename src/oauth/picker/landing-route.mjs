@@ -1,4 +1,4 @@
-import { sendAsset } from "../asset-response.mjs";
+import { sendAsset } from "../asset/response.mjs";
 import { pickerHtml } from "./page.mjs";
 
 const htmlContentType = `text/html${String.fromCharCode(59)} charset=utf-8`;

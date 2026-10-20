@@ -1,6 +1,5 @@
-import moduleCatalog from "../../data/cloudflare-oauth-modules.json" with { type: "json" };
 import { loadOAuthAccountData } from "./account/data.mjs";
-import { selectOAuthModules } from "./module-selection.mjs";
+import { moduleCatalog, selectOAuthModules } from "./module-catalog.mjs";
 
 export { REQUIRED_OAUTH_SCOPES, copyrightYear } from "./page-metadata.mjs";
 export async function collectOAuthSummary({ accessToken, account, scopes, fetchImpl }) {

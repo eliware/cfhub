@@ -1,4 +1,4 @@
-import { gzipSync } from "node:zlib";
+import { encodeAsset } from "./encoding.mjs";
 
 export function sendAsset(
   request,
@@ -7,17 +7,14 @@ export function sendAsset(
   contentType,
   { cacheControl = "public, max-age=31536000, immutable" } = {},
 ) {
-  const acceptsGzip = /(?:^|,\s*)gzip(?:\s*;|\s*,|\s*$)/i.test(
-    request.headers["accept-encoding"] || "",
-  );
-  const payload = acceptsGzip ? gzipSync(body) : Buffer.from(body);
+  const { payload, contentEncoding } = encodeAsset(request, body);
   const headers = {
     "content-type": contentType,
     "cache-control": cacheControl,
     "content-length": payload.length,
     vary: "Accept-Encoding",
   };
-  if (acceptsGzip) headers["content-encoding"] = "gzip";
+  if (contentEncoding) headers["content-encoding"] = contentEncoding;
   response.writeHead(200, headers);
   response.end(payload);
 }

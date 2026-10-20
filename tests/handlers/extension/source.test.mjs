@@ -1,30 +1,5 @@
 import { jest } from "@jest/globals";
-import {
-  extensionPathsOverlap,
-  loadExtensionSource,
-} from "../../../src/handlers/extension/source.mjs";
-
-test("detects equal, nested, and separate extension paths", () => {
-  expect(extensionPathsOverlap("C:/extensions/demo", "C:/extensions/demo")).toBe(true);
-  expect(extensionPathsOverlap("C:/extensions/demo/source", "C:/extensions/demo")).toBe(true);
-  expect(extensionPathsOverlap("C:/source", "C:/extensions/demo")).toBe(false);
-  expect(extensionPathsOverlap("C:/source", "C:/extensions/demo", {})).toBe(false);
-  expect(
-    extensionPathsOverlap("C:/source", "C:/extensions/demo", {
-      realpathSync: () => {
-        throw new Error("path is not linked");
-      },
-    }),
-  ).toBe(false);
-  expect(
-    extensionPathsOverlap("C:/source-link", "C:/extensions/demo", {
-      realpathSync: (value) =>
-        value.endsWith("source-link")
-          ? value.replace("source-link", "extensions/demo/source")
-          : value,
-    }),
-  ).toBe(true);
-});
+import { loadExtensionSource } from "../../../src/handlers/extension/source.mjs";
 
 const validManifest = { name: "demo", version: "1.0.0", commands: {} };
 
@@ -35,6 +10,28 @@ test("loads a valid extension source manifest", () => {
     manifest: validManifest,
   });
   expect(fsImpl.readFileSync).toHaveBeenCalledWith("/source/cf-extension.json", "utf8");
+});
+
+test("loads command files inside the extension source", () => {
+  const lstatSync = jest.fn((filePath) => ({
+    isSymbolicLink: () => false,
+    isFile: () => filePath.endsWith("index.mjs"),
+  }));
+  const loaded = loadExtensionSource({
+    sourcePath: "/source",
+    fsImpl: {
+      readFileSync: () =>
+        JSON.stringify({
+          name: "demo",
+          version: "1.0.0",
+          commands: { demo: "commands/index.mjs" },
+        }),
+      lstatSync,
+    },
+    fail: jest.fn(),
+  });
+  expect(loaded?.manifest.name).toBe("demo");
+  expect(lstatSync).toHaveBeenCalledTimes(2);
 });
 
 test("reports a missing path or invalid manifest", () => {

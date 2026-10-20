@@ -1,4 +1,10 @@
-import { selectOAuthModules } from "../../src/oauth/module-selection.mjs";
+import { moduleCatalog, selectOAuthModules } from "../../src/oauth/module-catalog.mjs";
+
+test("selects catalog modules when their read scopes are granted", () => {
+  const selected = selectOAuthModules(moduleCatalog.modules, ["zone.read", "dns.read"]);
+  expect(selected.map(({ id }) => id)).toContain("zones");
+  expect(selected.map(({ id }) => id)).not.toContain("workers");
+});
 
 test("selects modules when their read scopes are granted", () => {
   const modules = [

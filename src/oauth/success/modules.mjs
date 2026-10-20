@@ -1,5 +1,5 @@
-import moduleCatalog from "../../../data/cloudflare-oauth-modules.json" with { type: "json" };
 import { escapeOAuthHtml } from "../html.mjs";
+import { moduleCatalog } from "../module-catalog.mjs";
 
 function moduleCard(module, enabled) {
   const status = enabled

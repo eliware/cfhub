@@ -1,5 +1,5 @@
 import { pickerAsset, pickerAssetBuffer } from "./assets.mjs";
-import { sendAsset } from "../asset-response.mjs";
+import { sendAsset } from "../asset/response.mjs";
 import { pickerAssetDefinition } from "./asset-map.mjs";
 
 export function serveOAuthPickerStaticAsset({ request, response, url, scopePicker }) {

@@ -1,6 +1,7 @@
 import { extensionRoot } from "../../extensions.mjs";
-import { extensionPathsOverlap, loadExtensionSource } from "./source.mjs";
 import { extensionDestination } from "./destination.mjs";
+import { extensionPathsOverlap } from "./path-policy.mjs";
+import { loadExtensionSource } from "./source.mjs";
 
 export function installExtension({ opts, printer, fail, fsImpl, homeDir }) {
   const loaded = loadExtensionSource({ sourcePath: opts.path, fsImpl, fail });

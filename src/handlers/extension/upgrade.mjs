@@ -1,6 +1,7 @@
 import { extensionRoot } from "../../extensions.mjs";
-import { extensionPathsOverlap, loadExtensionSource } from "./source.mjs";
 import { extensionDestination } from "./destination.mjs";
+import { extensionPathsOverlap } from "./path-policy.mjs";
+import { loadExtensionSource } from "./source.mjs";
 import { replaceExtension } from "./upgrade-transaction.mjs";
 
 export function upgradeExtension({ opts, printer, fail, fsImpl, homeDir }) {
