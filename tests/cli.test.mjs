@@ -16,8 +16,7 @@ test("dispatches to injected handlers and loads env", async () => {
   const loadEnv = jest.fn();
   const zones = jest.fn().mockResolvedValue(undefined);
 
-  const mod = await import("../bin/cfhub.mjs?ts=1");
-  await mod.run({
+  await run({
     argv: ["zones", "list", "--json", "--data", "{}"],
     cfFactory,
     loadEnv,
@@ -37,14 +36,13 @@ test("prints help with no args and unknown resource", async () => {
   const log = jest.fn();
   const error = jest.fn();
   const cfFactory = jest.fn();
-  const mod = await import("../bin/cfhub.mjs?ts=2");
-  await mod.run({
+  await run({
     argv: [],
     printer: { log, error },
     fsImpl: { readFileSync: jest.fn(() => "") },
     exit: jest.fn(),
   });
-  await mod.run({
+  await run({
     argv: ["nope", "list"],
     printer: { log, error },
     fsImpl: { readFileSync: jest.fn(() => "") },
@@ -57,10 +55,9 @@ test("prints help with no args and unknown resource", async () => {
 });
 
 test("formats authorization errors from a handler", async () => {
-  const mod = await import("../bin/cfhub.mjs?ts=3");
   const printer = { log: jest.fn(), error: jest.fn() };
   const exit = jest.fn();
-  await mod.run({
+  await run({
     argv: ["zones", "list"],
     env: {},
     loadEnv: jest.fn(),
@@ -77,18 +74,23 @@ test("formats authorization errors from a handler", async () => {
   expect(exit).toHaveBeenCalledWith(1);
 });
 
-test("handles resource help, unknown actions, missing scopes, and raw errors", async () => {
-  const mod = await import("../src/cli.mjs?ts=4");
+test("handles resource help", async () => {
   const printer = { log: jest.fn(), error: jest.fn() };
   const exit = jest.fn();
-  await mod.run({
+  await run({
     argv: ["zones", "--help"],
     printer,
     exit,
     loadEnv: jest.fn(),
     fsImpl: { readFileSync: jest.fn(() => "") },
   });
-  await mod.run({
+  expect(printer.log).toHaveBeenCalled();
+});
+
+test("handles unknown actions", async () => {
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const exit = jest.fn();
+  await run({
     argv: ["zones", "far-away"],
     printer,
     exit,
@@ -96,7 +98,13 @@ test("handles resource help, unknown actions, missing scopes, and raw errors", a
     fsImpl: { readFileSync: jest.fn(() => "") },
     cfFactory: jest.fn(),
   });
-  await mod.run({
+  expect(exit).toHaveBeenCalledWith(1);
+});
+
+test("rejects zone access when OAuth scopes are missing", async () => {
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const exit = jest.fn();
+  await run({
     argv: ["zones", "list"],
     env: { CFHUB_OAUTH_SCOPES: "dns.read" },
     printer,
@@ -105,7 +113,13 @@ test("handles resource help, unknown actions, missing scopes, and raw errors", a
     fsImpl: { readFileSync: jest.fn(() => "") },
     cfFactory: jest.fn(),
   });
-  await mod.run({
+  expect(exit).toHaveBeenCalledWith(1);
+});
+
+test("rejects inventory export when OAuth scopes are missing", async () => {
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const exit = jest.fn();
+  await run({
     argv: ["inventory", "export"],
     env: { CFHUB_OAUTH_SCOPES: "" },
     printer,
@@ -114,8 +128,14 @@ test("handles resource help, unknown actions, missing scopes, and raw errors", a
     fsImpl: { readFileSync: jest.fn(() => "") },
     cfFactory: jest.fn(),
   });
+  expect(exit).toHaveBeenCalledWith(1);
+});
+
+test("surfaces raw handler errors", async () => {
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const exit = jest.fn();
   await expect(
-    mod.run({
+    run({
       argv: ["audit", "list"],
       env: {
         CFHUB_OAUTH_SCOPES: "account-settings.read,zone.read,dns.read,ssl-and-certificates.read",
