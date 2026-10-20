@@ -75,6 +75,23 @@ test("rejects inactive tokens and tolerates unavailable token details", async ()
   ).resolves.toMatchObject({ permissionsKnown: false });
 });
 
+test("keeps a verified token when the optional details request fails", async () => {
+  const fetchImpl = jest
+    .fn()
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ result: { id: "token-1", status: "active" } }),
+    })
+    .mockRejectedValueOnce(Error("details unavailable"));
+  await expect(inspectApiToken({ token: "cfut_token", fetchImpl })).resolves.toMatchObject({
+    verified: true,
+    tokenId: "token-1",
+    permissionsKnown: false,
+    permissions: [],
+    permissionSummary: { total: 0, read: 0, write: 0, other: 0 },
+  });
+});
+
 test("token details with missing policies or groups return no permissions", async () => {
   const fetchImpl = jest
     .fn()

@@ -24,14 +24,18 @@ export async function inspectApiToken({ token, accountId, fetchImpl = fetch } = 
     permissions: [],
   };
   if (!accountToken && result.tokenId) {
-    const detailsResponse = await fetchImpl(`${API_ROOT}/user/tokens/${result.tokenId}`, {
-      headers: { authorization: `Bearer ${token}` },
-    });
-    if (detailsResponse.ok) {
-      const details = await detailsResponse.json();
-      result.permissions = permissionNames(details);
-      result.permissionsKnown = true;
-      result.permissionSummary = summarizePermissions(result.permissions);
+    try {
+      const detailsResponse = await fetchImpl(`${API_ROOT}/user/tokens/${result.tokenId}`, {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      if (detailsResponse.ok) {
+        const details = await detailsResponse.json();
+        result.permissions = permissionNames(details);
+        result.permissionsKnown = true;
+        result.permissionSummary = summarizePermissions(result.permissions);
+      }
+    } catch {
+      // Permission details are optional after token verification.
     }
   }
   if (!result.permissionSummary)

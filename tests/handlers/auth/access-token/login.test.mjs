@@ -1,5 +1,6 @@
 import { jest } from "@jest/globals";
 import { saveApiTokenLogin } from "../../../../src/handlers/auth/access-token/login.mjs";
+import { inspectApiToken } from "../../../../src/token-permissions.mjs";
 
 const savedEnv = {
   account: process.env.CLOUDFLARE_ACCOUNT_ID,
@@ -122,6 +123,30 @@ test("reports token inspection errors", async () => {
   const inspect = setup({ inspectApiTokenImpl: jest.fn().mockRejectedValue(Error("denied")) });
   await saveApiTokenLogin(inspect.args);
   expect(inspect.fail).toHaveBeenCalledWith("Could not verify API token: denied");
+});
+
+test("saves a verified token when optional permission details are unavailable", async () => {
+  const fetchImpl = jest
+    .fn()
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ result: { id: "token-1", status: "active" } }),
+    })
+    .mockRejectedValueOnce(Error("details unavailable"));
+  const { args, data, printer, write } = setup({
+    readToken: () => "cfut_token",
+    inspectApiTokenImpl: ({ token, accountId }) => inspectApiToken({ token, accountId, fetchImpl }),
+  });
+
+  await saveApiTokenLogin(args);
+
+  expect(data.profiles.work).toMatchObject({
+    authMethod: "api-token",
+    apiPermissionsKnown: false,
+    apiPermissions: [],
+  });
+  expect(printer.log).toHaveBeenCalled();
+  expect(write).toHaveBeenCalledWith(data, "home", args.profileFs);
 });
 
 test("does not report success when credential persistence fails", async () => {

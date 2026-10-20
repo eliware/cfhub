@@ -4,18 +4,22 @@ import { copyExtensionToStage, createExtensionStagingRoot } from "./staging.mjs"
 export function replaceExtension({ source, destination, root, name, fsImpl }) {
   let stagingRoot;
   let backupRoot;
+  let backupDestination;
   let stagedDestination;
   let originalMoved = false;
+  let installedSuccessfully = false;
+  const cleanupErrors = [];
   try {
     stagingRoot = createExtensionStagingRoot(root, fsImpl);
     backupRoot = fsImpl.mkdtempSync(path.join(root, ".cfhub-extension-backup-"));
-    const backupDestination = path.join(backupRoot, name);
+    backupDestination = path.join(backupRoot, name);
     stagedDestination = copyExtensionToStage({ source, stagingRoot, name, fsImpl });
     fsImpl.renameSync(destination, backupDestination);
     originalMoved = true;
     try {
       fsImpl.renameSync(stagedDestination, destination);
       originalMoved = false;
+      installedSuccessfully = true;
     } catch (installError) {
       try {
         fsImpl.renameSync(backupDestination, destination);
@@ -30,9 +34,26 @@ export function replaceExtension({ source, destination, root, name, fsImpl }) {
     }
   } finally {
     try {
-      if (stagingRoot) fsImpl.rmSync(stagingRoot, { recursive: true, force: true });
+      if (stagingRoot) {
+        if (installedSuccessfully) {
+          try {
+            fsImpl.rmSync(stagingRoot, { recursive: true, force: true });
+          } catch (error) {
+            cleanupErrors.push({ path: stagingRoot, error });
+          }
+        } else fsImpl.rmSync(stagingRoot, { recursive: true, force: true });
+      }
     } finally {
-      if (backupRoot && !originalMoved) fsImpl.rmSync(backupRoot, { recursive: true, force: true });
+      if (backupRoot && !originalMoved) {
+        if (installedSuccessfully) {
+          try {
+            fsImpl.rmSync(backupRoot, { recursive: true, force: true });
+          } catch (error) {
+            cleanupErrors.push({ path: backupRoot, error });
+          }
+        } else fsImpl.rmSync(backupRoot, { recursive: true, force: true });
+      }
     }
   }
+  if (cleanupErrors.length) return { backupDestination, cleanupErrors };
 }

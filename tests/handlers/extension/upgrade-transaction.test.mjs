@@ -120,7 +120,32 @@ test("attempts backup cleanup when staging cleanup fails", () => {
       })
       .mockImplementationOnce(() => {}),
   };
-  expect(() =>
+  const result = replaceExtension({
+    source: "source",
+    destination: "installed/demo",
+    root: "installed",
+    name: "demo",
+    fsImpl,
+  });
+  expect(fsImpl.rmSync).toHaveBeenNthCalledWith(2, "temp-2", { recursive: true, force: true });
+  expect(result.cleanupErrors).toEqual([{ path: "temp-1", error: expect.any(Error) }]);
+});
+
+test("returns backup cleanup failures after installing the replacement", () => {
+  let tempNumber = 0;
+  const cleanupError = new Error("backup cleanup failed");
+  const fsImpl = {
+    mkdtempSync: jest.fn(() => `temp-${++tempNumber}`),
+    cpSync: jest.fn(),
+    renameSync: jest.fn(),
+    rmSync: jest
+      .fn()
+      .mockImplementationOnce(() => {})
+      .mockImplementationOnce(() => {
+        throw cleanupError;
+      }),
+  };
+  expect(
     replaceExtension({
       source: "source",
       destination: "installed/demo",
@@ -128,6 +153,13 @@ test("attempts backup cleanup when staging cleanup fails", () => {
       name: "demo",
       fsImpl,
     }),
-  ).toThrow("stage cleanup failed");
-  expect(fsImpl.rmSync).toHaveBeenNthCalledWith(2, "temp-2", { recursive: true, force: true });
+  ).toEqual({
+    backupDestination: expect.stringContaining("demo"),
+    cleanupErrors: [{ path: "temp-2", error: cleanupError }],
+  });
+  expect(fsImpl.renameSync).toHaveBeenNthCalledWith(
+    2,
+    expect.stringContaining("temp-1"),
+    "installed/demo",
+  );
 });

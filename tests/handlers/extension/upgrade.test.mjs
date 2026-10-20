@@ -37,6 +37,42 @@ test("upgrade replaces an existing extension", () => {
   expect(printer.log).toHaveBeenCalledWith("Upgraded extension demo");
 });
 
+test("reports upgrade success when backup cleanup fails", () => {
+  let tempNumber = 0;
+  const cleanupError = new Error("backup cleanup failed");
+  const fsImpl = {
+    readFileSync: () => JSON.stringify({ name: "demo", version: "2", commands: {} }),
+    mkdirSync: jest.fn(),
+    existsSync: jest.fn(() => true),
+    mkdtempSync: jest.fn(() => `cfhub-temp-${++tempNumber}`),
+    renameSync: jest.fn(),
+    cpSync: jest.fn(),
+    rmSync: jest
+      .fn()
+      .mockImplementationOnce(() => {})
+      .mockImplementationOnce(() => {
+        throw cleanupError;
+      }),
+  };
+  const printer = { log: jest.fn(), error: jest.fn() };
+  upgradeExtension({
+    opts: { path: "/source" },
+    printer,
+    fail: jest.fn(),
+    fsImpl,
+    homeDir: "/home",
+  });
+  expect(fsImpl.renameSync).toHaveBeenNthCalledWith(
+    2,
+    expect.stringContaining("cfhub-temp-1"),
+    expect.stringContaining("demo"),
+  );
+  expect(printer.log).toHaveBeenCalledWith("Upgraded extension demo");
+  expect(printer.error).toHaveBeenCalledWith(
+    expect.stringContaining("Upgrade completed, but cleanup failed"),
+  );
+});
+
 test("keeps the installed extension when staging the new extension fails", () => {
   let tempNumber = 0;
   const fsImpl = {

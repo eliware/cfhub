@@ -23,6 +23,10 @@ export function upgradeExtension({ opts, printer, fail, fsImpl, homeDir }) {
     fail(`Extension ${manifest.name} is not installed. Run the install command.`);
     return;
   }
-  replaceExtension({ source, destination, root, name: manifest.name, fsImpl });
-  return printer.log(`Upgraded extension ${manifest.name}`);
+  const result = replaceExtension({ source, destination, root, name: manifest.name, fsImpl });
+  const message = printer.log(`Upgraded extension ${manifest.name}`);
+  result?.cleanupErrors.forEach(({ path: cleanupPath, error }) => {
+    printer.error(`Upgrade completed, but cleanup failed for ${cleanupPath}: ${error.message}`);
+  });
+  return message;
 }
