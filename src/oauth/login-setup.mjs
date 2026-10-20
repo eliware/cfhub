@@ -1,4 +1,4 @@
-import { REQUIRED_OAUTH_SCOPES } from "./page-metadata.mjs";
+import { REQUIRED_OAUTH_SCOPES } from "./scope/required.mjs";
 import { createOAuthAuthorization } from "./authorization.mjs";
 import { createOAuthCallback } from "./callback.mjs";
 import { launchOAuthBrowser } from "./browser-launch.mjs";

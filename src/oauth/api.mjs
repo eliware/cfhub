@@ -1,5 +1,6 @@
 export { collectOAuthSummary } from "./pages.mjs";
-export { copyrightYear, REQUIRED_OAUTH_SCOPES } from "./page-metadata.mjs";
+export { copyrightYear } from "./page-metadata.mjs";
+export { REQUIRED_OAUTH_SCOPES } from "./scope/required.mjs";
 export { openBrowser } from "./browser.mjs";
 export { DEFAULT_OAUTH_CLIENT_ID, revokeOAuth } from "./tokens.mjs";
 export { refreshOAuth } from "./refresh.mjs";

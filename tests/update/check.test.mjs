@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals";
-import { checkForUpdate, updateNotice } from "../../src/update/check.mjs";
+import { checkForUpdate } from "../../src/update/check.mjs";
 import { run } from "../../src/cli.mjs";
 function memoryFs(files = new Map()) {
   return {
@@ -27,7 +27,6 @@ test("update check caches once per interval and reports newer versions", async (
   await expect(checkForUpdate(options)).resolves.toBe("2.0.0");
   await expect(checkForUpdate({ ...options, now: 86_401_000 })).resolves.toBe("2.0.0");
   expect(fetchImpl).toHaveBeenCalledTimes(1);
-  expect(updateNotice("2.0.0", "1.1.3")).toContain("npm install --global @eliware/cfhub@latest");
 });
 
 test("update check respects opt-out, current versions, bad responses, and failures", async () => {
@@ -44,7 +43,6 @@ test("update check respects opt-out, current versions, bad responses, and failur
   await expect(checkForUpdate(base)).resolves.toBeNull();
   await expect(checkForUpdate({ ...base, now: 86_400_002 })).resolves.toBeNull();
   await expect(checkForUpdate({ ...base, now: 172_800_003 })).resolves.toBeNull();
-  await expect(updateNotice(null, "1.1.3")).toBeNull();
 });
 
 test("update check uses defaults and recovers from invalid cache data", async () => {

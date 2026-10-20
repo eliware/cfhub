@@ -1,8 +1,4 @@
-import { copyrightYear, REQUIRED_OAUTH_SCOPES } from "../../src/oauth/page-metadata.mjs";
-
-test("provides required OAuth scopes", () => {
-  expect(REQUIRED_OAUTH_SCOPES).toEqual(["user-details.read", "zone.read"]);
-});
+import { copyrightYear } from "../../src/oauth/page-metadata.mjs";
 
 test("keeps the copyright year current and adds a range for later years", () => {
   expect(copyrightYear(2025)).toBe("2026");

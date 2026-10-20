@@ -67,3 +67,33 @@ test("prepares direct authorization and browser launch", () => {
     expect.objectContaining({ browserUrl: "https://auth.test/" }),
   );
 });
+
+test("uses default authorization, callback, and browser helpers", () => {
+  let requestHandler;
+  const server = {
+    setOAuthRequestHandler: jest.fn((handler) => {
+      requestHandler = handler;
+    }),
+  };
+  const open = jest.fn();
+  const print = jest.fn();
+
+  const result = prepareOAuthLogin({
+    clientId: "client",
+    redirectHost: "127.0.0.1",
+    port: 8080,
+    scopePicker: false,
+    scopes: ["zone.read"],
+    server,
+    open,
+    print,
+  });
+
+  expect(result.redirectUri).toBe("http://127.0.0.1:8080/oauth/callback");
+  expect(result.verifier).toEqual(expect.any(String));
+  expect(result.getSelectedScopes()).toEqual(expect.arrayContaining(["zone.read"]));
+  expect(server.setOAuthRequestHandler).toHaveBeenCalledTimes(1);
+  expect(requestHandler).toEqual(expect.any(Function));
+  expect(open).toHaveBeenCalledWith(expect.stringMatching(/^https:\/\//));
+  expect(print).toHaveBeenCalledWith(expect.stringContaining("authorize cfhub"));
+});

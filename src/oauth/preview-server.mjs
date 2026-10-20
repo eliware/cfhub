@@ -1,5 +1,5 @@
 import { createOAuthAuthorization } from "./authorization.mjs";
-import { REQUIRED_OAUTH_SCOPES } from "./page-metadata.mjs";
+import { REQUIRED_OAUTH_SCOPES } from "./scope/required.mjs";
 import { serveOAuthPickerRoute } from "./picker/routes.mjs";
 import { DEFAULT_OAUTH_SCOPES } from "./scopes.mjs";
 import { DEFAULT_WEB_PORT } from "../web/port.mjs";

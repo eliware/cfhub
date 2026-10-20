@@ -15,3 +15,13 @@ test("prints an update notice and ignores failed checks", async () => {
   await showUpdateNotice({ ...shared, updateCheck: jest.fn().mockRejectedValue(Error("offline")) });
   expect(printer.error).toHaveBeenCalledTimes(1);
 });
+
+test("does not print a notice when the update check finds no newer version", async () => {
+  const printer = { error: jest.fn() };
+  await showUpdateNotice({
+    currentVersion: "1.0.0",
+    updateCheck: jest.fn().mockResolvedValue(null),
+    printer,
+  });
+  expect(printer.error).not.toHaveBeenCalled();
+});

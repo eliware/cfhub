@@ -1,4 +1,5 @@
-import { terminalColorMode, terminalWidth } from "../../terminal/format.mjs";
+import { terminalColorMode } from "../../terminal/format.mjs";
+import { terminalWidth } from "../../terminal/width.mjs";
 import { requiresTerminalOutput } from "./use-policy.mjs";
 
 export function terminalOptions({

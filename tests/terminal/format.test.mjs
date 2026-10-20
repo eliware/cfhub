@@ -1,11 +1,6 @@
-import {
-  fitTerminal,
-  styleTerminalText,
-  terminalColorMode,
-  terminalWidth,
-} from "../../src/terminal/format.mjs";
+import { terminalColorMode } from "../../src/terminal/format.mjs";
 
-test("selects terminal color modes and validates widths", () => {
+test("selects terminal color modes", () => {
   expect(terminalColorMode("always", { isTTY: false })).toBe(true);
   expect(terminalColorMode("never", { isTTY: true })).toBe(false);
   expect(terminalColorMode("true", { isTTY: false })).toBe(true);
@@ -14,17 +9,8 @@ test("selects terminal color modes and validates widths", () => {
   expect(terminalColorMode("auto", { isTTY: true, noColor: true })).toBe(false);
   expect(typeof terminalColorMode("auto")).toBe("boolean");
   expect(terminalColorMode(undefined, { isTTY: false, noColor: false })).toBe(false);
-  expect(terminalWidth()).toBe(120);
-  expect(terminalWidth("80")).toBe(80);
-  expect(terminalWidth("bad", 90)).toBe(90);
-  expect(terminalWidth("39")).toBe(120);
 });
 
-test("fits terminal lines and styles multiline headers", () => {
-  expect(fitTerminal("short\nlonger", 5)).toBe("short\nlong…");
-  expect(fitTerminal("plain")).toBe("plain");
-  expect(styleTerminalText("one\ntwo")).toBe("one\ntwo");
-  expect(styleTerminalText("one\ntwo", { color: true })).toContain(
-    "\u001b[1m\u001b[36mone\u001b[0m\ntwo",
-  );
+test("uses TTY and NO_COLOR defaults", () => {
+  expect(terminalColorMode("auto")).toEqual(expect.any(Boolean));
 });

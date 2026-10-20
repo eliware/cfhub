@@ -1,4 +1,4 @@
-import { REQUIRED_OAUTH_SCOPES } from "../page-metadata.mjs";
+import { REQUIRED_OAUTH_SCOPES } from "./required.mjs";
 import { scopeCategories } from "./catalog.mjs";
 import moduleCatalog from "../../../data/cloudflare-oauth-modules.json" with { type: "json" };
 
