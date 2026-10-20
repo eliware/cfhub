@@ -49,3 +49,10 @@ test("health delete dry-run does not call Cloudflare", async () => {
     JSON.stringify({ action: "delete", zoneId: "z1", id: "h1", dryRun: true }, null, 2),
   );
 });
+
+test("health delete requires an ID before calling Cloudflare", async () => {
+  const ctx = base();
+  await handleHealth({ ...ctx, action: "delete", opts: { "zone-id": "z1", force: true } });
+  expect(ctx.fail).toHaveBeenCalledWith("Missing --id");
+  expect(ctx.cf.delete).not.toHaveBeenCalled();
+});

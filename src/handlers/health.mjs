@@ -33,7 +33,10 @@ export async function handleHealth({
     return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
   }
   if (action === "delete") {
-    requireValue(id, "Missing --id", fail);
+    if (!id) {
+      fail("Missing --id");
+      return;
+    }
     requireValue(opts.force, "Refusing to delete without --force", fail);
     if (opts["dry-run"])
       return printer.log(JSON.stringify({ action, zoneId, id, dryRun: true }, null, 2));

@@ -9,7 +9,7 @@ export function createHiddenInputEditor() {
       for (const character of text) {
         if (character === "\u0003") return { done: true, value: "" };
         if (character === "\r" || character === "\n") return { done: true, value };
-        if (character === "\u007f") value = value.slice(0, -1);
+        if (character === "\u007f") value = [...value].slice(0, -1).join("");
         else value += character;
       }
       return { done: false };

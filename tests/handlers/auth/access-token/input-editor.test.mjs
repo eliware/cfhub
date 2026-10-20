@@ -13,6 +13,11 @@ test("decodes UTF-8 characters across chunks", () => {
   expect(editor.write(bytes.subarray(4))).toEqual({ done: true, value: "café" });
 });
 
+test("backspace removes one supplementary Unicode character", () => {
+  const editor = createHiddenInputEditor();
+  expect(editor.write("secret-😀\u007f\r")).toEqual({ done: true, value: "secret-" });
+});
+
 test("returns an empty value when the user interrupts input", () => {
   const editor = createHiddenInputEditor();
   editor.write("secret");

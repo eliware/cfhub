@@ -5,6 +5,9 @@ import {
 
 test("selects the verification endpoint for each token type", () => {
   expect(tokenVerificationEndpoint("cfat_key", "account")).toBe("/accounts/account/tokens/verify");
+  expect(tokenVerificationEndpoint("cfat_key", "account/name")).toBe(
+    "/accounts/account%2Fname/tokens/verify",
+  );
   expect(tokenVerificationEndpoint("user-key")).toBe("/user/tokens/verify");
 });
 

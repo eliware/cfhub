@@ -11,6 +11,10 @@ test("rejects invalid paths, methods, bodies, and unsafe deletes", () => {
   for (const [action, opts, body] of [
     ["", {}, null],
     ["https://example.test", {}, null],
+    ["zones/../user/tokens", {}, null],
+    ["zones/%2e%2e/user/tokens", {}, null],
+    ["zones\\..\\user\\tokens", {}, null],
+    ["zones/%zz", {}, null],
     ["zones", { method: "TRACE" }, null],
     ["zones", {}, {}],
     ["zones", { method: "DELETE" }, null],
@@ -19,4 +23,19 @@ test("rejects invalid paths, methods, bodies, and unsafe deletes", () => {
     expect(validateApiRequest({ action, opts, body, fail })).toBeNull();
     expect(fail).toHaveBeenCalled();
   }
+});
+
+test("accepts leading slashes and dry-run deletes", () => {
+  expect(validateApiRequest({ action: "/zones", opts: {}, body: null, fail: jest.fn() })).toEqual({
+    path: "/zones",
+    method: "GET",
+  });
+  expect(
+    validateApiRequest({
+      action: "zones/z1",
+      opts: { method: "DELETE", "dry-run": true },
+      body: null,
+      fail: jest.fn(),
+    }),
+  ).toEqual({ path: "/zones/z1", method: "DELETE" });
 });

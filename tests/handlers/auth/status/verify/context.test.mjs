@@ -32,3 +32,29 @@ test("reports missing token or account context", () => {
     "Account API token verification requires --account-id or CLOUDFLARE_ACCOUNT_ID",
   );
 });
+
+test("rejects account IDs that contain path separators", () => {
+  const fail = jest.fn();
+  expect(
+    resolveAuthStatusVerifyContext({
+      token: "cfat_token",
+      data: { profiles: {} },
+      opts: { "account-id": "../user" },
+      fail,
+    }),
+  ).toBeNull();
+  expect(fail).toHaveBeenCalledWith("Account ID contains invalid path characters");
+});
+
+test("rejects a dot-only account ID", () => {
+  const fail = jest.fn();
+  expect(
+    resolveAuthStatusVerifyContext({
+      token: "cfat_token",
+      data: { profiles: {} },
+      opts: { "account-id": ".." },
+      fail,
+    }),
+  ).toBeNull();
+  expect(fail).toHaveBeenCalledWith("Account ID contains invalid path characters");
+});

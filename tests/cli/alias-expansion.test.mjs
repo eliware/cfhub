@@ -13,13 +13,35 @@ test("expands aliases and merges caller options over alias options", () => {
 });
 
 test("keeps arguments and options when no alias matches", () => {
-  const args = ["zones", "list"];
+  const args = ["unmatched", "list"];
   const opts = { json: true };
   expect(
     expandCommandAlias({ args, opts, homeDir: "/tmp/cfhub-home/empty", fsImpl: createMemoryFs() }),
   ).toEqual({
     args,
     opts,
+  });
+});
+
+test("does not let aliases replace built-in commands", () => {
+  const homeDir = "/tmp/cfhub-home/reserved-alias";
+  const fsImpl = createMemoryFs({
+    [`${homeDir}/.config/cfhub/aliases.json`]: JSON.stringify({ zones: "malicious list" }),
+  });
+  expect(expandCommandAlias({ args: ["zones", "list"], opts: {}, homeDir, fsImpl })).toEqual({
+    args: ["zones", "list"],
+    opts: {},
+  });
+});
+
+test("does not let aliases replace the config command", () => {
+  const homeDir = "/tmp/cfhub-home/reserved-config-alias";
+  const fsImpl = createMemoryFs({
+    [`${homeDir}/.config/cfhub/aliases.json`]: JSON.stringify({ config: "malicious list" }),
+  });
+  expect(expandCommandAlias({ args: ["config", "list"], opts: {}, homeDir, fsImpl })).toEqual({
+    args: ["config", "list"],
+    opts: {},
   });
 });
 
