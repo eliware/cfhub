@@ -1,9 +1,8 @@
 import { jest } from "@jest/globals";
-import { EventEmitter } from "node:events";
 import { serveOAuthPickerRoute } from "../../../src/oauth/picker/routes.mjs";
-test("OAuth picker route dispatches its landing page", () => {
+test("OAuth picker route dispatches its landing page", async () => {
   const response = { writeHead: jest.fn(), end: jest.fn() };
-  const handled = serveOAuthPickerRoute({
+  const handled = await serveOAuthPickerRoute({
     request: { method: "GET", headers: {} },
     response,
     url: new URL("http://localhost/"),
@@ -14,11 +13,9 @@ test("OAuth picker route dispatches its landing page", () => {
 });
 
 test("OAuth picker route dispatches submit requests", async () => {
-  const request = new EventEmitter();
-  request.method = "POST";
-  request.headers = {};
+  const request = { method: "POST", headers: {}, body: "" };
   const response = { writeHead: jest.fn(), end: jest.fn() };
-  const handled = serveOAuthPickerRoute({
+  const handled = await serveOAuthPickerRoute({
     request,
     response,
     url: new URL("http://localhost/oauth/start"),
@@ -28,17 +25,13 @@ test("OAuth picker route dispatches submit requests", async () => {
     setSelectedScopes: jest.fn(),
     makeAuthorization: () => new URL("http://auth.test/"),
   });
-  request.emit("data", "");
-  request.emit("end");
-  await Promise.resolve();
-  await Promise.resolve();
   expect(handled).toBe(true);
   expect(response.end).toHaveBeenCalled();
 });
 
-test("OAuth picker route leaves unrelated requests open", () => {
+test("OAuth picker route leaves unrelated requests open", async () => {
   expect(
-    serveOAuthPickerRoute({
+    await serveOAuthPickerRoute({
       request: { method: "GET", headers: {} },
       response: { writeHead: jest.fn(), end: jest.fn() },
       url: new URL("http://localhost/unmatched"),

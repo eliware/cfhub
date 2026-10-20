@@ -1,26 +1,37 @@
-export async function startOAuthServer({ ports, serverFactory, bindHost }) {
+import Fastify from "fastify";
+
+export function createOAuthServer() {
+  const server = Fastify({ logger: false, bodyLimit: 16 * 1024 });
+  let handleRequest = () => {};
+  server.addContentTypeParser(
+    "application/x-www-form-urlencoded",
+    { parseAs: "string" },
+    (_request, body, done) => done(null, body),
+  );
+  const dispatch = async (request, reply) => {
+    reply.hijack();
+    const handled = await handleRequest(request, reply.raw);
+    if (!handled && !reply.raw.writableEnded) reply.raw.writeHead(404).end();
+  };
+  server.all("/", dispatch);
+  server.all("/*", dispatch);
+  server.setOAuthRequestHandler = (handler) => {
+    handleRequest = handler;
+  };
+  return server;
+}
+
+export async function startOAuthServer({ ports, serverFactory = createOAuthServer, bindHost }) {
   let server;
   let port;
   for (const candidate of ports) {
     try {
       server = serverFactory();
-      await new Promise((resolve, reject) => {
-        const onError = (error) => {
-          server.removeListener("listening", onListen);
-          reject(error);
-        };
-        const onListen = () => {
-          server.removeListener("error", onError);
-          resolve();
-        };
-        server.once("error", onError);
-        server.once("listening", onListen);
-        server.listen(candidate, bindHost);
-      });
-      port = server.address()?.port || candidate;
+      await server.listen({ port: candidate, host: bindHost });
+      port = server.server.address()?.port || candidate;
       break;
     } catch (error) {
-      if (server) server.close();
+      if (server) await server.close();
       if (error.code !== "EADDRINUSE") throw error;
     }
   }

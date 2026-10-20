@@ -1,38 +1,70 @@
 # Command reference
 
-Run `cfhub --help` to list commands. Run `cfhub <resource> --help` to list actions. Use command help for flags.
+Run `cfhub --help` to list commands. Run `cfhub <command> --help` to list actions.
+Use action help to list flags.
 
-## Cloudflare resources
+## Commands
 
-| Command                                                           | Common actions                                                   |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `zones`                                                           | `list`, `get`, `audit`, `security`, `create`, `update`, `delete` |
-| `dns-records`                                                     | `list`, `get`, `create`, `update`, `delete`, `diff`, `apply`     |
-| `zone-settings`                                                   | `get`, `set`                                                     |
-| `rulesets`                                                        | `list`, `get`, `create`, `update`                                |
-| `lists`                                                           | `list`, `get`, `create`, `update`, `delete`                      |
-| `list-items`                                                      | `list`, `create`, `delete`                                       |
-| `ssl`                                                             | `get`, `set`, `certificates`, `coverage`                         |
-| `origin-ca`                                                       | `list`, `create`, `revoke`                                       |
-| `load-balancer`                                                   | `list`, `get`, `create`, `update`, `delete`                      |
-| `tunnel`                                                          | Resource actions. Run command help for details.                  |
-| `workers`                                                         | `list`, `get`, `create`, `update`, `delete`                      |
-| `pages`, `r2`, `d1`, `queues`, `stream`, `images`, `ai`, `access` | Resource actions. Run command help for details.                  |
+| Group    | Command         | Description                                   |
+| -------- | --------------- | --------------------------------------------- |
+| CORE     | `auth`          | Save and manage API-token profiles.           |
+| CORE     | `oauth`         | Manage OAuth browser authentication.          |
+| CORE     | `zones`         | Manage zones.                                 |
+| CORE     | `dns-records`   | Manage DNS records.                           |
+| CORE     | `zone-settings` | Manage zone options.                          |
+| CORE     | `rulesets`      | Manage rulesets.                              |
+| CORE     | `lists`         | Manage account lists.                         |
+| CORE     | `list-items`    | Manage account list items.                    |
+| CORE     | `ssl`           | Inspect and configure SSL/TLS.                |
+| CORE     | `cache`         | Manage cache settings.                        |
+| CORE     | `api`           | Make an authenticated Cloudflare API request. |
+| ACCOUNT  | `health`        | Check Cloudflare API access.                  |
+| ACCOUNT  | `audit`         | View account audit logs.                      |
+| ACCOUNT  | `inventory`     | Export account inventory.                     |
+| ACCOUNT  | `origin-ca`     | Manage CA certificates.                       |
+| ACCOUNT  | `load-balancer` | Manage zone load balancers.                   |
+| ACCOUNT  | `tunnel`        | Manage account tunnels.                       |
+| PLATFORM | `workers`       | Manage Workers.                               |
+| PLATFORM | `pages`         | Manage Pages projects.                        |
+| PLATFORM | `r2`            | Manage R2 buckets.                            |
+| PLATFORM | `d1`            | Manage D1 databases.                          |
+| PLATFORM | `queues`        | Manage Queues.                                |
+| PLATFORM | `stream`        | Manage Stream.                                |
+| PLATFORM | `images`        | Manage Images.                                |
+| PLATFORM | `ai`            | Manage AI and Vectorize.                      |
+| PLATFORM | `access`        | Manage Access and Zero Trust.                 |
+| PLATFORM | `extension`     | Manage local cfhub extensions.                |
+| PLATFORM | `alias`         | Manage command aliases.                       |
+| PLATFORM | `config`        | Manage local cfhub options.                   |
 
-## Local commands
+## Global flags
 
-| Command     | Use                                |
-| ----------- | ---------------------------------- |
-| `auth`      | Add and manage API token profiles. |
-| `oauth`     | Add and manage OAuth profiles.     |
-| `api`       | Call a Cloudflare API path.        |
-| `audit`     | Inspect recent resource changes.   |
-| `inventory` | Export account inventory.          |
-| `extension` | Manage local command extensions.   |
-| `alias`     | Manage command aliases.            |
-| `config`    | Read and change cfhub options.     |
+| Flag           | Description                                      |
+| -------------- | ------------------------------------------------ |
+| `--help`       | Show help for a command.                         |
+| `--version`    | Show the version.                                |
+| `--json`       | Print JSON output.                               |
+| `--output`     | Select json or text output.                      |
+| `--jq`         | Select fields from JSON output.                  |
+| `--template`   | Format JSON values with {{.field}} placeholders. |
+| `--quiet`      | Suppress standard output.                        |
+| `--pager`      | Page readable output.                            |
+| `--no-pager`   | Disable paging.                                  |
+| `--color`      | Set a color mode.                                |
+| `--width`      | Set terminal width.                              |
+| `--verbose`    | Include diagnostic details.                      |
+| `--paginate`   | Fetch all supported pages.                       |
+| `--web`        | Open a Cloudflare dashboard link.                |
+| `--force`      | Confirm destructive actions.                     |
+| `--dry-run`    | Show changes without writing.                    |
+| `--account-id` | Cloudflare account ID.                           |
+| `--zone-id`    | Cloudflare zone ID.                              |
+| `--file`       | Read a JSON request body.                        |
+| `--data`       | Use an inline JSON request body.                 |
 
-## API calls
+Supported color values are `always`, `never`, and `auto`.
+
+## API requests
 
 Pass a relative Cloudflare API path to `cfhub api`:
 
@@ -41,22 +73,7 @@ cfhub api /zones --json
 cfhub api /zones/<zone_id>/dns_records --json
 ```
 
-Use `--data` to pass a JSON body. Use `--file` to read a request body from a file. The API command supports `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`. Run `cfhub api --help` for method options.
+Use `--data` for a JSON body. Use `--file` to read a body from a file.
+The API command supports GET, POST, PUT, PATCH, and DELETE.
 
-## Common flags
-
-| Flag                     | Use                                        |
-| ------------------------ | ------------------------------------------ |
-| `--json`                 | Print JSON output.                         |
-| `--output json\|text`    | Select output format.                      |
-| `--jq <filter>`          | Select values from JSON output.            |
-| `--template <text>`      | Format output with a template.             |
-| `--account-id <id>`      | Set the account ID used by this command.   |
-| `--zone-id <id>`         | Set the zone for a command.                |
-| `--dry-run`              | Preview a supported write.                 |
-| `--force`                | Confirm a destructive action.              |
-| `--paginate`             | Request all result pages when supported.   |
-| `--color <mode>`         | Set color to `always`, `never`, or `auto`. |
-| `--pager` / `--no-pager` | Enable or disable the pager.               |
-
-Use `--help` for all global flags and action options.
+Shell completions use the command and flag names in this reference.

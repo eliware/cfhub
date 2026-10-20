@@ -1,12 +1,10 @@
-import { EventEmitter } from "node:events";
 import { jest } from "@jest/globals";
 import { serveOAuthPickerSubmitRoute } from "../../../src/oauth/picker/submit-route.mjs";
 test("filters requested scopes and redirects to authorization", async () => {
-  const request = new EventEmitter();
-  request.method = "POST";
+  const request = { method: "POST", body: "scope=invalid&keep-signed-in=on" };
   const response = { writeHead: jest.fn(), end: jest.fn() };
   const selected = jest.fn();
-  const handled = serveOAuthPickerSubmitRoute({
+  const handled = await serveOAuthPickerSubmitRoute({
     request,
     response,
     url: new URL("http://localhost/oauth/start"),
@@ -18,10 +16,6 @@ test("filters requested scopes and redirects to authorization", async () => {
     makeAuthorization: (scopes, keep) =>
       new URL(`https://auth.test/?scopes=${scopes.join(",")}&keep=${keep}`),
   });
-  request.emit("data", "scope=invalid&keep-signed-in=on");
-  request.emit("end");
-  await Promise.resolve();
-  await Promise.resolve();
   expect(handled).toBe(true);
   expect(selected).toHaveBeenCalledWith(["user-details.read", "dns.read"]);
   expect(response.writeHead).toHaveBeenCalledWith(
@@ -33,10 +27,9 @@ test("filters requested scopes and redirects to authorization", async () => {
 
 test("ignores requests when the picker is disabled", async () => {
   const response = { writeHead: jest.fn(), end: jest.fn() };
-  const request = new EventEmitter();
-  request.method = "POST";
+  const request = { method: "POST", body: "" };
   expect(
-    serveOAuthPickerSubmitRoute({
+    await serveOAuthPickerSubmitRoute({
       request,
       response,
       url: new URL("http://localhost/oauth/start"),
@@ -50,11 +43,10 @@ test("ignores requests when the picker is disabled", async () => {
 });
 
 test("reports authorization URL errors and rejects the OAuth callback", async () => {
-  const request = new EventEmitter();
-  request.method = "POST";
+  const request = { method: "POST", body: "" };
   const response = { writeHead: jest.fn(), end: jest.fn() };
   const error = new Error("invalid OAuth setup");
-  serveOAuthPickerSubmitRoute({
+  await serveOAuthPickerSubmitRoute({
     request,
     response,
     url: new URL("http://localhost/oauth/start"),
@@ -66,9 +58,6 @@ test("reports authorization URL errors and rejects the OAuth callback", async ()
       throw error;
     },
   });
-  request.emit("end");
-  await Promise.resolve();
-  await Promise.resolve();
   expect(response.writeHead).toHaveBeenCalledWith(500, {
     "content-type": "text/plain; charset=utf-8",
   });
@@ -76,10 +65,9 @@ test("reports authorization URL errors and rejects the OAuth callback", async ()
 });
 
 test("returns 413 for an oversized OAuth form", async () => {
-  const request = new EventEmitter();
-  request.method = "POST";
+  const request = { method: "POST", body: "a".repeat(16 * 1024 + 1) };
   const response = { writeHead: jest.fn(), end: jest.fn() };
-  serveOAuthPickerSubmitRoute({
+  await serveOAuthPickerSubmitRoute({
     request,
     response,
     url: new URL("http://localhost/oauth/start"),
@@ -89,9 +77,6 @@ test("returns 413 for an oversized OAuth form", async () => {
     setSelectedScopes: jest.fn(),
     makeAuthorization: jest.fn(),
   });
-  request.emit("data", Buffer.alloc(16 * 1024 + 1, 97));
-  await Promise.resolve();
-  await Promise.resolve();
   expect(response.writeHead).toHaveBeenCalledWith(413, {
     "content-type": "text/plain; charset=utf-8",
   });

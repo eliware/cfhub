@@ -6,7 +6,7 @@ import { loadBody } from "./cli/body-loader.mjs";
 import { resolveCommand } from "./cli/resolve/command.mjs";
 import { loadProjectEnv } from "./env.mjs";
 import { createCloudflareClient } from "./cloudflare.mjs";
-import { createCommandContext } from "./cli/command-context.mjs";
+import { createCommandContext } from "./cli/command/context.mjs";
 import { runExtensionCommand } from "./cli/extension-command.mjs";
 import { handleLocalCommand } from "./cli/local-commands.mjs";
 import { checkForUpdate } from "./update/check.mjs";

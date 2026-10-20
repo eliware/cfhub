@@ -39,23 +39,26 @@
   ],
   "scripts": {
     "test": "eliware-test",
+    "pretest": "node scripts/validate-cli-references.mjs --check",
     "lint": "eliware-test --lint",
     "audit": "eliware-test --audit",
     "format": "eliware-test --format",
     "format:check": "eliware-test --format-check",
     "build": "webpack --config webpack.config.mjs",
-    "build:web": "node bin/build-web.mjs",
+    "prebuild": "webpack-cli --version",
     "pack": "eliware-test --pack",
+    "references:generate": "node scripts/validate-cli-references.mjs",
     "test:gaps": "node bin/test-gaps.mjs",
     "test:live": "npm run test:live:dry",
     "test:live:dry": "node bin/test-live.mjs --dry",
     "test:live:wet": "node bin/test-live.mjs --wet",
+    "start:web": "node bin/preview-web.mjs",
+    "screenshots": "node bin/screenshots.mjs",
     "test:e2e:screenshots": "node test-fixtures/e2e/oauth-picker-success.e2e.mjs && node test-fixtures/e2e/oauth-errors.e2e.mjs",
     "test:e2e:lighthouse": "node test-fixtures/e2e/oauth-picker.lighthouse.mjs",
     "test:e2e:web": "npm run test:e2e:screenshots && npm run test:e2e:lighthouse",
-    "screenshots": "npm run test:e2e:screenshots",
-    "puppeteer": "npm run test:e2e:screenshots",
-    "lighthouse": "node test-fixtures/e2e/oauth-picker.lighthouse.mjs"
+    "puppeteer": "puppeteer browsers install chrome",
+    "lighthouse": "lighthouse http://127.0.0.1:1020 --only-categories=performance,best-practices,seo,accessibility --output=json --output-path=artifacts/lighthouse.json --chrome-flags=--headless"
   },
   "engines": {
     "node": ">=26"
@@ -63,7 +66,8 @@
   "dependencies": {
     "@eliware/common": "^13.0.0",
     "cloudflare": "^7.1.0",
-    "lighthouse": "^13.4.1",
+    "fastify": "^5.12.7",
+    "lighthouse": "^13.5.0",
     "puppeteer": "^25.14.0"
   },
   "devDependencies": {

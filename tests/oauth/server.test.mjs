@@ -1,23 +1,40 @@
 import { jest } from "@jest/globals";
-import { EventEmitter } from "node:events";
 import { startOAuthServer } from "../../src/oauth/server.mjs";
 
 function makeServer({ error, port } = {}) {
-  const server = new EventEmitter();
-  server.listen = jest.fn(() => {
-    process.nextTick(() => (error ? server.emit("error", error) : server.emit("listening")));
-  });
-  server.address = () => (port ? { port } : null);
-  server.close = jest.fn();
-  return server;
+  return {
+    listen: jest.fn(() => (error ? Promise.reject(error) : Promise.resolve())),
+    server: { address: () => (port ? { port } : null) },
+    close: jest.fn(),
+  };
 }
+
+test("creates a Fastify callback server", async () => {
+  const { server } = await startOAuthServer({ ports: [0], bindHost: "127.0.0.1" });
+  expect(server).toHaveProperty("setOAuthRequestHandler", expect.any(Function));
+  const response = await server.inject({ method: "GET", url: "/unhandled" });
+  expect(response.statusCode).toBe(404);
+  server.setOAuthRequestHandler((_request, reply) => {
+    reply.writeHead(201).end("handled");
+    return false;
+  });
+  const handled = await server.inject({
+    method: "POST",
+    url: "/oauth/start",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    payload: "scope=zone.read",
+  });
+  expect(handled.statusCode).toBe(201);
+  expect(handled.body).toBe("handled");
+  await server.close();
+});
 
 test("server binds the first available port and returns its assigned port", async () => {
   const server = makeServer({ port: 9000 });
   await expect(
     startOAuthServer({ ports: [8765, 8766], bindHost: "127.0.0.1", serverFactory: () => server }),
   ).resolves.toEqual({ server, port: 9000 });
-  expect(server.listen).toHaveBeenCalledWith(8765, "127.0.0.1");
+  expect(server.listen).toHaveBeenCalledWith({ port: 8765, host: "127.0.0.1" });
 });
 
 test("server retries ports that are in use and falls back to the candidate port", async () => {

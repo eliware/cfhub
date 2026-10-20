@@ -62,17 +62,17 @@ test("OAuth login opens the scope picker before authorization", async () => {
 test("OAuth login falls back when the first callback port is busy", async () => {
   const servers = [];
   const serverFactory = jest.fn(() => {
-    const server = new EventEmitter();
+    const index = servers.length;
     const port = servers.length ? 43210 : 8765;
-    server.listen = () =>
-      queueMicrotask(() =>
-        server.emit(
-          servers.length === 1 ? "error" : "listening",
-          Object.assign(new Error("Address in use"), { code: "EADDRINUSE" }),
-        ),
-      );
-    server.address = () => ({ port });
-    server.close = jest.fn();
+    const server = {
+      listen: () =>
+        index === 0
+          ? Promise.reject(Object.assign(new Error("Address in use"), { code: "EADDRINUSE" }))
+          : Promise.resolve(),
+      server: { address: () => ({ port }) },
+      close: jest.fn(),
+      setOAuthRequestHandler: (handler) => (server.handleRequest = handler),
+    };
     servers.push(server);
     return server;
   });
@@ -89,7 +89,7 @@ test("OAuth login falls back when the first callback port is busy", async () => 
   expect(callbackUrl.port).toBe("43210");
   const callback = makeOAuthCallbackUrl(authorization, { code: "code" });
   const request = { method: "GET", url: `${callback.pathname}${callback.search}` };
-  servers[1].emit("request", request, { writeHead: jest.fn(), end: jest.fn() });
+  servers[1].handleRequest(request, { writeHead: jest.fn(), end: jest.fn() });
   await expect(promise).resolves.toMatchObject({ accessToken: "access" });
   closeServer();
 });

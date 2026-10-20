@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals";
-import { createCommandContext } from "../../src/cli/command-context.mjs";
+import { createCommandContext } from "../../../src/cli/command/context.mjs";
 
 const context = (overrides = {}) => ({
   resource: "zones",

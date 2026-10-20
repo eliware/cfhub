@@ -1,6 +1,6 @@
-import { toJsonOutput } from "../output/printers.mjs";
-import { selectJson } from "../json-selection.mjs";
-import { renderTemplate } from "../template-rendering.mjs";
+import { toJsonOutput } from "../../output/printers.mjs";
+import { selectJson } from "../../json-selection.mjs";
+import { renderTemplate } from "../../template-rendering.mjs";
 
 export function createCommandContext({
   resource,

@@ -9,5 +9,4 @@ import "../styles/picker-brand-lockup.css";
 import "../styles/picker-footer.css";
 import "../styles/picker-quick-setup.css";
 import "../styles/picker-faq.css";
-
 export const cssOnlyEntry = true;

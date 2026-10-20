@@ -19,7 +19,7 @@ test("handleZoneSettings get/set/unknown", async () => {
     zones: {
       settings: {
         get: jest.fn().mockResolvedValue({ value: "on" }),
-        update: jest.fn().mockResolvedValue({ value: "off" }),
+        edit: jest.fn().mockResolvedValue({ value: "off" }),
       },
     },
   };
@@ -71,7 +71,8 @@ test("handleZoneSettings get/set/unknown", async () => {
     }),
   ).rejects.toThrow("Unknown zone-settings action: noop");
   expect(cf.zones.settings.get).toHaveBeenCalledTimes(2);
-  expect(cf.zones.settings.update).toHaveBeenCalledTimes(2);
+  expect(cf.zones.settings.edit).toHaveBeenCalledTimes(2);
+  expect(cf.zones.settings.edit).toHaveBeenCalledWith("dev", { zone_id: "z1", value: "off" });
   expect(printer.log).toHaveBeenCalledWith('{\n  "value": "off"\n}');
   await handleZoneSettings({
     cf,
@@ -83,7 +84,7 @@ test("handleZoneSettings get/set/unknown", async () => {
     toJsonOutput,
     fail,
   });
-  expect(cf.zones.settings.update).toHaveBeenCalledTimes(2);
+  expect(cf.zones.settings.edit).toHaveBeenCalledTimes(2);
   expect(printer.log).toHaveBeenLastCalledWith(expect.stringContaining('"dryRun": true'));
 });
 
@@ -124,9 +125,9 @@ test("handleZoneSettings validates missing zone, setting, and value", async () =
 
 test("stops a set when the failure handler returns", async () => {
   const failWithoutThrowing = jest.fn();
-  const update = jest.fn();
+  const edit = jest.fn();
   await handleZoneSettings({
-    cf: { zones: { settings: { update } } },
+    cf: { zones: { settings: { edit } } },
     action: "set",
     opts: { "zone-id": "z1", setting: "dev" },
     body: {},
@@ -135,5 +136,5 @@ test("stops a set when the failure handler returns", async () => {
     fail: failWithoutThrowing,
   });
   expect(failWithoutThrowing).toHaveBeenCalledWith("Missing JSON body with value");
-  expect(update).not.toHaveBeenCalled();
+  expect(edit).not.toHaveBeenCalled();
 });

@@ -1,4 +1,3 @@
-import { EventEmitter } from "node:events";
 import { jest } from "@jest/globals";
 import { loginOAuth } from "../../src/oauth.mjs";
 import { createOAuthAuthorization } from "../../src/oauth/authorization.mjs";
@@ -40,15 +39,12 @@ test("OAuth callback reports token exchange and response errors", async () => {
 });
 
 test("OAuth login reports exhausted and non-retryable callback listeners", async () => {
-  class FailingServer extends EventEmitter {
+  class FailingServer {
     constructor(code) {
-      super();
-      this.code = code;
+      this.error = Object.assign(new Error(code), { code });
     }
     listen() {
-      process.nextTick(() =>
-        this.emit("error", Object.assign(new Error(this.code), { code: this.code })),
-      );
+      return Promise.reject(this.error);
     }
     close() {}
   }
@@ -84,16 +80,18 @@ test("OAuth login reports exhausted and non-retryable callback listeners", async
 });
 
 test("OAuth login accepts a callback server without an address object", async () => {
-  class ListeningServer extends EventEmitter {
-    once(...args) {
-      return super.once(...args);
-    }
+  class ListeningServer {
     listen() {
-      process.nextTick(() => this.emit("listening"));
+      return Promise.resolve();
     }
-    address() {
-      return undefined;
+    setOAuthRequestHandler(handler) {
+      this.handler = handler;
     }
+    server = {
+      address() {
+        return undefined;
+      },
+    };
     close() {}
   }
   const server = new ListeningServer();
@@ -117,10 +115,11 @@ test("OAuth login accepts a callback server without an address object", async ()
   await opened;
   const authorization = new URL(printed[0].match(/https?:\/\/\S+/)[0]);
   const response = { writeHead: jest.fn(), end: jest.fn() };
-  server.emit(
-    "request",
+  server.handler(
     {
+      method: "GET",
       url: `/oauth/callback?state=${authorization.searchParams.get("state")}&code=code`,
+      headers: {},
     },
     response,
   );

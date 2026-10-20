@@ -77,15 +77,16 @@ Preview a DNS write:
 cfhub dns-records create --zone-id <zone_id> --data '{"type":"A","name":"www","content":"192.0.2.1"}' --dry-run
 ```
 
-Read [docs/README.md](docs/README.md) for setup, profile, command, output, and extension guides. Read [specs/README.md](specs/README.md) for project rules. Read [RELEASE_NOTES.md](RELEASE_NOTES.md) for version history.
+Read [docs/README.md](docs/README.md) for setup, profile, command, output, and extension guides. Read [docs/web-preview.md](docs/web-preview.md) to inspect the OAuth picker. Read [specs/README.md](specs/README.md) for project rules. Read [RELEASE_NOTES.md](RELEASE_NOTES.md) for version history.
 
 ## Development
 
-Install dependencies and build OAuth pages:
+Install dependencies and build the OAuth pages:
 
 ```sh
 npm ci
-npm run build:web
+npm run puppeteer
+npm run build
 ```
 
 Use `.env` for local defaults. See the configuration guide in [docs/README.md](docs/README.md).
@@ -146,11 +147,13 @@ OAuth page sources and images live in `src/oauth-web/`.
 
 ## Development server
 
-`cfhub oauth login` starts a temporary local web server. It tries ports 8765 through 8769.
+Run `npm run start:web` to start the OAuth picker preview on port 1020. The server binds to `127.0.0.1` by default.
+
+`cfhub oauth login` starts a temporary callback server. It tries ports 8765 through 8769.
 
 ## Build
 
-Run `npm run build:web` after OAuth page or style changes. The command writes bundles under `src/oauth-web/bundled/`.
+Run `npm run build` after OAuth page or style changes. Webpack writes bundles to `dist/`. The preview server uses those files when they exist.
 
 ## Deployment
 

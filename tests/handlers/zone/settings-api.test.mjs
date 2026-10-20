@@ -1,7 +1,7 @@
 import { jest } from "@jest/globals";
 import { getZoneSetting, setZoneSetting } from "../../../src/handlers/zone/settings-api.mjs";
 
-test("calls modern and legacy settings endpoints", async () => {
+test("uses direct API and typed SDK settings methods", async () => {
   const modern = { get: jest.fn(), patch: jest.fn() };
   await getZoneSetting(modern, "z", "ssl");
   await setZoneSetting(modern, "z", "ssl", "on");
@@ -24,12 +24,9 @@ test("calls modern and legacy settings endpoints", async () => {
   expect(legacy.zones.settings.edit).toHaveBeenCalledWith("ssl", { zone_id: "z", value: "on" });
 });
 
-test("uses the older positional settings methods", async () => {
-  const get = jest.fn(function () {});
-  const update = jest.fn();
-  const cf = { zones: { settings: { get, update } } };
-  await getZoneSetting(cf, "z", "ssl");
-  await setZoneSetting(cf, "z", "ssl", "on");
-  expect(get).toHaveBeenCalledWith("z", "ssl");
-  expect(update).toHaveBeenCalledWith("z", "ssl", { value: "on" });
+test("rejects zone setting updates when the SDK has no supported edit method", async () => {
+  const cf = { zones: { settings: { get: jest.fn() } } };
+  await expect(setZoneSetting(cf, "z", "ssl", "on")).rejects.toThrow(
+    "Cloudflare SDK does not support zone setting updates",
+  );
 });

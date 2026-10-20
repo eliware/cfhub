@@ -13,10 +13,10 @@ export function createOAuthCallback({
 }) {
   let selectedScopes = [...new Set([...requiredScopes, ...scopes])];
   const callback = new Promise((resolve, reject) =>
-    server.on("request", (request, response) => {
+    server.setOAuthRequestHandler(async (request, response) => {
       const url = new URL(request.url, redirectUri);
       if (
-        serveOAuthPickerRoute({
+        await serveOAuthPickerRoute({
           request,
           response,
           url,
@@ -35,6 +35,7 @@ export function createOAuthCallback({
       const result = routeOAuthCallback({ url, state, response });
       if (result.error) reject(result.error);
       else if (!result.handled) resolve({ code: result.code, response });
+      return true;
     }),
   );
   callback.catch(() => {});
