@@ -3,12 +3,13 @@ import { beforeEach, jest } from "@jest/globals";
 const readFileSync = jest.fn();
 jest.unstable_mockModule("node:fs", () => ({ readFileSync }));
 const { readBuiltPickerAsset } = await import("../../../src/oauth/picker/built-assets.mjs");
+const { pickerAsset } = await import("../../../src/oauth/picker/assets.mjs");
 
 beforeEach(() => readFileSync.mockReset());
 
-test("reads a mapped built asset", () => {
+test("serves a mapped built asset through the asset facade", () => {
   readFileSync.mockReturnValue("built CSS");
-  expect(readBuiltPickerAsset("oauth-web/bundled/oauth-picker.css")).toBe("built CSS");
+  expect(pickerAsset("oauth-web/bundled/oauth-picker.css")).toBe("built CSS");
   expect(readFileSync).toHaveBeenCalledWith(expect.stringContaining("dist"), "utf8");
 });
 

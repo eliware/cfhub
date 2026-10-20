@@ -6,12 +6,6 @@ const { pickerAsset, pickerAssetBuffer } = await import("../../../src/oauth/pick
 
 beforeEach(() => readFileSync.mockReset());
 
-test("serves a built asset through the asset facade", () => {
-  readFileSync.mockReturnValueOnce("built CSS");
-  expect(pickerAsset("oauth-web/bundled/oauth-picker.css")).toBe("built CSS");
-  expect(readFileSync).toHaveBeenCalledWith(expect.stringContaining("dist"), "utf8");
-});
-
 test("falls back to a source asset through the asset facade", () => {
   readFileSync
     .mockImplementationOnce(() => {
