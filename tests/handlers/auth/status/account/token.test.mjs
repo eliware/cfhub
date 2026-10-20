@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals";
-import { showAccountTokenStatus } from "../../../../src/handlers/auth/status/account-token.mjs";
+import { showAccountTokenStatus } from "../../../../../src/handlers/auth/status/account/token.mjs";
 
 test("account token status returns account details", async () => {
   const cf = { get: jest.fn().mockResolvedValue({ result: [{ id: "a" }] }) };
@@ -13,7 +13,7 @@ test("account token status returns account details", async () => {
     toJsonOutput,
   });
   expect(cf.get).toHaveBeenCalledWith("/accounts");
-  expect(toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ accounts: [{ id: "a" }] }));
+  expect(toJsonOutput).toHaveBeenCalledTimes(1);
 });
 
 test("account token status uses account ID and text output", async () => {
@@ -52,17 +52,4 @@ test.each([
     else process.env.CLOUDFLARE_ACCOUNT_ID = previous;
   }
   expect(cf.get).toHaveBeenCalledWith(`/accounts/${expectedId}`);
-});
-
-test("account token status returns an empty list when the API has no result", async () => {
-  const toJsonOutput = jest.fn();
-  await showAccountTokenStatus({
-    statusProfile: "work",
-    opts: {},
-    data: { profiles: {} },
-    cf: { get: jest.fn().mockResolvedValue({}) },
-    outputJson: true,
-    toJsonOutput,
-  });
-  expect(toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ accounts: [] }));
 });

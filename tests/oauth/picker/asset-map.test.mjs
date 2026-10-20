@@ -18,6 +18,7 @@ test("maps picker text and image routes to their assets", () => {
     asset: "oauth-web/cloudflare-115x53.png",
     contentType: "image/png",
     binary: true,
+    public: true,
   });
   expect(pickerAssetDefinition("/missing")).toBeNull();
 });

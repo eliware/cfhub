@@ -8,7 +8,7 @@ const textAssets = {
   "/picker-events.mjs": ["oauth-web/picker/events.mjs", utf8ContentType("text/javascript")],
   "/picker-state.mjs": ["oauth-web/picker/state.mjs", utf8ContentType("text/javascript")],
   "/picker-navigation.mjs": ["oauth-web/picker/navigation.mjs", utf8ContentType("text/javascript")],
-  "/oauth-web/cf-logo.svg": ["oauth-web/cf-logo.svg", "image/svg+xml"],
+  "/oauth-web/cf-logo.svg": ["oauth-web/cf-logo.svg", "image/svg+xml", true],
   "/oauth-result.css": ["oauth-web/bundled/oauth-result.css", utf8ContentType("text/css")],
 };
 const imageAssets = {
@@ -18,11 +18,16 @@ const imageAssets = {
 
 export function pickerAssetDefinition(pathname) {
   if (textAssets[pathname]) {
-    const [asset, contentType] = textAssets[pathname];
-    return { asset, contentType, binary: false };
+    const [asset, contentType, publicAsset = false] = textAssets[pathname];
+    return { asset, contentType, binary: false, ...(publicAsset ? { public: true } : {}) };
   }
   if (imageAssets[pathname]) {
-    return { asset: `oauth-web/${imageAssets[pathname]}`, contentType: "image/png", binary: true };
+    return {
+      asset: `oauth-web/${imageAssets[pathname]}`,
+      contentType: "image/png",
+      binary: true,
+      public: true,
+    };
   }
   return null;
 }

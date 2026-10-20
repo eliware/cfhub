@@ -25,12 +25,10 @@ export async function saveApiTokenLogin({
     readToken,
     promptToken,
     printer,
+    fail,
   });
-  if (!suppliedToken?.trim()) {
-    fail("No API token supplied. Run cfhub auth login again.");
-    return;
-  }
-  const credential = { apiToken: suppliedToken.trim() };
+  if (!suppliedToken) return;
+  const credential = { apiToken: suppliedToken };
   const { accountId, detectedAccountToken } = await resolveTokenAccount({
     opts,
     interactive,

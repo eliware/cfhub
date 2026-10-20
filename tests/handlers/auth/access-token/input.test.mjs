@@ -26,3 +26,16 @@ test("interactive token login prints guidance before it prompts", async () => {
     expect.stringContaining("Create an Account API Token in Cloudflare:"),
   );
 });
+
+test("rejects a blank token", async () => {
+  const fail = jest.fn();
+  const result = await readLoginToken({
+    opts: { "token-stdin": true },
+    readToken: () => "  ",
+    promptToken: jest.fn(),
+    printer: {},
+    fail,
+  });
+  expect(result).toEqual({ interactive: false, suppliedToken: null });
+  expect(fail).toHaveBeenCalledWith("No API token supplied. Run cfhub auth login again.");
+});

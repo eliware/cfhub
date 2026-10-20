@@ -1,3 +1,5 @@
+import { filterPickerCategories } from "./search.mjs";
+
 export function bindPickerNavigation() {
   document.querySelector("[data-expand]").addEventListener("click", () => {
     document.querySelectorAll(".category").forEach((category) => {
@@ -10,11 +12,6 @@ export function bindPickerNavigation() {
     });
   });
   document.querySelector("#scope-search").addEventListener("input", (event) => {
-    const term = event.target.value.toLowerCase();
-    document.querySelectorAll(".category").forEach((category) => {
-      const visible = category.textContent.toLowerCase().includes(term);
-      category.hidden = !visible;
-      if (term && visible) category.open = true;
-    });
+    filterPickerCategories(document.querySelectorAll(".category"), event.target.value);
   });
 }

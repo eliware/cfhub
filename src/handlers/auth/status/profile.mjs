@@ -1,7 +1,6 @@
-import { showAccountTokenStatus } from "./account-token.mjs";
+import { showAccountTokenStatus } from "./account/token.mjs";
 import { showUserTokenStatus } from "./user.mjs";
-import { selectAuthStatusIdentity } from "./identity.mjs";
-import { requireAuthStatusToken } from "./token-required.mjs";
+import { requireAuthStatusToken, selectAuthStatusIdentity } from "./identity.mjs";
 
 export async function showAuthStatus(context) {
   const {
