@@ -29,12 +29,8 @@ Cloudflare administration and automation CLI with GitHub CLI-style commands, pro
 
 ## Features
 
-- Manage zones, DNS, settings, rules, lists, and Cloudflare account services.
-- Inspect audits, inventory, SSL, certificates, and cache state.
-- Call Cloudflare API endpoints with `cfhub api`.
-- Filter JSON fields and format output with templates.
-- Preview writes with `--dry-run`. Confirm destructive actions with `--force`.
-- Use API tokens, OAuth profiles, and local extensions.
+Use `cfhub` to manage Cloudflare resources, inspect account state, and call API endpoints.
+Use API-token or OAuth profiles. Preview supported writes with `--dry-run` and confirm destructive actions with `--force`.
 
 ## Requirements
 
@@ -48,15 +44,6 @@ Install the public package:
 
 ```sh
 npm install --global @eliware/cfhub
-```
-
-Or install from source:
-
-```sh
-git clone https://github.com/eliware/cfhub.git
-cd cfhub
-npm ci
-npm link
 ```
 
 Run `cfhub auth login` to save an API token. Run `cfhub oauth login` to use OAuth.
@@ -77,61 +64,47 @@ Preview a DNS write:
 cfhub dns-records create --zone-id <zone_id> --data '{"type":"A","name":"www","content":"192.0.2.1"}' --dry-run
 ```
 
-Read [docs/README.md](docs/README.md) for setup, profile, command, output, and extension guides. Read [docs/web-preview.md](docs/web-preview.md) to inspect the OAuth picker. Read [specs/README.md](specs/README.md) for project rules. Read [RELEASE_NOTES.md](RELEASE_NOTES.md) for version history.
+Read [docs/README.md](docs/README.md) for user guides. Read [specs/README.md](specs/README.md) for project rules. Read [RELEASE_NOTES.md](RELEASE_NOTES.md) for version history.
 
 ## Development
 
-Install dependencies and build the OAuth pages:
+Install dependencies before you run repository checks:
 
 ```sh
 npm ci
-npm run puppeteer
-npm run build
 ```
 
-Use `.env` for local defaults. See the configuration guide in [docs/README.md](docs/README.md).
+Read [AGENTS.md](AGENTS.md) and the [specifications index](specs/README.md) before you change files.
 
 ## Testing
 
-Run checks from the repository root:
+Run aggregate checks from the repository root:
 
 ```sh
 npm test
 ```
 
-### Browser checks
-
-Run browser checks for the OAuth pages with `npm run test:e2e:web`.
-
-Install Node.js 26 or later. Run `npm ci` from the repository root. Install Chrome, Edge, or Chromium. Set `CHROME_PATH` to the browser executable if cfhub cannot find it.
-
-Make local TCP ports 1120 through 1124 available. The checks start OAuth preview servers on these ports. They use a preview client and a mock token response. They do not require Cloudflare credentials.
-
-The screenshot checks capture the OAuth picker, success, cancellation, and expired-request pages. They use desktop, mobile, and mobile landscape viewports. By default, they write PNG files to `artifacts/oauth-screenshots/`. Set `CFHUB_SCREENSHOT_DIR` to change this folder.
-
-The Lighthouse check writes `report.html` and `report.json` to `artifacts/oauth-lighthouse/`. Set `CFHUB_LIGHTHOUSE_DIR` to change this folder. The command prints performance, accessibility, best-practices, and SEO scores.
-
-Confirm success when the command exits with code 0 and prints the screenshot path, report path, and Lighthouse scores.
+Run `npm run test:e2e:web` for OAuth browser checks. Read [Web preview](docs/web-preview.md) for browser setup, ports, and output files.
 
 ## Troubleshooting
 
-Run `cfhub auth login` or `cfhub oauth login` when cfhub reports no active login. Use a token with the required Cloudflare permissions when a request fails.
+Read [Setup and first use](docs/getting-started.md) when login fails. Check that the token has the required Cloudflare permissions when a request fails.
 
 ## Security
 
-Keep API tokens, OAuth credentials, and `.env` files private. cfhub uses the operating system keychain when available.
+Keep API tokens, OAuth credentials, and local configuration files private. cfhub uses the operating system keychain when available.
 
 ## Configuration
 
-Set optional environment values such as `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and `CLOUDFLARE_ZONE_ID`. See [docs/README.md](docs/README.md) for profile and storage details.
+Read [Profiles and settings](docs/configuration.md) for environment values, profiles, and storage paths.
 
 ## Operations
 
-Run `cfhub auth status` to view login status. Run `cfhub config set update-check false` to disable the daily update check.
+Run `cfhub auth status` to view login status. Read [Profiles and settings](docs/configuration.md) to control daily update checks.
 
 ## Commands
 
-Run `cfhub --help` to list commands. Run `cfhub <resource> --help` for actions. See [docs/commands.md](docs/commands.md) for the resource list.
+Run `cfhub --help` to list commands. Run `cfhub <resource> --help` for actions. Read [the command reference](docs/commands.md) for command groups and global options.
 
 ## Exit codes
 
@@ -147,13 +120,11 @@ OAuth page sources and images live in `src/oauth-web/`.
 
 ## Development server
 
-Run `npm run start:web` to start the OAuth picker preview on port 1120. The server binds to `127.0.0.1` by default.
-
-`cfhub oauth login` starts a temporary callback server. It tries ports 1120 through 1124.
+Run `npm run start:web` to start the OAuth picker preview on `127.0.0.1:1120`. Read [Web preview](docs/web-preview.md) for browser workflows.
 
 ## Build
 
-Run `npm run build` after OAuth page or style changes. Webpack writes bundles to `dist/`. The preview server uses those files when they exist.
+Run `npm run build` after OAuth page or style changes. Webpack writes bundles to `dist/`.
 
 ## Deployment
 
