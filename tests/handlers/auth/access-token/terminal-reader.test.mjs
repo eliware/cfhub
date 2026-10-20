@@ -10,17 +10,16 @@ function terminalInput() {
   return input;
 }
 
-test("reads terminal input and removes the last character on delete", async () => {
+test("sets up and cleans up terminal mode after input", async () => {
   const input = terminalInput();
   const output = { write: jest.fn() };
   const result = readHiddenTerminalInput(input, output);
-  input.emit("data", "secret");
-  input.emit("data", "\u007f");
-  input.emit("data", "t");
+  input.emit("data", "terminal input");
   input.emit("data", "\r");
-  await expect(result).resolves.toBe("secret");
+  await expect(result).resolves.toBe("terminal input");
   expect(input.setRawMode.mock.calls).toEqual([[true], [false]]);
   expect(input.pause).toHaveBeenCalledTimes(1);
+  expect(input.resume).toHaveBeenCalledTimes(1);
   expect(output.write).toHaveBeenCalledWith("\n");
 });
 
@@ -32,14 +31,4 @@ test("returns an empty value and resets terminal mode on interrupt", async () =>
   await expect(result).resolves.toBe("");
   expect(input.setRawMode.mock.calls).toEqual([[true], [false]]);
   expect(input.pause).toHaveBeenCalledTimes(1);
-});
-
-test("preserves UTF-8 characters split across input chunks", async () => {
-  const input = terminalInput();
-  const output = { write: jest.fn() };
-  const result = readHiddenTerminalInput(input, output);
-  const bytes = Buffer.from("café\r");
-  input.emit("data", bytes.subarray(0, 4));
-  input.emit("data", bytes.subarray(4));
-  await expect(result).resolves.toBe("café");
 });

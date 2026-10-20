@@ -88,6 +88,25 @@ test("removes the staging directory when backup setup fails", () => {
   expect(fsImpl.rmSync).toHaveBeenCalledWith("stage-root", { recursive: true, force: true });
 });
 
+test("does not clean a staging directory when creation fails", () => {
+  const fsImpl = {
+    mkdtempSync: jest.fn(() => {
+      throw new Error("staging setup failed");
+    }),
+    rmSync: jest.fn(),
+  };
+  expect(() =>
+    replaceExtension({
+      source: "source",
+      destination: "installed/demo",
+      root: "installed",
+      name: "demo",
+      fsImpl,
+    }),
+  ).toThrow("staging setup failed");
+  expect(fsImpl.rmSync).not.toHaveBeenCalled();
+});
+
 test("attempts backup cleanup when staging cleanup fails", () => {
   let tempNumber = 0;
   const fsImpl = {

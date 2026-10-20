@@ -1,14 +1,16 @@
 import path from "node:path";
+import { copyExtensionToStage, createExtensionStagingRoot } from "./staging.mjs";
 
 export function replaceExtension({ source, destination, root, name, fsImpl }) {
-  const stagingRoot = fsImpl.mkdtempSync(path.join(root, ".cfhub-extension-stage-"));
+  let stagingRoot;
   let backupRoot;
-  const stagedDestination = path.join(stagingRoot, name);
+  let stagedDestination;
   let originalMoved = false;
   try {
+    stagingRoot = createExtensionStagingRoot(root, fsImpl);
     backupRoot = fsImpl.mkdtempSync(path.join(root, ".cfhub-extension-backup-"));
     const backupDestination = path.join(backupRoot, name);
-    fsImpl.cpSync(source, stagedDestination, { recursive: true });
+    stagedDestination = copyExtensionToStage({ source, stagingRoot, name, fsImpl });
     fsImpl.renameSync(destination, backupDestination);
     originalMoved = true;
     try {
@@ -28,7 +30,7 @@ export function replaceExtension({ source, destination, root, name, fsImpl }) {
     }
   } finally {
     try {
-      fsImpl.rmSync(stagingRoot, { recursive: true, force: true });
+      if (stagingRoot) fsImpl.rmSync(stagingRoot, { recursive: true, force: true });
     } finally {
       if (backupRoot && !originalMoved) fsImpl.rmSync(backupRoot, { recursive: true, force: true });
     }

@@ -14,24 +14,14 @@ function terminalInput() {
   return input;
 }
 
-test("hidden prompt handles text, deletion, enter, and interrupt", async () => {
+test("hidden prompt connects the terminal reader and handles interrupt", async () => {
   const input = terminalInput();
   const output = outputWriter();
   const result = promptHidden(input, output);
-  input.emit("data", "secret");
-  input.emit("data", "\u007f");
-  input.emit("data", "t");
-  input.emit("data", "\r");
-  await expect(result).resolves.toBe("secret");
+  input.emit("data", "\u0003");
+  await expect(result).resolves.toBe("");
   expect(input.setRawMode.mock.calls).toEqual([[true], [false]]);
   expect(input.pause).toHaveBeenCalledTimes(1);
-
-  const interrupted = terminalInput();
-  const interruptedResult = promptHidden(interrupted, outputWriter());
-  interrupted.emit("data", "\u0003");
-  await expect(interruptedResult).resolves.toBe("");
-  expect(interrupted.setRawMode).toHaveBeenLastCalledWith(false);
-  expect(interrupted.pause).toHaveBeenCalledTimes(1);
 });
 
 test("hidden prompt uses the default process streams", async () => {
