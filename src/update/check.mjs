@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import { newerVersion } from "../version-comparison.mjs";
-import { readUpdateCache, updateCachePath, writeUpdateCache } from "./cache.mjs";
+import { readUpdateCache, updateCachePath } from "./cache.mjs";
+import { writeUpdateCache } from "./cache-writer.mjs";
 
 const PACKAGE_URL = "https://registry.npmjs.org/@eliware%2Fcfhub/latest";
 const DAY_MS = 24 * 60 * 60 * 1000;

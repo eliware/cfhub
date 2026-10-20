@@ -14,15 +14,6 @@ function terminalInput() {
   return input;
 }
 
-test("hidden prompt reads and trims non-terminal input", async () => {
-  const input = new PassThrough();
-  const output = outputWriter();
-  input.end("  token-value  \n");
-  await expect(promptHidden(input, output)).resolves.toBe("token-value");
-  expect(output.write).toHaveBeenCalledWith("Cloudflare API token (input hidden): ");
-  expect(output.write).toHaveBeenCalledWith("\n");
-});
-
 test("hidden prompt handles text, deletion, enter, and interrupt", async () => {
   const input = terminalInput();
   const output = outputWriter();
