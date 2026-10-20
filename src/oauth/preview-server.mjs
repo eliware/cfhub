@@ -2,12 +2,13 @@ import { createOAuthAuthorization } from "./authorization.mjs";
 import { REQUIRED_OAUTH_SCOPES } from "./page-metadata.mjs";
 import { serveOAuthPickerRoute } from "./picker/routes.mjs";
 import { DEFAULT_OAUTH_SCOPES } from "./scopes.mjs";
+import { DEFAULT_WEB_PORT } from "../web/port.mjs";
 
 export function registerOAuthPickerPreview(
   server,
   {
     host = "127.0.0.1",
-    port = 1020,
+    port = DEFAULT_WEB_PORT,
     scopes = DEFAULT_OAUTH_SCOPES,
     clientId = "preview-client",
   } = {},

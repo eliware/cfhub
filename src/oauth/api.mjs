@@ -4,5 +4,9 @@ export { openBrowser } from "./browser.mjs";
 export { DEFAULT_OAUTH_CLIENT_ID, revokeOAuth } from "./tokens.mjs";
 export { refreshOAuth } from "./refresh.mjs";
 export { DEFAULT_OAUTH_SCOPES } from "./scopes.mjs";
+import { DEFAULT_WEB_PORT } from "../web/port.mjs";
 
-export const DEFAULT_OAUTH_PORTS = [8765, 8766, 8767, 8768, 8769];
+export const DEFAULT_OAUTH_PORTS = Array.from(
+  { length: 5 },
+  (_, index) => DEFAULT_WEB_PORT + index,
+);

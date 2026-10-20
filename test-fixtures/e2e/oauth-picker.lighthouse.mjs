@@ -16,7 +16,7 @@ const fetchImpl = async () => ({
 const login = loginOAuth({
   clientId: "preview-client",
   scopePicker: true,
-  ports: [8765, 8766, 8767, 8768, 8769],
+  ports: [1120, 1121, 1122, 1123, 1124],
   open: () => {},
   print: (value) => printed.push(value),
   fetchImpl,

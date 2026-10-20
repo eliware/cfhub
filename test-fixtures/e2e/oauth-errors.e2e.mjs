@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { join } from "node:path";
 import { outputDir, startOAuthSession } from "./oauth-session.mjs";
 
-const { browser, login, previewUrl, page } = await startOAuthSession([8766, 8767, 8768, 8769]);
+const { browser, login, previewUrl, page } = await startOAuthSession([1121, 1122, 1123, 1124]);
 try {
   const cancellationFailure = login.catch((error) => error);
   const start = await fetch(new URL("/oauth/start", previewUrl), {
@@ -35,7 +35,7 @@ try {
   }
   assert.match((await cancellationFailure).message, /authorization failed: access_denied/);
 
-  const invalid = await startOAuthSession([8767, 8768, 8769]);
+  const invalid = await startOAuthSession([1122, 1123, 1124]);
   try {
     const invalidFailure = invalid.login.catch((error) => error);
     const invalidCallback = new URL(invalid.previewUrl);

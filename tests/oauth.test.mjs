@@ -63,7 +63,7 @@ test("OAuth login falls back when the first callback port is busy", async () => 
   const servers = [];
   const serverFactory = jest.fn(() => {
     const index = servers.length;
-    const port = servers.length ? 43210 : 8765;
+    const port = servers.length ? 43210 : 1120;
     const server = {
       listen: () =>
         index === 0
@@ -83,7 +83,7 @@ test("OAuth login falls back when the first callback port is busy", async () => 
   const { promise, authorization, closeServer } = await startOAuthTestLogin({
     open: jest.fn(),
     fetchImpl,
-    options: { ports: [8765, 0], serverFactory },
+    options: { ports: [1120, 0], serverFactory },
   });
   const callbackUrl = new URL(authorization.searchParams.get("redirect_uri"));
   expect(callbackUrl.port).toBe("43210");

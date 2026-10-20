@@ -1,6 +1,6 @@
 # Web preview
 
-Use the preview server to inspect the OAuth scope picker in a browser. The server listens on `127.0.0.1:1020` by default.
+Use the preview server to inspect the OAuth scope picker in a browser. The server listens on `127.0.0.1:1120` by default.
 
 ## Start the preview
 
@@ -31,4 +31,4 @@ Set `WEB_HOST` or `WEB_PORT` before you start the preview server. These variable
 
 Run `npm run test:e2e:web` to test the complete OAuth picker and callback flow. The checks use temporary local servers and a mock token response.
 
-Set `CHROME_PATH` if Puppeteer cannot find Chrome. Keep ports `8765` through `8769` available for these checks.
+Set `CHROME_PATH` if Puppeteer cannot find Chrome. Keep ports `1120` through `1124` available for these checks.

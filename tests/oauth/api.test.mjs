@@ -10,7 +10,7 @@ import {
 } from "../../src/oauth/api.mjs";
 
 test("OAuth API facade exposes defaults and focused operations", () => {
-  expect(DEFAULT_OAUTH_PORTS).toEqual([8765, 8766, 8767, 8768, 8769]);
+  expect(DEFAULT_OAUTH_PORTS).toEqual([1120, 1121, 1122, 1123, 1124]);
   expect(DEFAULT_OAUTH_SCOPES).toEqual(expect.any(Array));
   expect(REQUIRED_OAUTH_SCOPES).toEqual(expect.any(Array));
   expect(DEFAULT_OAUTH_CLIENT_ID).toEqual(expect.any(String));

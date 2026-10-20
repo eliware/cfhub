@@ -7,11 +7,11 @@ OAuth lets cfhub access Cloudflare through a browser login. Run `cfhub oauth log
 Add these callback addresses to your OAuth client:
 
 ```text
-http://127.0.0.1:8765/oauth/callback
-http://127.0.0.1:8766/oauth/callback
-http://127.0.0.1:8767/oauth/callback
-http://127.0.0.1:8768/oauth/callback
-http://127.0.0.1:8769/oauth/callback
+http://127.0.0.1:1120/oauth/callback
+http://127.0.0.1:1121/oauth/callback
+http://127.0.0.1:1122/oauth/callback
+http://127.0.0.1:1123/oauth/callback
+http://127.0.0.1:1124/oauth/callback
 ```
 
 cfhub tries these TCP ports in order. The callback path is `/oauth/callback`.

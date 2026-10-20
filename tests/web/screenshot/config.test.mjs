@@ -2,14 +2,14 @@ import { resolveScreenshotConfig } from "../../../src/web/screenshot/config.mjs"
 
 test("uses default browser check values", () => {
   expect(resolveScreenshotConfig({ environment: {} })).toEqual({
-    url: "http://127.0.0.1:1020/",
+    url: "http://127.0.0.1:1120/",
     output: "artifacts/cfhub-oauth-picker.png",
   });
 });
 
 test("uses process environment when no options are passed", () => {
   expect(resolveScreenshotConfig()).toEqual({
-    url: process.env.WEB_URL ?? "http://127.0.0.1:1020/",
+    url: process.env.WEB_URL ?? "http://127.0.0.1:1120/",
     output: process.env.SCREENSHOT_PATH ?? "artifacts/cfhub-oauth-picker.png",
   });
 });

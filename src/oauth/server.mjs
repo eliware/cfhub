@@ -35,6 +35,9 @@ export async function startOAuthServer({ ports, serverFactory = createOAuthServe
       if (error.code !== "EADDRINUSE") throw error;
     }
   }
-  if (!server || !port) throw new Error("No OAuth callback ports are available (tried 8765-8769)");
+  if (!server || !port) {
+    const details = ports.length ? `tried ${ports[0]}-${ports.at(-1)}` : "no ports were provided";
+    throw new Error(`No OAuth callback ports are available (${details})`);
+  }
   return { server, port };
 }

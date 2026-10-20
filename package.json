@@ -58,7 +58,7 @@
     "test:e2e:lighthouse": "node test-fixtures/e2e/oauth-picker.lighthouse.mjs",
     "test:e2e:web": "npm run test:e2e:screenshots && npm run test:e2e:lighthouse",
     "puppeteer": "puppeteer browsers install chrome",
-    "lighthouse": "lighthouse http://127.0.0.1:1020 --only-categories=performance,best-practices,seo,accessibility --output=json --output-path=artifacts/lighthouse.json --chrome-flags=--headless"
+    "lighthouse": "lighthouse http://127.0.0.1:1120 --only-categories=performance,best-practices,seo,accessibility --output=json --output-path=artifacts/lighthouse.json --chrome-flags=--headless"
   },
   "engines": {
     "node": ">=26"

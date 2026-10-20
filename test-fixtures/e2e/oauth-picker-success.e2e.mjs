@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { outputDir, startOAuthSession } from "./oauth-session.mjs";
 
 const { browser, login, previewUrl, page } = await startOAuthSession([
-  8765, 8766, 8767, 8768, 8769,
+  1120, 1121, 1122, 1123, 1124,
 ]);
 try {
   for (const [name, viewport] of [

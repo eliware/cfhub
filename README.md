@@ -105,7 +105,7 @@ Run browser checks for the OAuth pages with `npm run test:e2e:web`.
 
 Install Node.js 26 or later. Run `npm ci` from the repository root. Install Chrome, Edge, or Chromium. Set `CHROME_PATH` to the browser executable if cfhub cannot find it.
 
-Make local TCP ports 8765 through 8769 available. The checks start OAuth preview servers on these ports. They use a preview client and a mock token response. They do not require Cloudflare credentials.
+Make local TCP ports 1120 through 1124 available. The checks start OAuth preview servers on these ports. They use a preview client and a mock token response. They do not require Cloudflare credentials.
 
 The screenshot checks capture the OAuth picker, success, cancellation, and expired-request pages. They use desktop, mobile, and mobile landscape viewports. By default, they write PNG files to `artifacts/oauth-screenshots/`. Set `CFHUB_SCREENSHOT_DIR` to change this folder.
 
@@ -147,9 +147,9 @@ OAuth page sources and images live in `src/oauth-web/`.
 
 ## Development server
 
-Run `npm run start:web` to start the OAuth picker preview on port 1020. The server binds to `127.0.0.1` by default.
+Run `npm run start:web` to start the OAuth picker preview on port 1120. The server binds to `127.0.0.1` by default.
 
-`cfhub oauth login` starts a temporary callback server. It tries ports 8765 through 8769.
+`cfhub oauth login` starts a temporary callback server. It tries ports 1120 through 1124.
 
 ## Build
 

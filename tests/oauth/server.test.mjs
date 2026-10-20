@@ -32,9 +32,9 @@ test("creates a Fastify callback server", async () => {
 test("server binds the first available port and returns its assigned port", async () => {
   const server = makeServer({ port: 9000 });
   await expect(
-    startOAuthServer({ ports: [8765, 8766], bindHost: "127.0.0.1", serverFactory: () => server }),
+    startOAuthServer({ ports: [1120, 1121], bindHost: "127.0.0.1", serverFactory: () => server }),
   ).resolves.toEqual({ server, port: 9000 });
-  expect(server.listen).toHaveBeenCalledWith({ port: 8765, host: "127.0.0.1" });
+  expect(server.listen).toHaveBeenCalledWith({ port: 1120, host: "127.0.0.1" });
 });
 
 test("server retries ports that are in use and falls back to the candidate port", async () => {
@@ -44,11 +44,11 @@ test("server retries ports that are in use and falls back to the candidate port"
   const servers = [first, second];
   const serverFactory = jest.fn(() => servers.shift());
   const result = await startOAuthServer({
-    ports: [8765, 8766],
+    ports: [1120, 1121],
     bindHost: "localhost",
     serverFactory,
   });
-  expect(result).toEqual({ server: second, port: 8766 });
+  expect(result).toEqual({ server: second, port: 1121 });
   expect(first.close).toHaveBeenCalled();
   expect(serverFactory).toHaveBeenCalledTimes(2);
 });
@@ -57,7 +57,7 @@ test("server rethrows errors other than address conflicts", async () => {
   const error = new Error("permission denied");
   const server = makeServer({ error });
   await expect(
-    startOAuthServer({ ports: [8765], bindHost: "localhost", serverFactory: () => server }),
+    startOAuthServer({ ports: [1120], bindHost: "localhost", serverFactory: () => server }),
   ).rejects.toBe(error);
   expect(server.close).toHaveBeenCalled();
 });
@@ -67,16 +67,16 @@ test("server rejects when all ports are in use", async () => {
   const servers = [makeServer({ error }), makeServer({ error })];
   await expect(
     startOAuthServer({
-      ports: [8765, 8766],
+      ports: [1120, 1121],
       bindHost: "localhost",
       serverFactory: () => servers.shift(),
     }),
-  ).rejects.toThrow("No OAuth callback ports are available (tried 8765-8769)");
+  ).rejects.toThrow("No OAuth callback ports are available (tried 1120-1121)");
 });
 
 test("server rejects an empty port list", async () => {
   await expect(startOAuthServer({ ports: [], serverFactory: jest.fn() })).rejects.toThrow(
-    "No OAuth callback ports are available (tried 8765-8769)",
+    "No OAuth callback ports are available (no ports were provided)",
   );
 });
 
@@ -84,7 +84,7 @@ test("server handles a factory error before it creates a server", async () => {
   const error = new Error("factory failed");
   await expect(
     startOAuthServer({
-      ports: [8765],
+      ports: [1120],
       serverFactory: () => {
         throw error;
       },
