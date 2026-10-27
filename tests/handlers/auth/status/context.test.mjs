@@ -36,3 +36,19 @@ test("keeps explicit context values, including undefined", () => {
     environmentAccountId: "caller-account",
   });
 });
+
+test("uses the injected environment for profile-backed auth status", () => {
+  expect(
+    resolveAuthStatusContext({
+      env: {
+        CLOUDFLARE_API_TOKEN: "profile-token",
+        CLOUDFLARE_PROFILE: "work",
+        CLOUDFLARE_ACCOUNT_ID: "profile-account",
+      },
+    }),
+  ).toMatchObject({
+    token: "profile-token",
+    activeProfile: "work",
+    environmentAccountId: "profile-account",
+  });
+});

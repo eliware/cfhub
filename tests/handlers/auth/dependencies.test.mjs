@@ -1,6 +1,5 @@
-import { jest } from "@jest/globals";
+import { PassThrough } from "node:stream";
 import { createAuthDependencies } from "../../../src/handlers/auth/dependencies.mjs";
-import { fs } from "../../../src/fs.mjs";
 
 test("auth dependencies provide the default workflow functions", () => {
   const dependencies = createAuthDependencies();
@@ -17,12 +16,15 @@ test("auth dependencies use supplied workflow functions", () => {
   expect(dependencies.write).toBe(write);
 });
 
-test("auth dependencies read a token from standard input by default", () => {
-  const read = jest.spyOn(fs, "readFileSync").mockReturnValue(" token ");
+test("auth dependencies read one token line from standard input by default", async () => {
+  const stdin = Object.getOwnPropertyDescriptor(process, "stdin");
+  const input = new PassThrough();
+  Object.defineProperty(process, "stdin", { configurable: true, value: input });
   try {
-    expect(createAuthDependencies().readToken()).toBe("token");
-    expect(read).toHaveBeenCalledWith(0, "utf8");
+    const token = createAuthDependencies().readToken();
+    input.end(" token \nextra data");
+    await expect(token).resolves.toBe("token");
   } finally {
-    read.mockRestore();
+    Object.defineProperty(process, "stdin", stdin);
   }
 });

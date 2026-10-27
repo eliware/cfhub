@@ -4,6 +4,7 @@ test("maps read and write commands to the matching OAuth scopes", () => {
   expect(requiredScopes("zones", "list")).toEqual(["zone.read"]);
   expect(requiredScopes("dns-records", "create")).toEqual(["dns.write"]);
   expect(requiredScopes("cache", "purge")).toEqual(["cache.purge"]);
+  expect(requiredScopes("health", "list")).toEqual(["healthcheck.read"]);
   expect(requiredScopes("unknown", "list")).toEqual([]);
   expect(requiredScopes("auth", "status")).toEqual([]);
   expect(requiredScopes("zones", "unknown")).toEqual(["zone.read"]);

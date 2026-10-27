@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import { readLoginToken } from "../../../../src/handlers/auth/access-token/input.mjs";
 
 test("token login reads a token from stdin", async () => {
-  const readToken = jest.fn(() => "stdin-token");
+  const readToken = jest.fn().mockResolvedValue("stdin-token");
   const result = await readLoginToken({
     opts: { "token-stdin": true },
     readToken,

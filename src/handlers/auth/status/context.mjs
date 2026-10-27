@@ -1,13 +1,10 @@
 export function resolveAuthStatusContext(context) {
+  const env = context.env || process.env;
   return {
     ...context,
-    token: resolveValue(context, "token", process.env.CLOUDFLARE_API_TOKEN),
-    activeProfile: resolveValue(context, "activeProfile", process.env.CLOUDFLARE_PROFILE),
-    environmentAccountId: resolveValue(
-      context,
-      "environmentAccountId",
-      process.env.CLOUDFLARE_ACCOUNT_ID,
-    ),
+    token: resolveValue(context, "token", env.CLOUDFLARE_API_TOKEN),
+    activeProfile: resolveValue(context, "activeProfile", env.CLOUDFLARE_PROFILE),
+    environmentAccountId: resolveValue(context, "environmentAccountId", env.CLOUDFLARE_ACCOUNT_ID),
   };
 }
 

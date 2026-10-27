@@ -74,6 +74,28 @@ test.each([
   }
 });
 
+test("auth verification uses the active profile token in its injected environment", async () => {
+  const originalToken = process.env.CLOUDFLARE_API_TOKEN;
+  delete process.env.CLOUDFLARE_API_TOKEN;
+  try {
+    const cf = { get: jest.fn().mockResolvedValue({ result: { status: "active" } }) };
+    await handleAuth({
+      action: "verify",
+      resource: "auth",
+      env: { CLOUDFLARE_API_TOKEN: "saved-profile-token" },
+      cf,
+      opts: {},
+      read: () => ({ active: "work", profiles: { work: {} } }),
+      outputJson: true,
+      toJsonOutput: jest.fn(),
+    });
+    expect(cf.get).toHaveBeenCalledWith("/user/tokens/verify");
+  } finally {
+    if (originalToken === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
+    else process.env.CLOUDFLARE_API_TOKEN = originalToken;
+  }
+});
+
 test("auth coordinator reports unknown actions", async () => {
   const fail = jest.fn();
   await handleAuth({ action: "unknown", read: () => ({ active: null, profiles: {} }), fail });

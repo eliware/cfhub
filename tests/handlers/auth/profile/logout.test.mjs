@@ -6,7 +6,7 @@ const options = () => ({
   data: { active: "old", profiles: { old: { authMethod: "oauth" }, next: {} } },
   readCredentialImpl: jest.fn().mockResolvedValue({ oauthRefreshToken: "refresh" }),
   revokeOAuthImpl: jest.fn().mockResolvedValue(true),
-  deleteCredentialImpl: jest.fn(),
+  deleteCredentialImpl: jest.fn().mockResolvedValue(true),
   write: jest.fn(),
   profileHome: "/home",
   profileFs: {},
@@ -42,13 +42,28 @@ test("continues local cleanup when revocation fails and rejects unknown profiles
   expect(unnamed.fail).toHaveBeenCalledWith("Unknown profile: (none)");
 });
 
-test("removes local profiles without OAuth tokens and preserves another active profile", async () => {
+test.each([
+  ["declines", jest.fn().mockResolvedValue(false)],
+  ["throws", jest.fn().mockRejectedValue(Error("unavailable"))],
+])("keeps a profile when credential deletion %s", async (_case, deletion) => {
+  const input = options();
+  input.readCredentialImpl.mockResolvedValue({ apiToken: "token" });
+  input.deleteCredentialImpl = deletion;
+  await logoutAuthProfile(input);
+  expect(input.revokeOAuthImpl).not.toHaveBeenCalled();
+  expect(input.data.active).toBe("old");
+  expect(input.data.profiles.old).toBeDefined();
+  expect(input.write).not.toHaveBeenCalled();
+  expect(input.fail).toHaveBeenCalledWith(
+    "Could not remove saved credentials. The profile remains saved.",
+  );
+});
+
+test("keeps another active profile when it removes a saved profile", async () => {
   const input = options();
   input.data.active = "next";
   input.readCredentialImpl.mockResolvedValue({ apiToken: "token" });
-  input.deleteCredentialImpl.mockRejectedValue(Error("unavailable"));
   await logoutAuthProfile(input);
-  expect(input.revokeOAuthImpl).not.toHaveBeenCalled();
   expect(input.data.active).toBe("next");
   expect(input.data.profiles.old).toBeUndefined();
 });

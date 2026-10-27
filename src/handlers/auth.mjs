@@ -80,6 +80,7 @@ export async function handleAuth(context = {}) {
       toJsonOutput,
       printer,
       fail,
+      env,
     });
   fail(`Unknown auth action: ${action}`);
 }

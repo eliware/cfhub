@@ -12,7 +12,7 @@ Use this table to set environment values:
 | `CLOUDFLARE_ACCOUNT_ID`       | Unset                                                                           | Required for account actions when no flag or profile provides an ID. | Set the default account ID.                               |
 | `CLOUDFLARE_ZONE_ID`          | Unset                                                                           | Required for zone actions when no flag or profile provides an ID.    | Set the default zone ID.                                  |
 | `CLOUDFLARE_PROFILE`          | The active saved profile                                                        | No.                                                                  | Select a profile for this process.                        |
-| `CFHUB_CONFIG_DIR`            | `$XDG_CONFIG_HOME/cfhub`, or `~/.config/cfhub`                                  | No.                                                                  | Set the configuration folder.                             |
+| `CFHUB_CONFIG_DIR`            | `$XDG_CONFIG_HOME/cfhub`, or `~/.config/cfhub`                                  | No.                                                                  | Override the configuration folder.                        |
 | `XDG_CONFIG_HOME`             | Unset                                                                           | No.                                                                  | Set the parent folder for the default configuration path. |
 | `CFHUB_NO_UPDATE_CHECK`       | Unset. Daily checks are enabled.                                                | No.                                                                  | Set `1` to disable update checks.                         |
 | `CFHUB_OAUTH_CLIENT_ID`       | The built-in Eliware client                                                     | No.                                                                  | Set an OAuth client ID.                                   |
@@ -23,6 +23,11 @@ Use this table to set environment values:
 | `CFHUB_API_PERMISSIONS_KNOWN` | Unset                                                                           | No.                                                                  | Set `1` when the permission list is complete.             |
 | `PAGER`                       | Pager is off. `--pager` uses the configured command, then `PAGER`, then `less`. | No.                                                                  | Select the pager command.                                 |
 | `NO_COLOR`                    | Unset                                                                           | No.                                                                  | Disable automatic color when this value is nonempty.      |
+| `WEB_HOST`                    | `127.0.0.1`                                                                     | No.                                                                  | Set the host for the web preview server.                  |
+| `WEB_PORT`                    | `1120`                                                                          | No.                                                                  | Set the port for the web preview server.                  |
+| `WEB_URL`                     | `http://127.0.0.1:1120/`                                                        | No.                                                                  | Set the page URL for screenshots.                         |
+| `SCREENSHOT_PATH`             | `artifacts/cfhub-oauth-picker.png`                                              | No.                                                                  | Set the screenshot output path.                           |
+| `CHROME_PATH`                 | Browser auto-discovery                                                          | No.                                                                  | Set a browser executable path for screenshots.            |
 
 cfhub uses `CLOUDFLARE_API_TOKEN` when you do not save access in a profile. Use the account and zone values only when a command needs those IDs.
 
@@ -40,7 +45,7 @@ Run `cfhub oauth login --profile work` to save OAuth access to a profile. Run `c
 
 ## Storage paths
 
-By default, cfhub stores settings and profiles under `~/.config/cfhub`. Set `CFHUB_CONFIG_DIR` to use a different folder. If that variable is unset, cfhub uses `$XDG_CONFIG_HOME/cfhub` when `XDG_CONFIG_HOME` is set.
+Set `CFHUB_CONFIG_DIR` to change the configuration folder. If it is unset, cfhub uses `$XDG_CONFIG_HOME/cfhub` when `XDG_CONFIG_HOME` is set. If both values are unset, cfhub uses `~/.config/cfhub`.
 
 cfhub uses the operating system keychain when available. If no keychain is available, cfhub stores credentials in `credentials.json` under the configuration folder. Keep this file private. Do not add it to source control.
 
@@ -55,7 +60,11 @@ Run `cfhub config list` to list options. Run `cfhub config get <key>` to read on
 | `width`        | 120 columns | Set the output width.           | A number of columns.          |
 | `update-check` | `true`      | Control the daily update check. | `true` or `false`.            |
 
-Set `CFHUB_NO_UPDATE_CHECK=1` to disable the update check for one process.
+Set `CFHUB_NO_UPDATE_CHECK=1` to disable the update check for one process. Set `NO_COLOR` to any nonempty value to disable automatic color. The value `0` also disables automatic color.
+
+Run `npm run start:web` to start the web preview server. Set `WEB_HOST` and `WEB_PORT` to change its network address. The default port is `1120`.
+
+Run `npm run screenshots` to save a screenshot. Set `WEB_URL` to change the page URL. Set `SCREENSHOT_PATH` to change the output path. If `CHROME_PATH` is unset, cfhub searches for an installed browser. If `CHROME_PATH` is set, cfhub uses that browser executable. If that path does not exist, cfhub reports an error.
 
 ## OAuth values
 

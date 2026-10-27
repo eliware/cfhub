@@ -27,10 +27,16 @@ export async function logoutAuthProfile({
   } catch {
     printer.error("Cloudflare could not revoke the OAuth token. The local profile was removed.");
   }
+  let credentialDeleted = true;
   try {
-    await deleteCredentialImpl(name);
+    const deleted = await deleteCredentialImpl(name);
+    credentialDeleted = !credential || deleted;
   } catch {
-    // Ignore local cleanup errors.
+    credentialDeleted = !credential;
+  }
+  if (!credentialDeleted) {
+    fail("Could not remove saved credentials. The profile remains saved.");
+    return;
   }
   delete data.profiles[name];
   if (data.active === name) data.active = Object.keys(data.profiles)[0] || null;
