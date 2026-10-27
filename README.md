@@ -109,6 +109,7 @@ Run `cfhub --help` to list commands. Run `cfhub <resource> --help` for actions. 
 ## Exit codes
 
 cfhub returns 0 after success. It returns 1 after a command or API error.
+After SIGINT, cfhub exits with code 130. After SIGTERM, it exits with code 143.
 
 ## Routes
 

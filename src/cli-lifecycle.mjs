@@ -6,12 +6,12 @@ export function runCliLifecycle(run, processImpl = process, consoleImpl = consol
   };
   processImpl.on("uncaughtException", onError);
   processImpl.on("unhandledRejection", onError);
-  const onSignal = () => {
+  const onSignal = (signal) => {
     processImpl.removeListener("uncaughtException", onError);
     processImpl.removeListener("unhandledRejection", onError);
-    processImpl.exitCode = 0;
+    processImpl.exit(signal === "SIGINT" ? 130 : 143);
   };
-  processImpl.once("SIGINT", onSignal);
-  processImpl.once("SIGTERM", onSignal);
+  processImpl.once("SIGINT", () => onSignal("SIGINT"));
+  processImpl.once("SIGTERM", () => onSignal("SIGTERM"));
   return run().catch(onError);
 }

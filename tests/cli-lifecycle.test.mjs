@@ -3,7 +3,11 @@ import { jest } from "@jest/globals";
 import { runCliLifecycle } from "../src/cli-lifecycle.mjs";
 
 function createProcess() {
-  return Object.assign(new EventEmitter(), { exitCode: undefined, noDeprecation: false });
+  return Object.assign(new EventEmitter(), {
+    exit: jest.fn(),
+    exitCode: undefined,
+    noDeprecation: false,
+  });
 }
 
 test("runs the CLI with process error handlers", async () => {
@@ -29,17 +33,22 @@ test("reports rejected CLI runs and clears error handlers on signals", async () 
     consoleImpl,
   );
   expect(consoleImpl.error).toHaveBeenCalledWith("CLI failed");
-  processImpl.exitCode = 1;
   processImpl.emit("SIGTERM");
-  expect(processImpl.exitCode).toBe(0);
+  expect(processImpl.exit).toHaveBeenCalledWith(143);
   expect(processImpl.listenerCount("uncaughtException")).toBe(0);
   expect(processImpl.listenerCount("unhandledRejection")).toBe(0);
 });
 
 test("uses the current process and console when callers omit them", async () => {
   const priorExitCode = process.exitCode;
-  await runCliLifecycle(async () => {});
-  expect(process.noDeprecation).toBe(true);
-  process.emit("SIGINT");
-  process.exitCode = priorExitCode;
+  const exit = jest.spyOn(process, "exit").mockImplementation(() => process);
+  try {
+    await runCliLifecycle(async () => {});
+    expect(process.noDeprecation).toBe(true);
+    process.emit("SIGINT");
+    expect(exit).toHaveBeenCalledWith(130);
+  } finally {
+    process.exitCode = priorExitCode;
+    exit.mockRestore();
+  }
 });

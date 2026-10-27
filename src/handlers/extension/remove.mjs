@@ -15,6 +15,14 @@ export function removeExtension({ opts, printer, fail, fsImpl, homeDir }) {
     fail("Invalid extension name");
     return;
   }
+  try {
+    if (fsImpl.lstatSync(destination).isSymbolicLink()) {
+      fail("Refusing to remove a symbolic link");
+      return;
+    }
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
   fsImpl.rmSync(destination, { recursive: true, force: true });
   return printer.log(`Removed extension ${opts.name}`);
 }

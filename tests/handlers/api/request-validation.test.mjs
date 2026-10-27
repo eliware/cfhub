@@ -39,3 +39,14 @@ test("accepts leading slashes and dry-run deletes", () => {
     }),
   ).toEqual({ path: "/zones/z1", method: "DELETE" });
 });
+
+test("accepts an explicit false dry-run value as authorization for a DELETE", () => {
+  expect(
+    validateApiRequest({
+      action: "zones/z1",
+      opts: { method: "DELETE", "dry-run": false },
+      body: null,
+      fail: jest.fn(),
+    }),
+  ).toEqual({ path: "/zones/z1", method: "DELETE" });
+});

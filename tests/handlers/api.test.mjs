@@ -38,6 +38,17 @@ test("returns after an API dry run", async () => {
   expect(ctx.printer.log).toHaveBeenCalledWith(expect.stringContaining('"dryRun": true'));
 });
 
+test("performs an API DELETE when dry-run is explicitly false", async () => {
+  const ctx = context({
+    action: "/zones/z1",
+    opts: { method: "DELETE", "dry-run": false },
+  });
+  ctx.cf.delete = jest.fn().mockResolvedValue({ result: "deleted" });
+  await handleApi(ctx);
+  expect(ctx.cf.delete).toHaveBeenCalledWith("/zones/z1", undefined);
+  expect(ctx.printer.log).toHaveBeenCalledWith(expect.stringContaining("deleted"));
+});
+
 test.each([
   [{ action: "" }, "requires a path"],
   [{ action: "https://example.com" }, "relative"],
