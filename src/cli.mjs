@@ -1,32 +1,29 @@
-import * as fs from "node:fs";
 import { dispatchCommand } from "./cli/dispatch.mjs";
-import os from "node:os";
 import { parseArgs } from "./args.mjs";
 import { loadBody } from "./cli/body-loader.mjs";
 import { resolveCommand } from "./cli/resolve/command.mjs";
-import { loadProjectEnv } from "./env.mjs";
-import { createCloudflareClient } from "./cloudflare.mjs";
 import { createCommandContext } from "./cli/command/context.mjs";
 import { runExtensionCommand } from "./cli/extension-command.mjs";
 import { handleLocalCommand } from "./cli/local-commands.mjs";
-import { checkForUpdate } from "./update/check.mjs";
 import { authorizeCommand } from "./cli/authorization.mjs";
 import { createOutputContext } from "./cli/output-context.mjs";
+import { createCliDependencies } from "./cli/dependencies.mjs";
 
-export async function run({
-  argv = process.argv.slice(2),
-  env = process.env,
-  cfFactory = createCloudflareClient,
-  loadEnv = loadProjectEnv,
-  printer = console,
-  fsImpl = fs,
-  handlers = {},
-  projectRoot = process.cwd(),
-  homeDir = os.homedir(),
-  exit = (code) => process.exit(code),
-  updateCheck = checkForUpdate,
-  loadCommand,
-} = {}) {
+export async function run(options = {}) {
+  const {
+    argv,
+    env,
+    cfFactory,
+    loadEnv,
+    printer,
+    fsImpl,
+    handlers,
+    projectRoot,
+    homeDir,
+    exit,
+    updateCheck,
+    loadCommand,
+  } = createCliDependencies(options);
   let { args, opts } = parseArgs(argv);
   const local = handleLocalCommand({ args, opts, printer, homeDir, fsImpl });
   if (local.handled) return local.result;

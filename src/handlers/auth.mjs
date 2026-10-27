@@ -1,25 +1,23 @@
 import { handleAuthProfile } from "./auth/profile.mjs";
 import { handleAuthStatus } from "./auth/status.mjs";
 import { handleAuthLogin } from "./auth/login.mjs";
-import { createAuthDependencies } from "./auth/dependencies.mjs";
 import { authActionRoute } from "./auth/action-route.mjs";
+import { createAuthContext } from "./auth/context.mjs";
 
 export async function handleAuth(context = {}) {
   const {
-    resource = "oauth",
+    resource,
     cf,
     action,
     opts,
     outputJson,
-    printer = console,
+    printer,
     toJsonOutput,
-    fail = () => {},
+    fail,
     profileHome,
     profileFs,
-    env = process.env,
-  } = context;
-  const {
-    read,
+    env,
+    data,
     write,
     readToken,
     promptToken,
@@ -30,8 +28,7 @@ export async function handleAuth(context = {}) {
     deleteCredentialImpl,
     revokeOAuthImpl,
     inspectApiTokenImpl,
-  } = createAuthDependencies(context);
-  const data = read(profileHome, profileFs);
+  } = createAuthContext(context);
   const route = authActionRoute(action);
   if (route === "login")
     return handleAuthLogin({

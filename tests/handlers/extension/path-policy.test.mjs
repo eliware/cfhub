@@ -1,3 +1,6 @@
+import path from "node:path";
+import { jest } from "@jest/globals";
+import { installExtension } from "../../../src/handlers/extension/install.mjs";
 import { extensionPathsOverlap } from "../../../src/handlers/extension/path-policy.mjs";
 
 test("detects equal, nested, and separate extension paths", () => {
@@ -26,4 +29,23 @@ test("detects overlap after resolving a source link", () => {
           : value,
     }),
   ).toBe(true);
+});
+
+test("stops installation when the source overlaps its destination", () => {
+  const homeDir = path.join("/home", "cfhub-install-test");
+  const fail = jest.fn();
+  const copy = jest.fn();
+  installExtension({
+    opts: { path: path.join(homeDir, ".config", "cfhub", "extensions", "demo") },
+    printer: { log: jest.fn() },
+    fail,
+    fsImpl: {
+      readFileSync: () => JSON.stringify({ name: "demo", version: "1", commands: {} }),
+      mkdirSync: jest.fn(),
+      cpSync: copy,
+    },
+    homeDir,
+  });
+  expect(fail).toHaveBeenCalledWith("Extension source must not overlap its install destination");
+  expect(copy).not.toHaveBeenCalled();
 });

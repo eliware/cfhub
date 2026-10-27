@@ -2,6 +2,7 @@ import { cleanupExtension } from "./cleanup.mjs";
 import { restorePreviousExtension } from "./restore.mjs";
 import { copyExtensionToStage, createExtensionStagingRoot } from "./staging.mjs";
 import { createExtensionBackup } from "./backup.mjs";
+import { extensionCleanupReport } from "./cleanup-report.mjs";
 
 export function replaceExtension({ source, destination, root, name, fsImpl }) {
   let stagingRoot;
@@ -35,5 +36,5 @@ export function replaceExtension({ source, destination, root, name, fsImpl }) {
       fsImpl,
     });
   }
-  if (cleanupErrors.length) return { backupDestination, cleanupErrors };
+  return extensionCleanupReport(backupDestination, cleanupErrors);
 }
