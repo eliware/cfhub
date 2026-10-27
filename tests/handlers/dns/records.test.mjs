@@ -1,5 +1,14 @@
 import { jest } from "@jest/globals";
-import { handleDnsRecords } from "../../../src/handlers/dns/records.mjs";
+
+const writeDnsRecord = jest.fn();
+const deleteDnsRecord = jest.fn();
+jest.unstable_mockModule("../../../src/handlers/dns/mutation/write.mjs", () => ({
+  writeDnsRecord,
+}));
+jest.unstable_mockModule("../../../src/handlers/dns/mutation/delete.mjs", () => ({
+  deleteDnsRecord,
+}));
+const { handleDnsRecords } = await import("../../../src/handlers/dns/records.mjs");
 
 const context = (overrides = {}) => ({
   cf: { dns: { records: {} } },
@@ -84,66 +93,39 @@ test("delegates diff and apply actions", async () => {
 });
 
 test("delegates mutation actions", async () => {
-  const create = jest.fn().mockResolvedValue({ id: "created" });
-  const toJsonOutput = jest.fn();
+  writeDnsRecord.mockClear();
+  deleteDnsRecord.mockClear();
   await handleDnsRecords(
     context({
       action: "create",
       body: { type: "A" },
-      cf: { dns: { records: { create } } },
-      toJsonOutput,
+      cf: {},
     }),
   );
-  expect(create).toHaveBeenCalled();
-  const update = jest.fn().mockResolvedValue({ id: "updated" });
+  expect(writeDnsRecord).toHaveBeenCalledWith(
+    expect.objectContaining({ action: "create", zoneId: "zone-1", body: { type: "A" } }),
+  );
   await handleDnsRecords(
     context({
       action: "update",
       opts: { "zone-id": "z", id: "r" },
       body: { content: "192.0.2.3" },
-      cf: { dns: { records: { update } } },
-      toJsonOutput,
+      cf: {},
     }),
   );
-  expect(update).toHaveBeenCalled();
-  const remove = jest.fn().mockResolvedValue({ id: "deleted" });
+  expect(writeDnsRecord).toHaveBeenLastCalledWith(
+    expect.objectContaining({ action: "update", zoneId: "z", id: "r" }),
+  );
   await handleDnsRecords(
     context({
       action: "delete",
       opts: { "zone-id": "z", id: "r", force: true },
-      cf: { dns: { records: { delete: remove } } },
-      toJsonOutput,
+      cf: {},
     }),
   );
-  expect(remove).toHaveBeenCalled();
-
-  const post = jest.fn().mockResolvedValue({ id: "generic-created" });
-  const genericCreateOutput = jest.fn();
-  await handleDnsRecords(
-    context({
-      action: "create",
-      body: { type: "A", name: "www" },
-      cf: { post },
-      toJsonOutput: genericCreateOutput,
-    }),
+  expect(deleteDnsRecord).toHaveBeenCalledWith(
+    expect.objectContaining({ action: "delete", zoneId: "z", id: "r" }),
   );
-  expect(post).toHaveBeenCalledWith("/zones/zone-1/dns_records", {
-    body: { type: "A", name: "www" },
-  });
-  expect(genericCreateOutput).toHaveBeenCalledWith({ id: "generic-created" });
-
-  const genericDelete = jest.fn().mockResolvedValue({ deleted: true });
-  const genericDeleteOutput = jest.fn();
-  await handleDnsRecords(
-    context({
-      action: "delete",
-      opts: { "zone-id": "zone-1", id: "record-1", force: true },
-      cf: { delete: genericDelete },
-      toJsonOutput: genericDeleteOutput,
-    }),
-  );
-  expect(genericDelete).toHaveBeenCalledWith("/zones/zone-1/dns_records/record-1");
-  expect(genericDeleteOutput).toHaveBeenCalledWith({ deleted: true });
 });
 
 test("validates required values and rejects unknown actions", async () => {

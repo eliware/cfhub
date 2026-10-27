@@ -1,17 +1,9 @@
 import { jest } from "@jest/globals";
-import {
-  liveEnabled,
-  liveReady,
-  discoverContext,
-  run,
-  skipUnavailable,
-  canRun,
-  basicCommands,
-  dryRunCommands,
-  crudCommands,
-  helpCommands,
-  withContext,
-} from "./cli-live-support.mjs";
+import { liveEnabled, liveReady } from "./cli-live-settings.mjs";
+import { discoverContext, withContext } from "./cli-live-context.mjs";
+import { run } from "./cli-live-runner.mjs";
+import { skipUnavailable, canRun } from "./cli-live-capabilities.mjs";
+import { basicCommands, dryRunCommands, crudCommands, helpCommands } from "./cli-live-commands.mjs";
 
 const liveDescribe = liveEnabled && liveReady ? describe : describe.skip;
 liveDescribe("authenticated live CLI smoke tests", () => {

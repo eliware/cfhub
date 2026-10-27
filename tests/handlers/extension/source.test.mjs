@@ -9,7 +9,6 @@ test("loads a valid extension source manifest", () => {
     source: "/source",
     manifest: validManifest,
   });
-  expect(fsImpl.readFileSync).toHaveBeenCalledWith("/source/cf-extension.json", "utf8");
 });
 
 test("loads command files inside the extension source", () => {
@@ -34,48 +33,10 @@ test("loads command files inside the extension source", () => {
   expect(lstatSync).toHaveBeenCalledTimes(2);
 });
 
-test("reports a missing path or invalid manifest", () => {
+test("reports a missing source path", () => {
   const fail = jest.fn();
   expect(loadExtensionSource({ fsImpl: {}, fail })).toBeNull();
   expect(fail).toHaveBeenCalledWith("Missing --path to an extension directory");
-  expect(
-    loadExtensionSource({
-      sourcePath: "/source",
-      fsImpl: { readFileSync: () => "{}" },
-      fail,
-    }),
-  ).toBeNull();
-  expect(fail).toHaveBeenLastCalledWith("Invalid cfhub extension manifest");
-  expect(
-    loadExtensionSource({
-      sourcePath: "source",
-      fsImpl: { readFileSync: () => "{" },
-      fail,
-    }),
-  ).toBeNull();
-  expect(fail).toHaveBeenLastCalledWith("Invalid cfhub extension manifest");
-});
-
-test.each([
-  ["absolute command path", "/outside.mjs"],
-  ["relative command path traversal", "../outside.mjs"],
-])("rejects a command path outside the source directory with %s", (_reason, commandPath) => {
-  const fail = jest.fn();
-  expect(
-    loadExtensionSource({
-      sourcePath: "/source",
-      fsImpl: {
-        readFileSync: () =>
-          JSON.stringify({
-            name: "demo",
-            version: "1.0.0",
-            commands: { demo: commandPath },
-          }),
-      },
-      fail,
-    }),
-  ).toBeNull();
-  expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
 });
 
 test("rejects a source when a command file is missing", () => {

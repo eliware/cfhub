@@ -1,15 +1,8 @@
 import { jest } from "@jest/globals";
-import {
-  liveEnabled,
-  liveReady,
-  wetEnabled,
-  zoneId,
-  discoverContext,
-  run,
-  parseJson,
-  skipUnavailable,
-  canRun,
-} from "./cli-live-support.mjs";
+import { liveEnabled, liveReady, wetEnabled } from "./cli-live-settings.mjs";
+import { zoneId, discoverContext } from "./cli-live-context.mjs";
+import { run, parseJson } from "./cli-live-runner.mjs";
+import { skipUnavailable, canRun } from "./cli-live-capabilities.mjs";
 
 const liveDescribe = liveEnabled && liveReady ? describe : describe.skip;
 liveDescribe("authenticated live CLI dns lifecycle tests", () => {
