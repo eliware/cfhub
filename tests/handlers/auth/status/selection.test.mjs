@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import {
   requireAuthStatusToken,
   selectAuthStatusIdentity,
-} from "../../../../src/handlers/auth/status/identity.mjs";
+} from "../../../../src/handlers/auth/status/selection.mjs";
 
 test("accepts and requires an authentication token", () => {
   expect(requireAuthStatusToken("token", jest.fn())).toBe(true);
@@ -13,14 +13,24 @@ test("accepts and requires an authentication token", () => {
 
 test("selects account and user status identity from the token", () => {
   expect(
-    selectAuthStatusIdentity({ token: "cfat_secret", data: { active: "work" } }),
+    selectAuthStatusIdentity({
+      token: "cfat_secret",
+      fail: jest.fn(),
+      data: { active: "work" },
+    }),
   ).toMatchObject({ kind: "account", profile: "work" });
   expect(
-    selectAuthStatusIdentity({ token: "user", resource: "oauth", data: { active: null } }),
+    selectAuthStatusIdentity({
+      token: "user",
+      fail: jest.fn(),
+      resource: "oauth",
+      data: { active: null },
+    }),
   ).toMatchObject({ kind: "user", profile: "environment", resource: "oauth" });
   expect(
     selectAuthStatusIdentity({
       token: "user",
+      fail: jest.fn(),
       activeProfile: "profile-env",
       data: { active: "work" },
     }),

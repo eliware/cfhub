@@ -4,7 +4,8 @@ export function requireAuthStatusToken(token, fail) {
   return false;
 }
 
-export function selectAuthStatusIdentity({ token, activeProfile, resource, data, opts }) {
+export function selectAuthStatusIdentity({ token, fail, activeProfile, resource, data, opts }) {
+  if (!requireAuthStatusToken(token, fail)) return null;
   return {
     kind: token.startsWith("cfat_") ? "account" : "user",
     profile: activeProfile || data.active || "environment",

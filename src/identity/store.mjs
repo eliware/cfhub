@@ -1,5 +1,10 @@
 import os from "node:os";
 import * as fs from "node:fs";
+import {
+  deleteFromBackends,
+  readFromPreferredBackend,
+  writeToPreferredBackend,
+} from "./backend.mjs";
 import { deleteCredentialFile, readCredentialFile, writeCredentialFile } from "./files.mjs";
 import {
   deleteKeychainCredential,
@@ -15,11 +20,10 @@ export async function readCredential(
   fsImpl = fs,
   homeDir = os.homedir(),
 ) {
-  try {
-    const value = await readKeychainCredential(profile, load);
-    if (value) return value;
-  } catch {}
-  return readCredentialFile(profile, fsImpl, homeDir);
+  return readFromPreferredBackend(
+    () => readKeychainCredential(profile, load),
+    () => readCredentialFile(profile, fsImpl, homeDir),
+  );
 }
 
 export async function writeCredential(
@@ -29,10 +33,10 @@ export async function writeCredential(
   fsImpl = fs,
   homeDir = os.homedir(),
 ) {
-  try {
-    if (await writeKeychainCredential(profile, value, load)) return true;
-  } catch {}
-  return writeCredentialFile(profile, value, fsImpl, homeDir);
+  return writeToPreferredBackend(
+    () => writeKeychainCredential(profile, value, load),
+    () => writeCredentialFile(profile, value, fsImpl, homeDir),
+  );
 }
 
 export async function deleteCredential(
@@ -41,9 +45,8 @@ export async function deleteCredential(
   fsImpl = fs,
   homeDir = os.homedir(),
 ) {
-  let deleted = false;
-  try {
-    deleted = await deleteKeychainCredential(profile, load);
-  } catch {}
-  return deleteCredentialFile(profile, fsImpl, homeDir) || deleted;
+  return deleteFromBackends(
+    () => deleteKeychainCredential(profile, load),
+    () => deleteCredentialFile(profile, fsImpl, homeDir),
+  );
 }

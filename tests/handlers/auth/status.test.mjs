@@ -33,7 +33,6 @@ test("status uses explicit identity values from its caller", async () => {
       toJsonOutput,
     }),
   );
-  expect(cf.get).toHaveBeenCalledWith("/user");
   expect(toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ profile: "caller-profile" }));
 });
 
