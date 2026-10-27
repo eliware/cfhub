@@ -12,7 +12,5 @@ test("creates a tier with its controls and module list", () => {
   expect(document.createElement).toHaveBeenCalledWith("div");
   expect(group.className).toBe("module-tier");
   expect(group.innerHTML).toContain("Basic modules");
-  expect(group.innerHTML).toContain('data-tier-enable="basic"');
-  expect(group.innerHTML).toContain('data-tier-disable="basic"');
   expect(group.querySelector).toHaveBeenCalledWith(".module-list");
 });

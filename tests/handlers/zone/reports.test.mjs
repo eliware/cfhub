@@ -47,3 +47,28 @@ test("audits through generic clients and prints JSON text", async () => {
 test("requires a zone ID", async () => {
   await expect(handleZoneReport(context({ opts: {} }))).rejects.toThrow("Missing --zone-id");
 });
+
+test("coordinates JSON and text security reports", async () => {
+  const settings = ["ssl", "min_tls_version", "always_use_https", "tls_1_3", "other"].map((id) => ({
+    id,
+  }));
+  const toJsonOutput = jest.fn();
+  const cf = { get: jest.fn().mockResolvedValue({ result: settings }) };
+  await handleZoneReport(context({ action: "settings", cf, toJsonOutput }));
+  expect(toJsonOutput).toHaveBeenCalledWith({
+    zoneId: "zone",
+    settings: settings.slice(0, 4),
+    missing: [],
+  });
+
+  const printer = { log: jest.fn() };
+  await handleZoneReport(
+    context({
+      action: "settings",
+      cf: { get: jest.fn().mockResolvedValue({}) },
+      outputJson: false,
+      printer,
+    }),
+  );
+  expect(printer.log).toHaveBeenCalledWith(expect.stringContaining('"missing"'));
+});

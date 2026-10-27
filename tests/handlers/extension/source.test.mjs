@@ -56,17 +56,25 @@ test("reports a missing path or invalid manifest", () => {
   expect(fail).toHaveBeenLastCalledWith("Invalid cfhub extension manifest");
 });
 
-test("rejects command paths that resolve outside the source directory", () => {
+test.each([
+  ["absolute command path", "/outside.mjs"],
+  ["relative command path traversal", "../outside.mjs"],
+])("rejects a command path outside the source directory with %s", (_reason, commandPath) => {
   const fail = jest.fn();
-  const loaded = loadExtensionSource({
-    sourcePath: "/source",
-    fsImpl: {
-      readFileSync: () =>
-        JSON.stringify({ name: "demo", version: "1.0.0", commands: { demo: "/outside.mjs" } }),
-    },
-    fail,
-  });
-  expect(loaded).toBeNull();
+  expect(
+    loadExtensionSource({
+      sourcePath: "/source",
+      fsImpl: {
+        readFileSync: () =>
+          JSON.stringify({
+            name: "demo",
+            version: "1.0.0",
+            commands: { demo: commandPath },
+          }),
+      },
+      fail,
+    }),
+  ).toBeNull();
   expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
 });
 

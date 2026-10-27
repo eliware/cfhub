@@ -1,7 +1,7 @@
-import path from "node:path";
 import { cleanupExtension } from "./cleanup.mjs";
 import { restorePreviousExtension } from "./restore.mjs";
 import { copyExtensionToStage, createExtensionStagingRoot } from "./staging.mjs";
+import { createExtensionBackup } from "./backup.mjs";
 
 export function replaceExtension({ source, destination, root, name, fsImpl }) {
   let stagingRoot;
@@ -13,8 +13,7 @@ export function replaceExtension({ source, destination, root, name, fsImpl }) {
   let cleanupErrors;
   try {
     stagingRoot = createExtensionStagingRoot(root, fsImpl);
-    backupRoot = fsImpl.mkdtempSync(path.join(root, ".cfhub-extension-backup-"));
-    backupDestination = path.join(backupRoot, name);
+    ({ backupRoot, backupDestination } = createExtensionBackup(root, name, fsImpl));
     stagedDestination = copyExtensionToStage({ source, stagingRoot, name, fsImpl });
     fsImpl.renameSync(destination, backupDestination);
     originalMoved = true;

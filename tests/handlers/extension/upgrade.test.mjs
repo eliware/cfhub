@@ -128,30 +128,6 @@ test("upgrade requires a source path", () => {
   expect(fail).toHaveBeenCalledWith("Missing --path to an extension directory");
 });
 
-test("refuses an upgrade manifest with a command path traversal", () => {
-  const fail = jest.fn();
-  const rmSync = jest.fn();
-  upgradeExtension({
-    opts: { path: "/source" },
-    printer: { log: jest.fn() },
-    fail,
-    fsImpl: {
-      readFileSync: () =>
-        JSON.stringify({
-          name: "demo",
-          version: "1",
-          commands: { demo: "../outside.mjs" },
-        }),
-      mkdirSync: jest.fn(),
-      existsSync: jest.fn(() => true),
-      rmSync,
-    },
-    homeDir: "/home",
-  });
-  expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
-  expect(rmSync).not.toHaveBeenCalled();
-});
-
 test("refuses an extension name that is unsafe on Windows", () => {
   const fail = jest.fn();
   const rmSync = jest.fn();
