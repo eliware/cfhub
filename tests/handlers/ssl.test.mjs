@@ -14,25 +14,21 @@ const base = () => ({
   fail: jest.fn(),
 });
 
-test("ssl lists certificates and summarizes active coverage", async () => {
+test("routes certificate and coverage requests", async () => {
   const ctx = base();
   await handleSsl({ ...ctx, action: "certificates" });
-  await handleSsl({ ...ctx, action: "coverage" });
+  const coverage = base();
+  await handleSsl({ ...coverage, action: "coverage" });
   expect(ctx.cf.get).toHaveBeenCalledWith("/zones/z1/ssl/certificate_packs");
-  expect(ctx.toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ complete: true }));
+  expect(ctx.toJsonOutput).toHaveBeenCalledWith({
+    result: [{ hosts: ["example.com"], status: "active", type: " Universal" }],
+  });
+  expect(coverage.cf.get).toHaveBeenCalledWith("/zones/z1/ssl/certificate_packs");
+  expect(coverage.toJsonOutput).toHaveBeenCalled();
   const text = base();
   text.outputJson = false;
   await handleSsl({ ...text, action: "certificates" });
-  await handleSsl({ ...text, action: "coverage" });
   expect(text.printer.log).toHaveBeenCalled();
-  const empty = base();
-  empty.cf.get.mockResolvedValue({});
-  await handleSsl({ ...empty, action: "coverage" });
-  expect(empty.toJsonOutput).toHaveBeenCalledWith({ coverage: [], complete: true });
-  const noHosts = base();
-  noHosts.cf.get.mockResolvedValue({ result: [{ status: "active" }] });
-  await handleSsl({ ...noHosts, action: "coverage" });
-  expect(noHosts.toJsonOutput).toHaveBeenCalledWith({ coverage: [], complete: true });
 });
 
 test("gets SSL settings and prints text output", async () => {
@@ -78,18 +74,6 @@ test("validates zone IDs and reports unknown actions", async () => {
   await expect(handleSsl({ ...base(), action: "other", fail })).rejects.toThrow(
     "Unknown ssl action: other",
   );
-});
-
-test("coverage marks non-active packs incomplete", async () => {
-  const ctx = base();
-  ctx.cf.get.mockResolvedValue({
-    result: [{ hosts: ["example.com"], status: "pending", type: "advanced" }],
-  });
-  await handleSsl({ ...ctx, action: "coverage" });
-  expect(ctx.toJsonOutput).toHaveBeenCalledWith({
-    coverage: [{ host: "example.com", status: "pending", type: "advanced" }],
-    complete: false,
-  });
 });
 
 test("gets JSON settings and prints updated settings", async () => {

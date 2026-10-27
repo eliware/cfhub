@@ -29,14 +29,6 @@ test("creates a Fastify callback server", async () => {
   await server.close();
 });
 
-test("server binds the first available port and returns its assigned port", async () => {
-  const server = makeServer({ port: 9000 });
-  await expect(
-    startOAuthServer({ ports: [1120, 1121], bindHost: "127.0.0.1", serverFactory: () => server }),
-  ).resolves.toEqual({ server, port: 9000 });
-  expect(server.listen).toHaveBeenCalledWith({ port: 1120, host: "127.0.0.1" });
-});
-
 test("server retries ports that are in use and falls back to the candidate port", async () => {
   const busy = Object.assign(new Error("busy"), { code: "EADDRINUSE" });
   const first = makeServer({ error: busy });

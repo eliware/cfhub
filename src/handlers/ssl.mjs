@@ -1,5 +1,6 @@
 import { getZoneId } from "./identifiers.mjs";
 import { requireValue } from "./argument-validation.mjs";
+import { showCertificateCoverage } from "./ssl/certificate-coverage.mjs";
 
 export async function handleSsl({
   cf,
@@ -19,35 +20,12 @@ export async function handleSsl({
     const result = await cf.get(`/zones/${zoneId}/settings/${setting}`);
     return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
   }
-  if (action === "certificates" || action === "coverage") {
+  if (action === "certificates") {
     const result = await cf.get(`/zones/${zoneId}/ssl/certificate_packs`);
-    if (action === "certificates")
-      return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
-    const packs = Array.isArray(result?.result) ? result.result : [];
-    const coverage = new Map(
-      packs
-        .flatMap((pack) =>
-          (pack.hosts || []).map((host) => ({ host, status: pack.status, type: pack.type })),
-        )
-        .map((item) => [item.host, item]),
-    );
-    const items = [...coverage.values()];
-    return outputJson
-      ? toJsonOutput({
-          coverage: items,
-          complete: items.every((item) => item.status === "active"),
-        })
-      : printer.log(
-          JSON.stringify(
-            {
-              coverage: items,
-              complete: items.every((item) => item.status === "active"),
-            },
-            null,
-            2,
-          ),
-        );
+    return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
   }
+  if (action === "coverage")
+    return showCertificateCoverage({ cf, zoneId, outputJson, toJsonOutput, printer });
   if (action === "set") {
     requireValue(body, "Missing --data or --file", fail);
     if (opts["dry-run"])

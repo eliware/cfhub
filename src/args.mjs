@@ -1,4 +1,4 @@
-import { readOptionValue } from "./args-option-value.mjs";
+import { normalizeOptionValue, readOptionValue } from "./args/option-value.mjs";
 
 export function parseArgs(argv) {
   const args = [];
@@ -13,12 +13,12 @@ export function parseArgs(argv) {
     if (eq !== -1) {
       const key = arg.slice(2, eq);
       const value = arg.slice(eq + 1);
-      opts[key] = key === "dry-run" && ["true", "false"].includes(value) ? value === "true" : value;
+      opts[key] = normalizeOptionValue(key, value);
       continue;
     }
     const key = arg.slice(2);
     const option = readOptionValue(argv[i + 1]);
-    opts[key] = option.value;
+    opts[key] = option.consumesNext ? normalizeOptionValue(key, option.value) : option.value;
     if (option.consumesNext) i++;
   }
   return { args, opts };
