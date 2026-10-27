@@ -1,5 +1,6 @@
 import path from "node:path";
 import { cleanupExtension } from "./cleanup.mjs";
+import { restorePreviousExtension } from "./restore.mjs";
 import { copyExtensionToStage, createExtensionStagingRoot } from "./staging.mjs";
 
 export function replaceExtension({ source, destination, root, name, fsImpl }) {
@@ -22,15 +23,8 @@ export function replaceExtension({ source, destination, root, name, fsImpl }) {
       originalMoved = false;
       installedSuccessfully = true;
     } catch (installError) {
-      try {
-        fsImpl.renameSync(backupDestination, destination);
-        originalMoved = false;
-      } catch (restoreError) {
-        throw new Error(
-          `Extension upgrade failed. Restore the backup at ${backupDestination}. ${restoreError.message}`,
-          { cause: installError },
-        );
-      }
+      restorePreviousExtension({ backupDestination, destination, fsImpl, installError });
+      originalMoved = false;
       throw installError;
     }
   } finally {

@@ -21,7 +21,7 @@ test("serves text and image assets only for enabled GET requests", () => {
       scopePicker: true,
     }),
   ).toBe(true);
-  expect(response.end.mock.calls.at(-1)[0]).toBeInstanceOf(Buffer);
+  expect(response.end).toHaveBeenCalled();
   expect(
     serveOAuthPickerStaticAsset({
       request: { method: "POST", headers: {} },

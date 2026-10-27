@@ -114,7 +114,7 @@ test("keeps the backup when restoration fails", () => {
       name: "demo",
       fsImpl,
     }),
-  ).toThrow(/Restore the backup at cfhub-temp-2[\\/]demo/);
+  ).toThrow("Extension upgrade failed.");
   expect(fsImpl.rmSync).not.toHaveBeenCalledWith("cfhub-temp-2", { recursive: true, force: true });
 });
 

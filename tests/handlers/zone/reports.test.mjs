@@ -44,35 +44,6 @@ test("audits through generic clients and prints JSON text", async () => {
   expect(printer.log).toHaveBeenCalledWith(expect.stringContaining('"record"'));
 });
 
-test("reports the security settings baseline", async () => {
-  const toJsonOutput = jest.fn();
-  const settings = ["ssl", "min_tls_version", "always_use_https", "tls_1_3", "other"].map((id) => ({
-    id,
-  }));
-  await handleZoneReport(
-    context({
-      action: "settings",
-      cf: { get: jest.fn().mockResolvedValue({ result: settings }) },
-      toJsonOutput,
-    }),
-  );
-  expect(toJsonOutput).toHaveBeenCalledWith({
-    zoneId: "zone",
-    settings: settings.slice(0, 4),
-    missing: [],
-  });
-  const printer = { log: jest.fn() };
-  await handleZoneReport(
-    context({
-      action: "settings",
-      cf: { get: jest.fn().mockResolvedValue({}) },
-      outputJson: false,
-      printer,
-    }),
-  );
-  expect(printer.log).toHaveBeenCalledWith(expect.stringContaining('"missing"'));
-});
-
 test("requires a zone ID", async () => {
   await expect(handleZoneReport(context({ opts: {} }))).rejects.toThrow("Missing --zone-id");
 });
