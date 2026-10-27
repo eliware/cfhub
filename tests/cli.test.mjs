@@ -163,4 +163,93 @@ test("routes extension commands before Cloudflare setup", async () => {
   expect(cfFactory).not.toHaveBeenCalled();
 });
 
+test("supports a bare pager flag with and without saved pager settings", async () => {
+  const mod = await import("../src/cli.mjs?ts=17");
+  const home = "/tmp/cf-cli-pager-test";
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const fsImpl = {
+    existsSync: () => false,
+    readFileSync: jest.fn(),
+    mkdirSync: jest.fn(),
+    writeFileSync: jest.fn(),
+    chmodSync: jest.fn(),
+  };
+  const handler = ({ printer: injected }) => injected.log("pager output");
+  const oldPager = process.env.PAGER;
+  process.env.PAGER = "true";
+  try {
+    await mod.run({
+      argv: ["zones", "list", "--pager"],
+      env: {},
+      homeDir: home,
+      fsImpl,
+      printer,
+      loadEnv: jest.fn(),
+      cfFactory: jest.fn(() => ({})),
+      handlers: { zones: handler },
+      exit: jest.fn(),
+    });
+  } finally {
+    if (oldPager === undefined) delete process.env.PAGER;
+    else process.env.PAGER = oldPager;
+  }
+  const savedPager = process.env.PAGER;
+  delete process.env.PAGER;
+  try {
+    await mod.run({
+      argv: ["zones", "list", "--pager", "--no-pager"],
+      env: {},
+      homeDir: `${home}-fallback`,
+      fsImpl,
+      printer,
+      loadEnv: jest.fn(),
+      cfFactory: jest.fn(() => ({})),
+      handlers: { zones: handler },
+      exit: jest.fn(),
+    });
+  } finally {
+    if (savedPager === undefined) delete process.env.PAGER;
+    else process.env.PAGER = savedPager;
+  }
+  expect(printer.error).not.toHaveBeenCalled();
+});
+
+test("prints dashboard links before dispatch", async () => {
+  const mod = await import("../src/cli.mjs?ts=13");
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const common = {
+    printer,
+    env: {},
+    loadEnv: jest.fn(),
+    cfFactory: jest.fn(() => ({})),
+    exit: jest.fn(),
+  };
+  await mod.run({
+    ...common,
+    argv: ["zones", "get", "--zone-id", "z1", "--web"],
+  });
+  expect(printer.log).toHaveBeenCalledWith("https://dash.cloudflare.com/zones/z1");
+  await mod.run({
+    ...common,
+    argv: ["zones", "get", "--account-id", "a1", "--web"],
+  });
+  await mod.run({ ...common, argv: ["zones", "get", "--web"] });
+});
+
+test("renders templates through injected handlers", async () => {
+  const mod = await import("../src/cli.mjs?ts=14");
+  const printer = { log: jest.fn(), error: jest.fn() };
+  await mod.run({
+    argv: ["zones", "list", "--template", "{{.name}}"],
+    printer,
+    loadEnv: jest.fn(),
+    cfFactory: jest.fn(() => ({})),
+    handlers: {
+      zones: ({ toJsonOutput }) => toJsonOutput({ name: "example.com" }),
+    },
+    exit: jest.fn(),
+  });
+  expect(printer.log).toHaveBeenCalledWith("example.com");
+});
+
 test("covers default CLI inputs, exit handling, and web output", fixtureCase1);

@@ -1,5 +1,6 @@
-import { pickerAsset, pickerAssetBuffer } from "./selection.mjs";
+import { pickerAsset } from "./selection.mjs";
 import { pickerAssetDefinition } from "./map.mjs";
+import { pickerAssetBuffer } from "./source-buffer.mjs";
 
 export function loadOAuthPickerAsset(pathname) {
   const definition = pickerAssetDefinition(pathname);

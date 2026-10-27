@@ -1,8 +1,4 @@
-export function requireAuthStatusToken(token, fail) {
-  if (token) return true;
-  fail("You are not logged into Cloudflare. Run: cfhub auth login");
-  return false;
-}
+import { requireAuthStatusToken } from "./token-validation.mjs";
 
 export function selectAuthStatusIdentity({ token, fail, activeProfile, resource, data, opts }) {
   if (!requireAuthStatusToken(token, fail)) return null;
