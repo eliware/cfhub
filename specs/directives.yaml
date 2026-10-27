@@ -1,4 +1,4 @@
-version: "13.0"
+version: "15.0"
 description: Defines operating rules for cfhub.
 directives:
   - id: E-1120.0

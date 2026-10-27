@@ -31,6 +31,8 @@ Keep credentials, secret values, private data, and runtime state out of Git.
 
 ## Changes
 
+Update user documentation and RELEASE_NOTES.md when user-visible behavior changes.
+
 ## Application
 
 Run focused tests first during development.
@@ -41,7 +43,12 @@ Run the full `npm test` suite for final validation before a commit, milestone, o
 
 ## CLI
 
+Keep `--help` and `--version` read-only.
+Document each command, argument, default, error, and exit code.
+
 ## Web
+
+Keep route, asset, build, and deployment guidance aligned with maintained code and workflows.
 
 ## npm publication
 

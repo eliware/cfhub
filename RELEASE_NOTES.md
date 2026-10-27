@@ -1,11 +1,26 @@
 # Release Notes
 
-## 13.0.0 — 2026-10-17
+## 15.0.1 — 2026-10-27
+
+### Added
+
+- Added complete user guides for setup, commands, configuration, OAuth scopes, extensions, output, and web previews.
+- Added generated command references and shell completions.
+- Added a Fastify web preview, Webpack bundles, Puppeteer screenshots, and Lighthouse checks for OAuth pages.
 
 ### Changed
 
-- Updated package metadata and repository workflows for Convention 13.
-- Updated webpack and related lockfile packages.
+- Aligned package metadata, repository specifications, and workflows with Eliware Test 15.
+- Updated `@eliware/common`, `@eliware/test`, Puppeteer, Webpack, and all other outdated dependencies.
+- Restructured CLI, authentication, OAuth, DNS, extension, output, and web code into focused modules with matching tests.
+- Standardized browser validation and web tooling with port 1120.
+- Simplified repository guidance and aligned CI, npm, and Knit workflows with current conventions.
+
+### Fixed
+
+- Fixed API path traversal checks, account token verification paths, health check deletion, alias resolution, and Unicode token editing.
+- Fixed OAuth, extension upgrade cleanup, account output, and browser page behavior.
+- Fixed command references and end-user documentation.
 
 ## 12.0.1 — 2026-10-14
 
