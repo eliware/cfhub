@@ -1,13 +1,27 @@
 import { COMMAND_GROUPS, GLOBAL_FLAGS } from "../command/catalog.mjs";
 
+function renderTable(headers, rows) {
+  const widths = headers.map((header, index) =>
+    Math.max(header.length, ...rows.map((row) => row[index].length)),
+  );
+  const renderRow = (row) =>
+    `| ${row.map((cell, index) => cell.padEnd(widths[index])).join(" | ")} |`;
+  return [
+    renderRow(headers),
+    renderRow(widths.map((width) => "-".repeat(width))),
+    ...rows.map(renderRow),
+  ];
+}
+
 export function renderCommandReference() {
   const commandRows = COMMAND_GROUPS.flatMap(({ title, commands }) =>
-    commands.map(
-      ([name, description]) =>
-        `| ${title.replace(" COMMANDS", "")} | \`${name}\` | ${description} |`,
-    ),
+    commands.map(([name, description]) => [
+      title.replace(" COMMANDS", ""),
+      `\`${name}\``,
+      description,
+    ]),
   );
-  const flagRows = GLOBAL_FLAGS.map(([name, description]) => `| \`${name}\` | ${description} |`);
+  const flagRows = GLOBAL_FLAGS.map(([name, description]) => [`\`${name}\``, description]);
   return [
     "# Command reference",
     "",
@@ -17,15 +31,11 @@ export function renderCommandReference() {
     "",
     "## Commands",
     "",
-    "| Group | Command | Description |",
-    "| --- | --- | --- |",
-    ...commandRows,
+    ...renderTable(["Group", "Command", "Description"], commandRows),
     "",
     "## Global flags",
     "",
-    "| Flag | Description |",
-    "| --- | --- |",
-    ...flagRows,
+    ...renderTable(["Flag", "Description"], flagRows),
     "",
     "Supported color values are `always`, `never`, and `auto`.",
     "",
