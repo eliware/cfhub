@@ -2,13 +2,9 @@ import * as fs from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { resolve, sep } from "node:path";
 import os from "node:os";
-import { parseEnvFile } from "./env-file-parser.mjs";
+import { loadEnvFile } from "./env/file-loader.mjs";
 
-export function loadEnvFile(filePath, env = process.env, fsImpl = fs) {
-  if (!fsImpl.existsSync(filePath)) return false;
-  parseEnvFile(fsImpl.readFileSync(filePath, "utf8"), env);
-  return true;
-}
+export { loadEnvFile } from "./env/file-loader.mjs";
 
 export function loadUserEnv(homeDir = os.homedir(), env = process.env, fsImpl = fs) {
   return loadEnvFile(`${homeDir}/.cfhub`, env, fsImpl);
