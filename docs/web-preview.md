@@ -27,6 +27,14 @@ Run `npm run lighthouse` in a second terminal. The command writes a JSON report 
 
 Set `WEB_HOST` or `WEB_PORT` before you start the preview server. These variables select its listening address. Set `WEB_URL` before you capture screenshots to use a different address.
 
+| Variable          | Default                            | Purpose                                          |
+| ----------------- | ---------------------------------- | ------------------------------------------------ |
+| `WEB_HOST`        | `127.0.0.1`                        | Select the preview server host.                  |
+| `WEB_PORT`        | `1120`                             | Select the preview server port.                  |
+| `WEB_URL`         | `http://127.0.0.1:1120/`           | Select the screenshot target URL.                |
+| `SCREENSHOT_PATH` | `artifacts/cfhub-oauth-picker.png` | Select the screenshot file path.                 |
+| `CHROME_PATH`     | Automatic browser discovery        | Select a Chrome executable when discovery fails. |
+
 ## Run the OAuth browser checks
 
 Run `npm run test:e2e:web` to test the complete OAuth picker and callback flow. The checks use temporary local servers and a mock token response.
