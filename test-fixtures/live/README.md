@@ -15,21 +15,13 @@ The suite discovers a zone and account from `cfhub zones list`. Set
 
 The dry suite makes real Cloudflare read requests. Its write cases stop at
 cfhub's dry-run boundary and do not send mutation requests to Cloudflare.
-It runs serially and does not retry failed requests, keeping the request volume
-bounded. It still requires a valid token and the relevant permissions.
+It requires a valid token and the relevant permissions.
 Inventory export is skipped by default because it scans every zone in the
 account; enable it explicitly with `CFHUB_LIVE_INCLUDE_INVENTORY=1`.
 
-The wet command runs complete disposable DNS and health-check lifecycles. DNS
-is listed, created, read, updated, read again, deleted, and confirmed gone.
-The health workflow creates an HTTPS monitor for `eliware.org/health`, reads
-it, deletes it, and confirms it is gone. It requires a selected zone and is
-the only command that mutates Cloudflare:
-
-The wet suite also creates a temporary IP list, verifies an empty item list,
-adds an item, replaces it with an updated value, deletes the item, and then
-deletes and verifies the list. Cloudflare does not expose an in-place list-item
-update endpoint, so the update step is implemented as delete-and-recreate.
+The wet command mutates Cloudflare. It creates and removes a DNS record, an
+HTTPS monitor for `eliware.org/health`, and a temporary IP list with an item.
+It requires a selected test zone.
 
 ```sh
 npm run test:live:wet
