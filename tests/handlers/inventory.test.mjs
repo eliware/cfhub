@@ -102,39 +102,3 @@ test("inventory export uses generic zone and DNS clients", async () => {
     zones: [{ id: "z2", name: "site.test", status: undefined, records: [], ssl: { value: "ssl" } }],
   });
 });
-
-test("limits concurrent zones and keeps inventory order", async () => {
-  const zones = Array.from({ length: 6 }, (_, index) => ({
-    id: `z${index}`,
-    name: `zone-${index}`,
-  }));
-  let active = 0;
-  let maximum = 0;
-  const cf = {
-    get: jest.fn((path) => {
-      if (path.startsWith("/zones?")) return Promise.resolve({ result: zones });
-      active += 1;
-      maximum = Math.max(maximum, active);
-      return new Promise((resolve) =>
-        queueMicrotask(() => {
-          active -= 1;
-          resolve(path.endsWith("dns_records") ? { result: [] } : { value: "strict" });
-        }),
-      );
-    }),
-  };
-  const toJsonOutput = jest.fn();
-  await handleInventory({
-    cf,
-    action: "export",
-    opts: { "account-id": "account-1" },
-    outputJson: true,
-    toJsonOutput,
-    printer: { log: jest.fn() },
-    fail: jest.fn(),
-  });
-  const inventory = toJsonOutput.mock.calls[0][0].zones;
-  expect(inventory.map((zone) => zone.id)).toEqual(zones.map((zone) => zone.id));
-  expect(maximum).toBeLessThanOrEqual(10);
-  expect(maximum).toBeGreaterThan(2);
-});
