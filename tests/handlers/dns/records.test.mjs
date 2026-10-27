@@ -116,6 +116,34 @@ test("delegates mutation actions", async () => {
     }),
   );
   expect(remove).toHaveBeenCalled();
+
+  const post = jest.fn().mockResolvedValue({ id: "generic-created" });
+  const genericCreateOutput = jest.fn();
+  await handleDnsRecords(
+    context({
+      action: "create",
+      body: { type: "A", name: "www" },
+      cf: { post },
+      toJsonOutput: genericCreateOutput,
+    }),
+  );
+  expect(post).toHaveBeenCalledWith("/zones/zone-1/dns_records", {
+    body: { type: "A", name: "www" },
+  });
+  expect(genericCreateOutput).toHaveBeenCalledWith({ id: "generic-created" });
+
+  const genericDelete = jest.fn().mockResolvedValue({ deleted: true });
+  const genericDeleteOutput = jest.fn();
+  await handleDnsRecords(
+    context({
+      action: "delete",
+      opts: { "zone-id": "zone-1", id: "record-1", force: true },
+      cf: { delete: genericDelete },
+      toJsonOutput: genericDeleteOutput,
+    }),
+  );
+  expect(genericDelete).toHaveBeenCalledWith("/zones/zone-1/dns_records/record-1");
+  expect(genericDeleteOutput).toHaveBeenCalledWith({ deleted: true });
 });
 
 test("validates required values and rejects unknown actions", async () => {

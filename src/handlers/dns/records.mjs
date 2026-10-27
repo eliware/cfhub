@@ -3,7 +3,8 @@ import { requireValue } from "../argument-validation.mjs";
 import { displayDnsRecords } from "./read.mjs";
 import { getDnsRecord } from "./record-get.mjs";
 import { handleDnsDiff } from "./diff.mjs";
-import { handleDnsMutation } from "./mutations.mjs";
+import { writeDnsRecord } from "./mutation/write.mjs";
+import { deleteDnsRecord } from "./mutation/delete.mjs";
 
 export async function handleDnsRecords({
   cf,
@@ -47,8 +48,8 @@ export async function handleDnsRecords({
   if (action === "get")
     return getDnsRecord({ cf, zoneId, id, outputJson, toJsonOutput, printer, fail });
 
-  if (["create", "update", "delete"].includes(action))
-    return handleDnsMutation({
+  if (["create", "update", "delete"].includes(action)) {
+    const mutation = {
       action,
       zoneId,
       id,
@@ -59,7 +60,9 @@ export async function handleDnsRecords({
       toJsonOutput,
       printer,
       fail,
-    });
+    };
+    return action === "delete" ? deleteDnsRecord(mutation) : writeDnsRecord(mutation);
+  }
 
   fail(`Unknown dns-records action: ${action}`);
 }
