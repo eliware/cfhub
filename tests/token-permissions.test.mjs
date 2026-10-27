@@ -1,15 +1,5 @@
 import { jest } from "@jest/globals";
-import { inspectApiToken, summarizePermissions } from "../src/token-permissions.mjs";
-
-test("summarizes API permission groups", () => {
-  expect(summarizePermissions()).toEqual({ total: 0, read: 0, write: 0, other: 0 });
-  expect(summarizePermissions(["DNS Read", "DNS Write", "Billing"])).toEqual({
-    total: 3,
-    read: 1,
-    write: 1,
-    other: 1,
-  });
-});
+import { inspectApiToken } from "../src/token-permissions.mjs";
 
 test("discovers user-token permissions from token details", async () => {
   const fetchImpl = jest

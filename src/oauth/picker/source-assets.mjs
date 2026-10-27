@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { pickerAssetDefinition } from "./asset-map.mjs";
+import { pickerAssetDefinition } from "./asset/map.mjs";
 
 export function readSourcePickerAsset(name, encoding) {
   const definition = pickerAssetDefinition(`/${name}`);

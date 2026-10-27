@@ -30,4 +30,12 @@ test("serves text and image assets only for enabled GET requests", () => {
       scopePicker: true,
     }),
   ).toBe(false);
+  expect(
+    serveOAuthPickerStaticAsset({
+      request: { method: "GET", headers: {} },
+      response,
+      url: new URL("http://localhost/unknown.css"),
+      scopePicker: true,
+    }),
+  ).toBe(false);
 });

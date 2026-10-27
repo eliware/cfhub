@@ -1,10 +1,10 @@
-import { failurePage } from "../failure-page.mjs";
+import { renderFailurePage } from "../failure/render.mjs";
 
 const htmlContentType = `text/html${String.fromCharCode(59)} charset=utf-8`;
 
 export function sendOAuthCallbackFailure(response, { title, detail }) {
   response.writeHead(400, { "content-type": htmlContentType });
-  response.end(failurePage({ title, detail }));
+  response.end(renderFailurePage({ title, detail }));
 }
 
 export function callbackStateError(response) {

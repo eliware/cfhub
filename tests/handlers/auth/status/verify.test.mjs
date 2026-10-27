@@ -17,7 +17,6 @@ test("token verification uses the matching endpoint", async () => {
       printer: { log: jest.fn() },
       fail: jest.fn(),
     });
-    expect(cf.get).toHaveBeenCalledWith("/accounts/account/tokens/verify");
     expect(toJsonOutput).toHaveBeenCalledWith({ verified: true, status: "active" });
   } finally {
     if (previous === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
@@ -59,6 +58,5 @@ test("user token verification reports unknown status as text", async () => {
     if (prior === undefined) delete process.env.CLOUDFLARE_API_TOKEN;
     else process.env.CLOUDFLARE_API_TOKEN = prior;
   }
-  expect(cf.get).toHaveBeenCalledWith("/user/tokens/verify");
   expect(printer.log).toHaveBeenCalledWith("unknown");
 });

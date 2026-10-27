@@ -3,7 +3,7 @@ import { copyrightYear } from "../page-metadata.mjs";
 import { createOAuthScopeModel } from "../scope/model.mjs";
 import { serializeOAuthScopeModel } from "../scope/model-serialization.mjs";
 import { renderOAuthTemplate } from "../template.mjs";
-import { pickerAsset } from "./assets.mjs";
+import { pickerAsset } from "./asset/selection.mjs";
 
 export function pickerHtml() {
   const model = serializeOAuthScopeModel(createOAuthScopeModel());

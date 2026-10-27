@@ -3,7 +3,7 @@ import { beforeEach, jest } from "@jest/globals";
 const readFileSync = jest.fn();
 jest.unstable_mockModule("node:fs", () => ({ readFileSync }));
 const { readBuiltPickerAsset } = await import("../../../src/oauth/picker/built-assets.mjs");
-const { pickerAsset } = await import("../../../src/oauth/picker/assets.mjs");
+const { pickerAsset } = await import("../../../src/oauth/picker/asset/selection.mjs");
 
 beforeEach(() => readFileSync.mockReset());
 

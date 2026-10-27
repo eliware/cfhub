@@ -1,4 +1,4 @@
-import { pickerAssetDefinition } from "../../../src/oauth/picker/asset-map.mjs";
+import { pickerAssetDefinition } from "../../../../src/oauth/picker/asset/map.mjs";
 
 test("maps picker text and image routes to their assets", () => {
   expect(pickerAssetDefinition("/oauth-picker.mjs")).toMatchObject({

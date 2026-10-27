@@ -1,6 +1,6 @@
 import { VERSION } from "../../version.mjs";
 import { copyrightYear } from "../page-metadata.mjs";
-import { pickerAsset } from "../picker/assets.mjs";
+import { pickerAsset } from "../picker/asset/selection.mjs";
 import { escapeOAuthHtml } from "../html.mjs";
 import { renderOAuthTemplate } from "../template.mjs";
 

@@ -1,6 +1,6 @@
-import { pickerAsset, pickerAssetBuffer } from "./assets.mjs";
+import { pickerAsset, pickerAssetBuffer } from "./asset/selection.mjs";
 import { sendAsset } from "../asset/response.mjs";
-import { pickerAssetDefinition } from "./asset-map.mjs";
+import { pickerAssetDefinition } from "./asset/map.mjs";
 
 export function serveOAuthPickerStaticAsset({ request, response, url, scopePicker }) {
   if (!scopePicker || request.method !== "GET") return false;
