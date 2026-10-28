@@ -20,11 +20,19 @@ export function replaceExtension({ source, destination, root, name, fsImpl }) {
     try {
       fsImpl.renameSync(destination, backupDestination);
     } catch (error) {
-      preserveBackupRoot = true;
-      throw new Error(
-        `Could not move the installed extension. Inspect the backup at ${backupDestination}. ${error.message}`,
-        { cause: error },
-      );
+      let backupExists = true;
+      if (typeof fsImpl.existsSync === "function") {
+        try {
+          backupExists = fsImpl.existsSync(backupDestination);
+        } catch {
+          backupExists = true;
+        }
+      }
+      preserveBackupRoot = backupExists;
+      const backupNotice = backupExists ? ` Inspect the backup at ${backupDestination}.` : "";
+      throw new Error(`Could not move the installed extension.${backupNotice} ${error.message}`, {
+        cause: error,
+      });
     }
     originalMoved = true;
     try {

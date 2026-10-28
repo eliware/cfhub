@@ -160,27 +160,57 @@ test("does not clean a staging directory when creation fails", () => {
   expect(fsImpl.rmSync).not.toHaveBeenCalled();
 });
 
-test("preserves the backup directory when moving the installed extension fails", () => {
+function failedBackupMove(overrides = {}) {
   let tempNumber = 0;
-  const moveError = new Error("rename failed after partial move");
   const fsImpl = {
     mkdtempSync: jest.fn(() => `temp-${++tempNumber}`),
     cpSync: jest.fn(),
     renameSync: jest.fn(() => {
-      throw moveError;
+      throw new Error("rename failed");
     }),
     rmSync: jest.fn(),
+    ...overrides,
   };
-  expect(() =>
+  const run = () =>
     replaceExtension({
       source: "source",
       destination: "installed/demo",
       root: "installed",
       name: "demo",
       fsImpl,
-    }),
-  ).toThrow("Inspect the backup at temp-2\\demo");
+    });
+  return { fsImpl, run };
+}
+
+test("keeps a backup after a failed move when the backup exists", () => {
+  const { fsImpl, run } = failedBackupMove({ existsSync: jest.fn(() => true) });
+  expect(run).toThrow("Inspect the backup at temp-2\\demo");
   expect(fsImpl.rmSync).toHaveBeenCalledTimes(1);
   expect(fsImpl.rmSync).toHaveBeenCalledWith("temp-1", { recursive: true, force: true });
+  expect(fsImpl.rmSync).not.toHaveBeenCalledWith("temp-2", { recursive: true, force: true });
+});
+
+test("cleans an empty backup directory after a failed move", () => {
+  const { fsImpl, run } = failedBackupMove({ existsSync: jest.fn(() => false) });
+  expect(run).toThrow("Could not move the installed extension.");
+  expect(fsImpl.rmSync).toHaveBeenNthCalledWith(1, "temp-1", { recursive: true, force: true });
+  expect(fsImpl.rmSync).toHaveBeenNthCalledWith(2, "temp-2", { recursive: true, force: true });
+});
+
+test("keeps the backup when its existence check fails", () => {
+  const { fsImpl, run } = failedBackupMove({
+    existsSync: jest.fn(() => {
+      throw new Error("inspection failed");
+    }),
+  });
+  expect(run).toThrow("Inspect the backup at temp-2\\demo");
+  expect(fsImpl.rmSync).toHaveBeenCalledTimes(1);
+  expect(fsImpl.rmSync).not.toHaveBeenCalledWith("temp-2", { recursive: true, force: true });
+});
+
+test("keeps the backup when the file system cannot inspect it", () => {
+  const { fsImpl, run } = failedBackupMove();
+  expect(run).toThrow("Inspect the backup at temp-2\\demo");
+  expect(fsImpl.rmSync).toHaveBeenCalledTimes(1);
   expect(fsImpl.rmSync).not.toHaveBeenCalledWith("temp-2", { recursive: true, force: true });
 });
