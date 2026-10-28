@@ -38,6 +38,8 @@ export async function handleAuth(context = {}) {
       name: opts?.profile || "default",
       oauthLogin,
       writeCredentialImpl,
+      readCredentialImpl,
+      deleteCredentialImpl,
       readToken,
       promptToken,
       promptAccountId,

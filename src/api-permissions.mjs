@@ -41,7 +41,7 @@ function apiRequestScope(path, method, dryRun) {
     if (["load_balancers", "pools", "monitors"].includes(section))
       return `load-balancing-monitors-and-pools.${mode}`;
     if (section === "healthchecks") return `healthcheck.${mode}`;
-    if (section === "purge_cache") return "cache.purge";
+    if (section === "purge_cache") return requestMethod === "GET" ? `cache.${mode}` : "cache.purge";
     return null;
   }
   if (root !== "accounts") return null;

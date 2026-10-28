@@ -52,6 +52,8 @@ Pass `--zone-id` for zone commands. Pass `--account-id` for account commands. Pa
 
 Pass JSON with `--data` or load it from a file with `--file`. Read action help before you send a write request.
 
+For `api`, `GET` rejects `--data` and `--file`. `DELETE` requires `--force`, or use `--dry-run` to preview it.
+
 ## Authentication login options
 
 Save an API token with `auth login`. Pass `--profile <name>` to select a profile name. Pass `--account-id <id>` or `--zone-id <id>` to associate an account or zone. Pass `--token-stdin` to read the token from standard input.

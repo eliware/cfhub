@@ -1,19 +1,24 @@
 import { createHiddenInputEditor } from "./input-editor.mjs";
-
-export function readHiddenTerminalInput(input, output) {
-  return new Promise((resolve) => {
+export function readHiddenTerminalInput(input, output, interrupt) {
+  return new Promise((resolve, reject) => {
     const editor = createHiddenInputEditor();
-    const finish = (result) => {
+    const finish = () => {
       input.setRawMode(false);
       input.pause();
       output.write("\n");
-      resolve(result);
     };
     const onData = (chunk) => {
       const result = editor.write(chunk);
       if (result.done) {
         input.removeListener("data", onData);
-        finish(result.value);
+        finish();
+        if (result.error) reject(result.error);
+        else if (result.interrupted) {
+          interrupt();
+          const error = new Error("Token input interrupted");
+          error.code = "SIGINT";
+          reject(error);
+        } else resolve(result.value);
       }
     };
     input.on("data", onData);

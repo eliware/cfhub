@@ -17,9 +17,11 @@ function terminalInput() {
 test("hidden prompt connects the terminal reader and handles interrupt", async () => {
   const input = terminalInput();
   const output = outputWriter();
-  const result = promptHidden(input, output);
+  const interrupt = jest.fn();
+  const result = promptHidden(input, output, interrupt);
   input.emit("data", "\u0003");
-  await expect(result).resolves.toBe("");
+  await expect(result).rejects.toMatchObject({ code: "SIGINT" });
+  expect(interrupt).toHaveBeenCalledTimes(1);
   expect(input.setRawMode.mock.calls).toEqual([[true], [false]]);
   expect(input.pause).toHaveBeenCalledTimes(1);
 });

@@ -26,3 +26,18 @@ test("compresses when gzip has a positive quality", () => {
     encodeAsset({ headers: { "accept-encoding": "gzip;q=0.5" } }, "body").contentEncoding,
   ).toBe("gzip");
 });
+
+test.each(["gzip;q=0.5, gzip;q=0", "gzip;q=0.5;q=0.7", "gzip;q=1.1", "gzip;q=NaN", "gzip;q=0.5.1"])(
+  "does not compress for invalid or conflicting gzip quality: %s",
+  (acceptEncoding) => {
+    expect(
+      encodeAsset({ headers: { "accept-encoding": acceptEncoding } }, "body").contentEncoding,
+    ).toBeUndefined();
+  },
+);
+
+test("reads repeated encoding headers", () => {
+  expect(
+    encodeAsset({ headers: { "accept-encoding": ["br", "gzip;q=1"] } }, "body").contentEncoding,
+  ).toBe("gzip");
+});

@@ -23,14 +23,26 @@ test("sets up and cleans up terminal mode after input", async () => {
   expect(output.write).toHaveBeenCalledWith("\n");
 });
 
-test("returns an empty value and resets terminal mode on interrupt", async () => {
+test("sends an interrupt and resets terminal mode when the user presses Ctrl-C", async () => {
+  const input = terminalInput();
+  const output = { write: jest.fn() };
+  const interrupt = jest.fn();
+  const result = readHiddenTerminalInput(input, output, interrupt);
+  input.emit("data", "\u0003");
+  await expect(result).rejects.toMatchObject({ code: "SIGINT" });
+  expect(interrupt).toHaveBeenCalledTimes(1);
+  expect(input.setRawMode.mock.calls).toEqual([[true], [false]]);
+  expect(input.pause).toHaveBeenCalledTimes(1);
+});
+
+test("rejects oversized hidden input and resets terminal mode", async () => {
   const input = terminalInput();
   const output = { write: jest.fn() };
   const result = readHiddenTerminalInput(input, output);
-  input.emit("data", "\u0003");
-  await expect(result).resolves.toBe("");
+  input.emit("data", "a".repeat(4097));
+  await expect(result).rejects.toThrow("API token input exceeds 4096 bytes");
   expect(input.setRawMode.mock.calls).toEqual([[true], [false]]);
-  expect(input.pause).toHaveBeenCalledTimes(1);
+  expect(input.listenerCount("data")).toBe(0);
 });
 
 test("removes the data listener after each prompt", async () => {

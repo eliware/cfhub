@@ -72,7 +72,7 @@ test("fails closed when an API path or method cannot be mapped", () => {
     "Zone Read",
   ]);
   expect(requiredApiPermissions("api", "/zones/zone/purge_cache", { method: "GET" })).toEqual([
-    "Cache Purge",
+    "Cache Read",
   ]);
   expect(requiredApiPermissions("api", "/zones/zone/unknown", { method: "GET" })).toEqual([]);
   expect(

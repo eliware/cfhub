@@ -18,6 +18,12 @@
 
 ### Fixed
 
+- Mapped GET requests to the cache endpoint to the cache read permission.
+- Removed saved credentials when login profile storage fails.
+- Staged extension installs and rejected existing symbolic-link destinations.
+- Enforced token input limits and terminal cancellation for hidden input.
+- Compressed OAuth assets only when gzip has a valid positive quality value.
+- Documented body and confirmation rules for direct API requests.
 - Treated `--dry-run=false` as a real write request across command handlers.
 - Served the OAuth picker source modules with paths that preserve their relative imports.
 - Reported OAuth server factory errors and retried ports only after listen errors.
