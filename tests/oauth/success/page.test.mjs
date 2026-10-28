@@ -33,7 +33,7 @@ test("success page lists enabled modules and their command examples", () => {
   expect(page).toContain("cfhub dns-records list --zone-id zone-id");
   expect(page).toContain("cfhub zone-settings get --zone-id zone-id --setting &lt;name&gt;");
   expect(page).toContain("cfhub workers list");
-  expect(page).toContain("Enabled · available for the selected scopes.");
+  expect(page).toContain("Read access is enabled for the selected scopes.");
 });
 
 test("success page uses a default account label when account data is absent", () => {

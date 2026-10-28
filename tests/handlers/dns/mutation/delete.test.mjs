@@ -41,7 +41,7 @@ test("requires an ID and force before deletion", async () => {
 
 test("previews deletion without calling the client in dry-run mode", async () => {
   const remove = jest.fn();
-  const input = context({ cf: { delete: remove }, opts: { force: true, "dry-run": true } });
+  const input = context({ cf: { delete: remove }, opts: { "dry-run": true } });
   await deleteDnsRecord(input);
   expect(remove).not.toHaveBeenCalled();
   expect(input.printer.log).toHaveBeenCalledWith(

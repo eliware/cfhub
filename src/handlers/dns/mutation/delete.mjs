@@ -11,9 +11,9 @@ export async function deleteDnsRecord({
   fail,
 }) {
   requireValue(id, "Missing --id", fail);
-  requireValue(opts.force, "Refusing to delete without --force", fail);
   if (opts["dry-run"])
     return printer.log(JSON.stringify({ action: "delete", zoneId, id, dryRun: true }, null, 2));
+  requireValue(opts.force, "Refusing to delete without --force", fail);
   const result =
     typeof cf.delete === "function"
       ? await cf.delete(`/zones/${zoneId}/dns_records/${id}`)

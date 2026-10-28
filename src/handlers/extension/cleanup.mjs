@@ -14,6 +14,7 @@ export function cleanupExtension({
   stagingRoot,
   backupRoot,
   originalMoved,
+  preserveBackupRoot = false,
   installedSuccessfully,
   fsImpl,
 }) {
@@ -21,7 +22,7 @@ export function cleanupExtension({
   try {
     if (stagingRoot) removePath(stagingRoot, fsImpl, installedSuccessfully, errors);
   } finally {
-    if (backupRoot && !originalMoved) {
+    if (backupRoot && !originalMoved && !preserveBackupRoot) {
       removePath(backupRoot, fsImpl, installedSuccessfully, errors);
     }
   }

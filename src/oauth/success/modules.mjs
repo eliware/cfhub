@@ -3,7 +3,7 @@ import { moduleCatalog } from "../module-catalog.mjs";
 
 function moduleCard(module, enabled) {
   const status = enabled
-    ? "Enabled · available for the selected scopes."
+    ? "Read access is enabled for the selected scopes."
     : `Requires: ${escapeOAuthHtml(module.scopes.join(", "))}`;
   return `<div class="module"><strong>${escapeOAuthHtml(module.name)}</strong><small>${status}</small></div>`;
 }

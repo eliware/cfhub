@@ -4,7 +4,7 @@ test("module cards render enabled modules and disabled scope requirements", () =
   const enabled = [{ name: "Zone <tools>" }];
   const cards = successModuleCards(enabled);
   expect(cards.enabled).toContain("Zone &lt;tools&gt;");
-  expect(cards.enabled).toContain("Enabled · available for the selected scopes.");
+  expect(cards.enabled).toContain("Read access is enabled for the selected scopes.");
   expect(cards.disabled).toContain("Requires:");
 });
 test("module cards render no enabled items when selection is empty", () => {

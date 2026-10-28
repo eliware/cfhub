@@ -159,3 +159,28 @@ test("does not clean a staging directory when creation fails", () => {
   ).toThrow("staging setup failed");
   expect(fsImpl.rmSync).not.toHaveBeenCalled();
 });
+
+test("preserves the backup directory when moving the installed extension fails", () => {
+  let tempNumber = 0;
+  const moveError = new Error("rename failed after partial move");
+  const fsImpl = {
+    mkdtempSync: jest.fn(() => `temp-${++tempNumber}`),
+    cpSync: jest.fn(),
+    renameSync: jest.fn(() => {
+      throw moveError;
+    }),
+    rmSync: jest.fn(),
+  };
+  expect(() =>
+    replaceExtension({
+      source: "source",
+      destination: "installed/demo",
+      root: "installed",
+      name: "demo",
+      fsImpl,
+    }),
+  ).toThrow("Inspect the backup at temp-2\\demo");
+  expect(fsImpl.rmSync).toHaveBeenCalledTimes(1);
+  expect(fsImpl.rmSync).toHaveBeenCalledWith("temp-1", { recursive: true, force: true });
+  expect(fsImpl.rmSync).not.toHaveBeenCalledWith("temp-2", { recursive: true, force: true });
+});

@@ -52,6 +52,12 @@ Pass `--zone-id` for zone commands. Pass `--account-id` for account commands. Pa
 
 Pass JSON with `--data` or load it from a file with `--file`. Read action help before you send a write request.
 
+## Authentication login options
+
+Save an API token with `auth login`. Pass `--profile <name>` to select a profile name. Pass `--account-id <id>` or `--zone-id <id>` to associate an account or zone. Pass `--token-stdin` to read the token from standard input.
+
+Run `oauth login` to sign in through a browser. Pass `--profile <name>`, `--account-id <id>`, or `--zone-id <id>` to set profile details. Pass `--scopes <scopes>` for more comma-separated scopes. Pass `--scope <scope>` for one more scope. Pass `--no-scope-picker` to skip the browser scope picker.
+
 Compare the current DNS records with a JSON file:
 
 ```sh

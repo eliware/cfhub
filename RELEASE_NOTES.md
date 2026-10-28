@@ -21,6 +21,8 @@
 - Fixed API path traversal checks, account token verification paths, health check deletion, alias resolution, and Unicode token editing.
 - Fixed OAuth, extension upgrade cleanup, account output, and browser page behavior.
 - Fixed command references and end-user documentation.
+- Allowed DNS deletion previews without `--force` and kept extension backup paths after failed backup moves.
+- Clarified that the OAuth success page confirms read access for the selected scopes.
 
 ## 12.0.1 — 2026-10-14
 

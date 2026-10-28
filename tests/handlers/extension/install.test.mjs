@@ -87,7 +87,7 @@ test("refuses an extension when its command file is missing", () => {
     fsImpl: {
       readFileSync: () =>
         JSON.stringify({ name: "demo", version: "1", commands: { demo: "index.mjs" } }),
-      statSync: jest.fn(() => {
+      lstatSync: jest.fn(() => {
         throw new Error("missing file");
       }),
       mkdirSync: jest.fn(),
