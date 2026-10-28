@@ -195,3 +195,15 @@ test("previews zone deletion without calling Cloudflare in dry-run mode", async 
     JSON.stringify({ action: "delete", zoneId: "z1", dryRun: true }, null, 2),
   );
 });
+
+test("treats explicit false as a live zone deletion", async () => {
+  const remove = jest.fn().mockResolvedValue({ deleted: true });
+  await handleZones(
+    context({
+      action: "delete",
+      cf: { delete: remove },
+      opts: { "zone-id": "z1", force: true, "dry-run": false },
+    }),
+  );
+  expect(remove).toHaveBeenCalledWith("/zones/z1");
+});

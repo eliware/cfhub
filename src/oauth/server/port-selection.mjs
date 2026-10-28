@@ -2,14 +2,16 @@ export async function selectOAuthServerPort({ ports, serverFactory, bindHost }) 
   let server;
   let port;
   for (const candidate of ports) {
+    let candidateServer;
     try {
-      server = serverFactory();
-      await server.listen({ port: candidate, host: bindHost });
-      port = server.server.address()?.port || candidate;
+      candidateServer = serverFactory();
+      await candidateServer.listen({ port: candidate, host: bindHost });
+      server = candidateServer;
+      port = candidateServer.server.address()?.port || candidate;
       break;
     } catch (error) {
-      if (server) await server.close();
-      if (error.code !== "EADDRINUSE") throw error;
+      if (candidateServer) await candidateServer.close();
+      if (!candidateServer || error.code !== "EADDRINUSE") throw error;
     }
   }
   if (!server || !port) {

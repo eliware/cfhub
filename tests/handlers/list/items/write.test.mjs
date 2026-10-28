@@ -41,6 +41,15 @@ test("normalizes arrays and prints a create dry run", async () => {
   expect(dryRun.printer.log).toHaveBeenCalledWith(expect.stringContaining('"dryRun": true'));
 });
 
+test("creates items when dry run is explicitly false", async () => {
+  const create = base({ opts: { "dry-run": false } });
+  await createListItems(create);
+  expect(create.cf.post).toHaveBeenCalledWith("/accounts/acct/rules/lists/list/items", {
+    body: [create.body],
+  });
+  expect(create.printer.log).not.toHaveBeenCalled();
+});
+
 test("requires create data", async () => {
   await expect(createListItems(base({ body: null }))).rejects.toThrow("Missing --data");
 });

@@ -76,7 +76,7 @@ test("OAuth login reports exhausted and non-retryable callback listeners", async
       },
       open: jest.fn(),
     }),
-  ).rejects.toThrow("No OAuth callback ports are available");
+  ).rejects.toBe(occupiedError);
 });
 
 test("OAuth login accepts a callback server without an address object", async () => {

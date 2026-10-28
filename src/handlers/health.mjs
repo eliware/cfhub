@@ -27,7 +27,7 @@ export async function handleHealth({
   }
   if (action === "create") {
     requireValue(body, "Missing --data or --file", fail);
-    if (opts["dry-run"])
+    if (opts["dry-run"] === true)
       return printer.log(JSON.stringify({ action, zoneId, body, dryRun: true }, null, 2));
     const result = await cf.post(base, { body });
     return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));

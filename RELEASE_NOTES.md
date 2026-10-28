@@ -18,6 +18,9 @@
 
 ### Fixed
 
+- Treated `--dry-run=false` as a real write request across command handlers.
+- Served the OAuth picker source modules with paths that preserve their relative imports.
+- Reported OAuth server factory errors and retried ports only after listen errors.
 - Fixed API path traversal checks, account token verification paths, health check deletion, alias resolution, and Unicode token editing.
 - Fixed OAuth, extension upgrade cleanup, account output, and browser page behavior.
 - Fixed command references and end-user documentation.

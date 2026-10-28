@@ -56,3 +56,10 @@ test("Origin CA revoke dry-run does not call Cloudflare", async () => {
     JSON.stringify({ action: "revoke", id: "c1", dryRun: true }, null, 2),
   );
 });
+
+test("Origin CA revoke treats explicit false as a live operation", async () => {
+  const ctx = base();
+  ctx.opts = { id: "c1", force: true, "dry-run": false };
+  await handleOriginCa({ ...ctx, action: "revoke" });
+  expect(ctx.cf.delete).toHaveBeenCalledWith("/certificates/c1");
+});

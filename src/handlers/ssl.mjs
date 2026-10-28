@@ -28,7 +28,7 @@ export async function handleSsl({
     return showCertificateCoverage({ cf, zoneId, outputJson, toJsonOutput, printer });
   if (action === "set") {
     requireValue(body, "Missing --data or --file", fail);
-    if (opts["dry-run"])
+    if (opts["dry-run"] === true)
       return printer.log(JSON.stringify({ zoneId, setting, body, dryRun: true }, null, 2));
     const result = await cf.patch(`/zones/${zoneId}/settings/${setting}`, { body });
     return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));

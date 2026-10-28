@@ -25,7 +25,7 @@ export async function handleDnsDiff({
   const currentResponse = await listRecords();
   const current = Array.isArray(currentResponse?.result) ? currentResponse.result : [];
   const plan = buildDnsPlan(zoneId, targetRecords, current);
-  if (action === "diff" || opts["dry-run"])
+  if (action === "diff" || opts["dry-run"] === true)
     return outputJson ? toJsonOutput(plan) : printer.log(JSON.stringify(plan, null, 2));
   if (!opts.force) {
     fail("Refusing DNS apply without --force");

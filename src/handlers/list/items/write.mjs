@@ -12,7 +12,7 @@ export async function createListItems({
   fail,
 }) {
   requireValue(body, "Missing --data or --file", fail);
-  if (opts["dry-run"])
+  if (opts["dry-run"] === true)
     return printer.log(
       JSON.stringify({ listId: id, action: "create", body, dryRun: true }, null, 2),
     );

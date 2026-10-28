@@ -152,3 +152,16 @@ test("applies changes through generic methods and prints the result", async () =
   expect(removeRecord).toHaveBeenCalledWith("old-id", { zone_id: "zone-1" });
   expect(printer.log).toHaveBeenCalledWith(expect.stringContaining('"applied": true'));
 });
+
+test("applies a DNS plan when dry-run is explicitly false", async () => {
+  const toJsonOutput = jest.fn();
+  await handleDnsDiff(
+    context({
+      action: "apply",
+      opts: { force: true, "dry-run": false },
+      body: [],
+      toJsonOutput,
+    }),
+  );
+  expect(toJsonOutput).toHaveBeenCalledWith(expect.objectContaining({ applied: true }));
+});

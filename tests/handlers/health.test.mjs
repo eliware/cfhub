@@ -59,6 +59,13 @@ test("health delete dry-run does not require force", async () => {
   expect(ctx.printer.log).toHaveBeenCalledWith(expect.stringContaining('"dryRun": true'));
 });
 
+test("health delete treats explicit false as a live operation", async () => {
+  const ctx = base();
+  ctx.opts = { "zone-id": "z1", id: "h1", force: true, "dry-run": false };
+  await handleHealth({ ...ctx, action: "delete" });
+  expect(ctx.cf.delete).toHaveBeenCalledWith("/zones/z1/healthchecks/h1");
+});
+
 test("health delete requires an ID before calling Cloudflare", async () => {
   const ctx = base();
   await handleHealth({ ...ctx, action: "delete", opts: { "zone-id": "z1", force: true } });

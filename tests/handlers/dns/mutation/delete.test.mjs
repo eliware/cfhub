@@ -48,3 +48,13 @@ test("previews deletion without calling the client in dry-run mode", async () =>
     JSON.stringify({ action: "delete", zoneId: "zone-1", id: "record-1", dryRun: true }, null, 2),
   );
 });
+
+test("treats explicit false as a live deletion that requires force", async () => {
+  const remove = jest.fn().mockResolvedValue({ deleted: true });
+  await expect(
+    deleteDnsRecord(context({ cf: { delete: remove }, opts: { "dry-run": false } })),
+  ).rejects.toThrow("without --force");
+  const input = context({ cf: { delete: remove }, opts: { force: true, "dry-run": false } });
+  await deleteDnsRecord(input);
+  expect(remove).toHaveBeenCalledWith("/zones/zone-1/dns_records/record-1");
+});

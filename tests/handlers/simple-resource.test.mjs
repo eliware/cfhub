@@ -61,3 +61,15 @@ test("simple resource rejects unknown actions and unsafe deletes", async () => {
   await handle({ ...unsafe, action: "delete", opts: { "account-id": "a1", id: "r1" } });
   expect(unsafe.fail).toHaveBeenCalledWith(expect.stringContaining("force"));
 });
+
+test("simple resource treats explicit false as a live delete", async () => {
+  const handle = makeSimpleResource({
+    name: "tunnel",
+    scope: "account",
+    path: (id) => `/accounts/${id}/cfd_tunnel`,
+  });
+  const ctx = base();
+  ctx.opts = { "account-id": "a1", id: "t1", force: true, "dry-run": false };
+  await handle({ ...ctx, action: "delete" });
+  expect(ctx.cf.delete).toHaveBeenCalledWith("/accounts/a1/cfd_tunnel/t1");
+});

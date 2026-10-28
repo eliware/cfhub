@@ -26,7 +26,7 @@ export function makeSimpleResource({ name, scope, path }) {
     if (action === "create" || action === "update") {
       requireValue(body, "Missing --data or --file", fail);
       if (action === "update") requireValue(id, "Missing --id", fail);
-      if (opts["dry-run"])
+      if (opts["dry-run"] === true)
         return printer.log(
           JSON.stringify({ action, [scope + "Id"]: scopeId, body, dryRun: true }, null, 2),
         );
@@ -36,11 +36,11 @@ export function makeSimpleResource({ name, scope, path }) {
     }
     if (action === "delete") {
       requireValue(id, "Missing --id", fail);
-      requireValue(opts.force, `Refusing ${name} delete without --force`, fail);
-      if (opts["dry-run"])
+      if (opts["dry-run"] === true)
         return printer.log(
           JSON.stringify({ action, [scope + "Id"]: scopeId, id, dryRun: true }, null, 2),
         );
+      requireValue(opts.force, `Refusing ${name} delete without --force`, fail);
       const result = await cf.delete(endpoint);
       return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
     }

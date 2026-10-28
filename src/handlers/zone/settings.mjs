@@ -28,7 +28,7 @@ export async function handleZoneSettings({
       fail("Missing JSON body with value");
       return;
     }
-    if (opts["dry-run"])
+    if (opts["dry-run"] === true)
       return printer.log(
         JSON.stringify({ zoneId, setting, value: body.value, dryRun: true }, null, 2),
       );

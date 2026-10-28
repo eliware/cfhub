@@ -14,7 +14,7 @@ export async function writeDnsRecord({
 }) {
   if (action === "update") requireValue(id, "Missing --id", fail);
   requireValue(body, "Missing --data or --file", fail);
-  if (opts["dry-run"])
+  if (opts["dry-run"] === true)
     return printer.log(
       JSON.stringify(
         { zoneId, ...(action === "update" ? { id } : {}), action, body, dryRun: true },

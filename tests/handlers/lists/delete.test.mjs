@@ -43,3 +43,13 @@ test("previews deletion without calling Cloudflare in dry-run mode", async () =>
     ),
   );
 });
+
+test("treats explicit false as a live deletion that requires force", async () => {
+  const remove = jest.fn().mockResolvedValue({ success: true });
+  await expect(
+    handleListsDelete(base({ cf: { delete: remove }, opts: { "dry-run": false } })),
+  ).rejects.toThrow("without --force");
+  const input = base({ cf: { delete: remove }, opts: { force: true, "dry-run": false } });
+  await handleListsDelete(input);
+  expect(remove).toHaveBeenCalledWith("/accounts/account-1/rules/lists/list-1");
+});

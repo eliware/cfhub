@@ -15,7 +15,7 @@ export async function mutateRulesets({
 }) {
   if (action === "update") requireValue(id, "Missing --id", fail);
   requireValue(body, "Missing --data or --file", fail);
-  if (opts["dry-run"])
+  if (opts["dry-run"] === true)
     return printer.log(
       JSON.stringify({ zoneId, accountId, id, action, body, dryRun: true }, null, 2),
     );

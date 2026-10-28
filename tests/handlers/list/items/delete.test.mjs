@@ -40,6 +40,17 @@ test("supports delete dry runs without a network request", async () => {
   expect(dryRun.printer.log).toHaveBeenCalledWith(expect.stringContaining('"dryRun": true'));
 });
 
+test("treats explicit false as a live deletion that requires force", async () => {
+  const cf = { delete: jest.fn().mockResolvedValue({ ok: true }) };
+  await expect(deleteListItems(base({ cf, opts: { "dry-run": false } }))).rejects.toThrow(
+    "without --force",
+  );
+  await deleteListItems(base({ cf, opts: { force: true, "dry-run": false } }));
+  expect(cf.delete).toHaveBeenCalledWith("/accounts/acct/rules/lists/list/items", {
+    body: { items: [{ id: "a" }, { id: "b" }] },
+  });
+});
+
 test("requires item IDs and force", async () => {
   await expect(deleteListItems(base({ body: {} }))).rejects.toThrow("Missing --data");
   await expect(deleteListItems(base({ body: { ids: [] } }))).rejects.toThrow(

@@ -18,15 +18,16 @@ export async function handleOriginCa({
   }
   if (action === "create") {
     requireValue(body, "Missing --data or --file", fail);
-    if (opts["dry-run"])
+    if (opts["dry-run"] === true)
       return printer.log(JSON.stringify({ action, body, dryRun: true }, null, 2));
     const result = await cf.post("/certificates", { body });
     return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
   }
   if (action === "revoke") {
     requireValue(id, "Missing --id", fail);
+    if (opts["dry-run"] === true)
+      return printer.log(JSON.stringify({ action, id, dryRun: true }, null, 2));
     requireValue(opts.force, "Refusing to revoke without --force", fail);
-    if (opts["dry-run"]) return printer.log(JSON.stringify({ action, id, dryRun: true }, null, 2));
     const result = await cf.delete(`/certificates/${id}`);
     return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
   }

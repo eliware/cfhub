@@ -9,6 +9,15 @@ test("maps picker text and image routes to their assets", () => {
     asset: "oauth-web/oauth/picker-app.mjs",
     binary: false,
   });
+  expect(pickerAssetDefinition("/picker.mjs")).toMatchObject({
+    asset: "oauth-web/oauth/picker.mjs",
+    binary: false,
+  });
+  expect(pickerAssetDefinition("/picker/module/groups.mjs")).toMatchObject({
+    asset: "oauth-web/picker/module/groups.mjs",
+    contentType: "text/javascript; charset=utf-8",
+  });
+  expect(pickerAssetDefinition("/picker/../outside.mjs")).toBeNull();
   expect(pickerAssetDefinition("/oauth-picker.css")).toEqual({
     asset: "oauth-web/bundled/oauth-picker.css",
     contentType: "text/css; charset=utf-8",
