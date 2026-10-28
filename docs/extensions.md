@@ -20,11 +20,17 @@ Each command module must export a default function, a `run` function, or a `hand
 
 ## Install the example
 
+Install `@eliware/cfhub` in an npm project. Run these commands from the project root:
+
 ```sh
-cfhub extension install --path examples/extensions/hello
-cfhub extension list
-cfhub extension info --name hello
+npm install @eliware/cfhub
+npx cfhub extension install --path node_modules/@eliware/cfhub/examples/extensions/hello
+npx cfhub extension list
+npx cfhub extension info --name hello
+npx cfhub hello
 ```
+
+The install command adds the packaged `hello` example. The list and info commands show the installed extension. The last command prints `Hello, Cloudflare operator!`.
 
 Run an installed command by its name. Use command help to see its options. The extension runs with your user permissions.
 
