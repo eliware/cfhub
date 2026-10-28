@@ -25,6 +25,7 @@
 - Clarified that the OAuth success page confirms read access for the selected scopes.
 - Validated action names before showing action help and rejected API paths with nested traversal encoding.
 - Listed the API `--method` option in generated command references and shell completions.
+- Rejected OAuth callbacks without an authorization code and retained profiles after keychain deletion errors.
 
 ## 12.0.1 — 2026-10-14
 

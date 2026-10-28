@@ -1,4 +1,4 @@
-import { callbackProviderError, callbackStateError } from "./response.mjs";
+import { callbackCodeError, callbackProviderError, callbackStateError } from "./response.mjs";
 
 export function routeOAuthCallback({ url, state, response }) {
   if (url.pathname !== "/oauth/callback") {
@@ -14,5 +14,7 @@ export function routeOAuthCallback({ url, state, response }) {
       handled: true,
       error: callbackProviderError(response, error, url.searchParams.get("error_description")),
     };
-  return { handled: false, code: url.searchParams.get("code") };
+  const code = url.searchParams.get("code");
+  if (!code) return { handled: true, error: callbackCodeError(response) };
+  return { handled: false, code };
 }

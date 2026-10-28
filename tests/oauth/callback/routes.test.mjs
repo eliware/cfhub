@@ -34,3 +34,16 @@ test("callback routing reports provider errors and accepts valid codes", () => {
     }),
   ).toEqual({ handled: false, code: "c" });
 });
+
+test("callback routing rejects a valid state without an authorization code", () => {
+  const missingCode = response();
+  const result = routeOAuthCallback({
+    url: url("/oauth/callback?state=s"),
+    state: "s",
+    response: missingCode,
+  });
+  expect(result.handled).toBe(true);
+  expect(result.error.message).toContain("did not return an authorization code");
+  expect(missingCode.writeHead).toHaveBeenCalledWith(400, expect.any(Object));
+  expect(missingCode.end).toHaveBeenCalled();
+});

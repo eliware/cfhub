@@ -24,3 +24,11 @@ export function callbackProviderError(response, error, detail) {
   });
   return new Error(`Cloudflare authorization failed: ${error}`);
 }
+
+export function callbackCodeError(response) {
+  sendOAuthCallbackFailure(response, {
+    title: "Authorization code missing",
+    detail: "Cloudflare did not return an authorization code. Start a new login from cfhub.",
+  });
+  return new Error("Cloudflare authorization did not return an authorization code");
+}

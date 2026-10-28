@@ -15,8 +15,12 @@ export async function writeToPreferredBackend(primary, fallback) {
 
 export async function deleteFromBackends(primary, fallback) {
   let primaryDeleted = false;
+  let primaryFailed = false;
   try {
     primaryDeleted = await primary();
-  } catch {}
-  return (await fallback()) || primaryDeleted;
+  } catch {
+    primaryFailed = true;
+  }
+  const fallbackDeleted = await fallback();
+  return !primaryFailed && (fallbackDeleted || primaryDeleted);
 }

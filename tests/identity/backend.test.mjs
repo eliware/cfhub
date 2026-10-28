@@ -52,4 +52,10 @@ test("continues deletion when the preferred backend throws", async () => {
     deleteFromBackends(jest.fn().mockRejectedValue(new Error("backend unavailable")), fallback),
   ).resolves.toBe(false);
   expect(fallback).toHaveBeenCalledTimes(1);
+  await expect(
+    deleteFromBackends(
+      jest.fn().mockRejectedValue(new Error("keychain unavailable")),
+      jest.fn().mockResolvedValue(true),
+    ),
+  ).resolves.toBe(false);
 });
