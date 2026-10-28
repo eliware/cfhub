@@ -18,15 +18,13 @@ export function upgradeExtension({ opts, printer, fail, fsImpl, homeDir }) {
     fail("Extension source must not overlap its install destination");
     return;
   }
-  if (typeof fsImpl.lstatSync === "function") {
-    try {
-      if (fsImpl.lstatSync(destination).isSymbolicLink()) {
-        fail("Refusing to upgrade a symbolic link");
-        return;
-      }
-    } catch (error) {
-      if (error.code !== "ENOENT") throw error;
+  try {
+    if (fsImpl.lstatSync(destination).isSymbolicLink()) {
+      fail("Refusing to upgrade a symbolic link");
+      return;
     }
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
   }
   fsImpl.mkdirSync(root, { recursive: true });
   if (typeof fsImpl.existsSync !== "function" || !fsImpl.existsSync(destination)) {

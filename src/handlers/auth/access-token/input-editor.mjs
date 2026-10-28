@@ -12,7 +12,7 @@ export function createHiddenInputEditor() {
       for (const character of text) {
         if (character === "\u0003") return { done: true, interrupted: true };
         if (character === "\r" || character === "\n") return { done: true, value };
-        if (character === "\u007f") {
+        if (character === "\u007f" || character === "\u0008") {
           const lastCharacter = [...value].at(-1);
           if (lastCharacter) byteLength -= Buffer.byteLength(lastCharacter);
           value = [...value].slice(0, -1).join("");

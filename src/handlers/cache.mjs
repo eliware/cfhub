@@ -18,7 +18,19 @@ export async function handleCache({
     fail(`Unknown cache action: ${action}`);
     return;
   }
-  requireValue(body, "Missing --data or --file", fail);
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    fail("Missing cache purge selector in --data or --file");
+    return;
+  }
+  const hasSelector =
+    body.purge_everything === true ||
+    ["files", "tags", "hosts", "prefixes"].some(
+      (key) => Array.isArray(body[key]) && body[key].length > 0,
+    );
+  if (!hasSelector) {
+    fail("Missing cache purge selector in --data or --file");
+    return;
+  }
   const dryRun = opts["dry-run"] === true;
   if (!opts.force && !dryRun) {
     fail("Refusing cache removal without --force");

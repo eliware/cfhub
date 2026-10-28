@@ -41,6 +41,8 @@ test("stops installation when the source overlaps its destination", () => {
     fail,
     fsImpl: {
       readFileSync: () => JSON.stringify({ name: "demo", version: "1", commands: {} }),
+      lstatSync: () => ({ isSymbolicLink: () => false, isDirectory: () => false }),
+      readdirSync: () => [],
       mkdirSync: jest.fn(),
       cpSync: copy,
     },

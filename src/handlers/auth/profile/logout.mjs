@@ -35,9 +35,9 @@ export async function logoutAuthProfile({
   let credentialDeleted = true;
   try {
     const deleted = await deleteCredentialImpl(name);
-    credentialDeleted = !credential || deleted;
+    credentialDeleted = deleted;
   } catch {
-    credentialDeleted = !credential;
+    credentialDeleted = false;
   }
   if (!credentialDeleted) {
     fail("Could not remove saved credentials. The profile remains saved.");

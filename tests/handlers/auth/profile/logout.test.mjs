@@ -88,6 +88,18 @@ test("removes a profile when credential reading fails", async () => {
   );
 });
 
+test("keeps a profile when credential reading and deletion fail", async () => {
+  const input = options();
+  input.readCredentialImpl.mockRejectedValue(Error("keychain unavailable"));
+  input.deleteCredentialImpl.mockRejectedValue(Error("keychain unavailable"));
+  await logoutAuthProfile(input);
+  expect(input.data.profiles.old).toBeDefined();
+  expect(input.write).not.toHaveBeenCalled();
+  expect(input.fail).toHaveBeenCalledWith(
+    "Could not remove saved credentials. The profile remains saved.",
+  );
+});
+
 test("clears the active profile when no profiles remain", async () => {
   const input = options();
   input.data = { active: "old", profiles: { old: { authMethod: "api-token" } } };

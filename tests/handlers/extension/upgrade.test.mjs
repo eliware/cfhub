@@ -2,6 +2,21 @@ import { jest } from "@jest/globals";
 import path from "node:path";
 import { upgradeExtension } from "../../../src/handlers/extension/upgrade.mjs";
 
+function runUpgrade(options) {
+  const source = options.opts?.path ? path.resolve(options.opts.path) : null;
+  const originalLstat = options.fsImpl.lstatSync;
+  const fsImpl = {
+    ...options.fsImpl,
+    lstatSync(entryPath) {
+      if (entryPath === source) return { isSymbolicLink: () => false, isDirectory: () => false };
+      if (originalLstat) return originalLstat(entryPath);
+      throw Object.assign(new Error("not found"), { code: "ENOENT" });
+    },
+    readdirSync: options.fsImpl.readdirSync || (() => []),
+  };
+  return upgradeExtension({ ...options, fsImpl });
+}
+
 test("upgrade replaces an existing extension", () => {
   let tempNumber = 0;
   const fsImpl = {
@@ -17,7 +32,7 @@ test("upgrade replaces an existing extension", () => {
     cpSync: jest.fn(),
   };
   const printer = { log: jest.fn() };
-  upgradeExtension({
+  runUpgrade({
     opts: { path: "/source" },
     printer,
     fail: jest.fn(),
@@ -59,7 +74,7 @@ test("reports upgrade success when backup cleanup fails", () => {
       }),
   };
   const printer = { log: jest.fn(), error: jest.fn() };
-  upgradeExtension({
+  runUpgrade({
     opts: { path: "/source" },
     printer,
     fail: jest.fn(),
@@ -81,7 +96,7 @@ test("reports upgrade success when backup cleanup fails", () => {
 test("reports staging cleanup errors without claiming that the backup remains", () => {
   let tempNumber = 0;
   const printer = { log: jest.fn(), error: jest.fn() };
-  upgradeExtension({
+  runUpgrade({
     opts: { path: "/source" },
     printer,
     fail: jest.fn(),
@@ -120,7 +135,7 @@ test("keeps the installed extension when staging the new extension fails", () =>
   };
   const fail = jest.fn();
   expect(() =>
-    upgradeExtension({
+    runUpgrade({
       opts: { path: "/source" },
       printer: { log: jest.fn() },
       fail,
@@ -135,9 +150,9 @@ test("keeps the installed extension when staging the new extension fails", () =>
 test("upgrade requires an installed extension and valid input", () => {
   const fail = jest.fn();
   const base = { opts: { path: "/source" }, printer: { log: jest.fn() }, fail, homeDir: "/home" };
-  upgradeExtension({ ...base, fsImpl: { readFileSync: () => "{}", mkdirSync: jest.fn() } });
+  runUpgrade({ ...base, fsImpl: { readFileSync: () => "{}", mkdirSync: jest.fn() } });
   expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
-  upgradeExtension({
+  runUpgrade({
     ...base,
     fsImpl: {
       readFileSync: () => JSON.stringify({ name: "demo", version: "1", commands: {} }),
@@ -150,7 +165,7 @@ test("upgrade requires an installed extension and valid input", () => {
 
 test("upgrade requires a source path", () => {
   const fail = jest.fn();
-  upgradeExtension({
+  runUpgrade({
     opts: {},
     printer: { log: jest.fn() },
     fail,
@@ -163,7 +178,7 @@ test("upgrade requires a source path", () => {
 test("refuses an extension name that is unsafe on Windows", () => {
   const fail = jest.fn();
   const rmSync = jest.fn();
-  upgradeExtension({
+  runUpgrade({
     opts: { path: "source" },
     printer: { log: jest.fn() },
     fail,
@@ -189,7 +204,7 @@ test("refuses to upgrade an installed symbolic link", () => {
     mkdtempSync: jest.fn(),
     renameSync,
   };
-  upgradeExtension({
+  runUpgrade({
     opts: { path: "/source" },
     printer: { log: jest.fn() },
     fail,
@@ -204,7 +219,7 @@ test("refuses to upgrade an installed symbolic link", () => {
 test("propagates unexpected installed path inspection errors", () => {
   const inspectionError = Object.assign(new Error("permission denied"), { code: "EACCES" });
   expect(() =>
-    upgradeExtension({
+    runUpgrade({
       opts: { path: "/source" },
       printer: { log: jest.fn() },
       fail: jest.fn(),
@@ -230,7 +245,7 @@ test("refuses an upgrade source inside its installation destination", () => {
     cpSync: copy,
     rmSync: jest.fn(),
   };
-  upgradeExtension({
+  runUpgrade({
     opts: { path: path.join(homeDir, ".config", "cfhub", "extensions", "demo", "source") },
     printer: { log: jest.fn() },
     fail,

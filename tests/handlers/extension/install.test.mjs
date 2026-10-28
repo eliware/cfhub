@@ -1,5 +1,23 @@
 import { jest } from "@jest/globals";
+import path from "node:path";
 import { installExtension } from "../../../src/handlers/extension/install.mjs";
+
+function runInstall(options) {
+  const source = options.opts?.path ? path.resolve(options.opts.path) : null;
+  const originalLstat = options.fsImpl.lstatSync;
+  const fsImpl = {
+    ...options.fsImpl,
+    lstatSync(entryPath) {
+      if (entryPath === source) return { isSymbolicLink: () => false, isDirectory: () => false };
+      if (originalLstat) return originalLstat(entryPath);
+      if (options.fsImpl.existsSync?.(entryPath))
+        return { isSymbolicLink: () => false, isDirectory: () => false };
+      throw Object.assign(new Error("not found"), { code: "ENOENT" });
+    },
+    readdirSync: options.fsImpl.readdirSync || (() => []),
+  };
+  return installExtension({ ...options, fsImpl });
+}
 
 test("validates and installs an extension directory", () => {
   const fsImpl = {
@@ -14,7 +32,7 @@ test("validates and installs an extension directory", () => {
     }),
   };
   const printer = { log: jest.fn(), error: jest.fn() };
-  installExtension({
+  runInstall({
     opts: { path: "/source" },
     printer,
     fail: jest.fn(),
@@ -42,9 +60,9 @@ test("reports missing or invalid extension manifests", () => {
     fsImpl: {},
     homeDir: "/tmp/cfhub-home",
   };
-  installExtension({ ...base, opts: {} });
+  runInstall({ ...base, opts: {} });
   expect(fail).toHaveBeenCalledWith("Missing --path to an extension directory");
-  installExtension({
+  runInstall({
     ...base,
     opts: { path: "/source" },
     fsImpl: { readFileSync: () => JSON.stringify({ name: "bad name" }) },
@@ -61,7 +79,7 @@ test("refuses to replace an installed extension", () => {
     existsSync: jest.fn(() => true),
     cpSync: jest.fn(),
   };
-  installExtension({
+  runInstall({
     opts: { path: "/source" },
     printer: { log: jest.fn() },
     fail,
@@ -75,7 +93,7 @@ test("refuses to replace an installed extension", () => {
 test("refuses an extension name that is unsafe on Windows", () => {
   const fail = jest.fn();
   const cpSync = jest.fn();
-  installExtension({
+  runInstall({
     opts: { path: "source" },
     printer: { log: jest.fn() },
     fail,
@@ -96,7 +114,7 @@ test("refuses an extension name that is unsafe on Windows", () => {
 test("refuses an extension when its command file is missing", () => {
   const fail = jest.fn();
   const cpSync = jest.fn();
-  installExtension({
+  runInstall({
     opts: { path: "/source" },
     printer: { log: jest.fn() },
     fail,
@@ -126,7 +144,7 @@ test("refuses a broken symbolic link at the install destination", () => {
     mkdirSync: jest.fn(),
     cpSync: jest.fn(),
   };
-  installExtension({
+  runInstall({
     opts: { path: "/source" },
     printer: { log: jest.fn() },
     fail,
@@ -147,7 +165,7 @@ test("allows an absent destination and rejects inspection errors", () => {
     rmSync: jest.fn(),
   };
   const fail = jest.fn();
-  installExtension({
+  runInstall({
     opts: { path: "/source" },
     printer: { log: jest.fn() },
     fail,
@@ -161,7 +179,7 @@ test("allows an absent destination and rejects inspection errors", () => {
   });
   const inspectionError = Object.assign(new Error("access denied"), { code: "EACCES" });
   expect(() =>
-    installExtension({
+    runInstall({
       opts: { path: "/source" },
       printer: { log: jest.fn() },
       fail,

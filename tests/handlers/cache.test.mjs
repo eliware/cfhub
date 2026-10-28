@@ -8,7 +8,7 @@ const base = () => ({
     post: jest.fn().mockResolvedValue({ ok: true }),
   },
   opts: { "zone-id": "z1" },
-  body: { value: "full" },
+  body: { purge_everything: true },
   outputJson: true,
   printer: { log: jest.fn() },
   toJsonOutput: jest.fn(),
@@ -24,7 +24,9 @@ test("cache purge requires force and supports dry-run", async () => {
   expect(ctx.cf.post).not.toHaveBeenCalled();
   const live = base();
   await handleCache({ ...live, action: "purge", opts: { "zone-id": "z1", force: true } });
-  expect(live.cf.post).toHaveBeenCalledWith("/zones/z1/purge_cache", { body: { value: "full" } });
+  expect(live.cf.post).toHaveBeenCalledWith("/zones/z1/purge_cache", {
+    body: { purge_everything: true },
+  });
 });
 
 test("cache handles unknown action and text output", async () => {
@@ -44,5 +46,17 @@ test("treats false dry-run values as a live purge when force is set", async () =
     action: "purge",
     opts: { "zone-id": "z1", force: true, "dry-run": false },
   });
-  expect(ctx.cf.post).toHaveBeenCalledWith("/zones/z1/purge_cache", { body: { value: "full" } });
+  expect(ctx.cf.post).toHaveBeenCalledWith("/zones/z1/purge_cache", {
+    body: { purge_everything: true },
+  });
 });
+
+test.each([null, {}, { files: [] }, { purge_everything: false }])(
+  "rejects a purge body without a selector: %s",
+  async (body) => {
+    const ctx = base();
+    await handleCache({ ...ctx, action: "purge", body, opts: { "zone-id": "z1", force: true } });
+    expect(ctx.fail).toHaveBeenCalledWith("Missing cache purge selector in --data or --file");
+    expect(ctx.cf.post).not.toHaveBeenCalled();
+  },
+);

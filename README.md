@@ -113,11 +113,19 @@ After SIGINT, cfhub exits with code 130. After SIGTERM, it exits with code 143.
 
 ## Routes
 
-The local OAuth server serves login pages and receives OAuth callbacks.
+The local OAuth server provides these routes when the scope picker is enabled:
+
+- `GET /` returns the scope picker.
+- `POST /oauth/start` accepts the selected scopes and redirects to Cloudflare.
+- `GET /api/version?project=cfhub` returns the package version.
+- `GET /oauth-picker.css`, `/oauth-picker-app.mjs`, and `/picker/*.mjs` return picker files.
+- `GET /oauth-web/*` returns the picker logos and images.
+- `GET /oauth/callback` receives the OAuth callback.
 
 ## Assets
 
-OAuth page sources and images live in `src/oauth-web/`.
+The picker uses bundled files from `src/oauth-web/` and these images from `public/oauth-web/`:
+`cf-logo.svg`, `cloudflare-115x53.png`, and `eliware-58x58.png`.
 
 ## Development server
 

@@ -31,3 +31,13 @@ test("rejects nested symbolic links and unreadable source entries", () => {
     }),
   ).toBe(false);
 });
+
+test("rejects filesystems that cannot inspect symbolic links", () => {
+  expect(hasNoExtensionSymlinks("/extension", {})).toBe(false);
+  expect(hasNoExtensionSymlinks("/extension", { lstatSync: () => ({}) })).toBe(false);
+  expect(
+    hasNoExtensionSymlinks("/extension", {
+      lstatSync: () => ({ isSymbolicLink: () => false, isDirectory: () => true }),
+    }),
+  ).toBe(false);
+});

@@ -93,6 +93,22 @@ test("loads every zone page and DNS records for every zone", async () => {
   );
 });
 
+test("uses page metadata when an intermediate page contains fewer than 50 results", async () => {
+  const pages = [
+    { result: [{ id: "first" }], result_info: { total_pages: 3 } },
+    { result: [{ id: "middle" }], result_info: { total_pages: 3 } },
+    { result: [], result_info: { total_pages: 3 } },
+  ];
+  const fetchImpl = jest.fn().mockImplementation(async () => ({
+    ok: true,
+    json: async () => pages.shift(),
+  }));
+  await expect(
+    loadOAuthAccountData({ enabled: [{ id: "zones" }], accessToken: "token", fetchImpl }),
+  ).resolves.toMatchObject({ zones: [{ id: "first" }, { id: "middle" }] });
+  expect(fetchImpl).toHaveBeenCalledTimes(3);
+});
+
 test("requests DNS data for independent zones in parallel", async () => {
   const pending = [];
   let resolveRequests;
@@ -115,4 +131,34 @@ test("requests DNS data for independent zones in parallel", async () => {
   expect(pending).toHaveLength(2);
   for (const resolve of pending) resolve({ ok: true, json: async () => ({ result: [] }) });
   await expect(loading).resolves.toMatchObject({ zones: [{ id: "one" }, { id: "two" }], dns: [] });
+});
+
+test("limits concurrent DNS requests to five zones", async () => {
+  const zones = Array.from({ length: 7 }, (_, index) => ({ id: `zone-${index}` }));
+  let active = 0;
+  let maximum = 0;
+  let dnsRequests = 0;
+  const pendingBatches = new Map();
+  const fetchImpl = jest.fn(async (url) => {
+    if (url.includes("/zones?")) return { ok: true, json: async () => ({ result: zones }) };
+    active += 1;
+    maximum = Math.max(maximum, active);
+    const requestIndex = dnsRequests++;
+    const batchIndex = Math.floor(requestIndex / 5);
+    const expectedBatchSize = Math.min(5, zones.length - batchIndex * 5);
+    return new Promise((resolve) => {
+      const batch = pendingBatches.get(batchIndex) || [];
+      batch.push(() => {
+        active -= 1;
+        resolve({ ok: true, json: async () => ({ result: [] }) });
+      });
+      pendingBatches.set(batchIndex, batch);
+      if (batch.length === expectedBatchSize) {
+        batch.forEach((complete) => complete());
+        pendingBatches.delete(batchIndex);
+      }
+    });
+  });
+  await loadOAuthAccountData({ enabled, accessToken: "token", fetchImpl });
+  expect(maximum).toBe(5);
 });

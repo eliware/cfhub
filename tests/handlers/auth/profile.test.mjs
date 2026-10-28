@@ -18,7 +18,7 @@ test("auth profile helper lists and activates saved profiles", async () => {
     profileFs: {},
     readCredentialImpl: jest.fn(),
     revokeOAuthImpl: jest.fn(),
-    deleteCredentialImpl: jest.fn(),
+    deleteCredentialImpl: jest.fn().mockResolvedValue(true),
   };
 
   await handleAuthProfile({

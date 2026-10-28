@@ -18,6 +18,13 @@ test("backspace removes one supplementary Unicode character", () => {
   expect(editor.write("secret-😀\u007f\r")).toEqual({ done: true, value: "secret-" });
 });
 
+test("Ctrl-H removes the last character from hidden input", () => {
+  const editor = createHiddenInputEditor();
+  editor.write("token");
+  expect(editor.write("\u0008")).toEqual({ done: false });
+  expect(editor.write("\n")).toEqual({ done: true, value: "toke" });
+});
+
 test("ignores backspace when the value is empty", () => {
   const editor = createHiddenInputEditor();
   expect(editor.write("\u007f\n")).toEqual({ done: true, value: "" });

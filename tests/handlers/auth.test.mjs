@@ -112,7 +112,7 @@ test("auth coordinator sends logout through the profile workflow", async () => {
     opts: {},
     read: () => data,
     readCredentialImpl: jest.fn().mockResolvedValue(null),
-    deleteCredentialImpl: jest.fn(),
+    deleteCredentialImpl: jest.fn().mockResolvedValue(true),
     write,
     printer: { log },
     profileHome: "/tmp/profiles",

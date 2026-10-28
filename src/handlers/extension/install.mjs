@@ -21,10 +21,8 @@ export function installExtension({ opts, printer, fail, fsImpl, homeDir }) {
   fsImpl.mkdirSync(root, { recursive: true });
   let installed = false;
   try {
-    if (typeof fsImpl.lstatSync === "function") {
-      fsImpl.lstatSync(destination);
-      installed = true;
-    } else installed = Boolean(fsImpl.existsSync?.(destination));
+    fsImpl.lstatSync(destination);
+    installed = true;
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
   }

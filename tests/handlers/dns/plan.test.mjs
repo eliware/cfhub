@@ -21,3 +21,15 @@ test("DNS plan compares every managed record field", () => {
     unchanged: [],
   });
 });
+
+test("DNS plan removes duplicate current records beyond the desired count", () => {
+  const desired = { type: "A", name: "www", content: "192.0.2.1", ttl: 1, proxied: false };
+  const first = { ...desired, id: "first" };
+  const duplicate = { ...desired, id: "duplicate" };
+  expect(buildDnsPlan("zone", [desired], [first, duplicate])).toEqual({
+    zoneId: "zone",
+    add: [],
+    remove: [duplicate],
+    unchanged: [first],
+  });
+});
