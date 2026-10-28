@@ -1,6 +1,6 @@
 # Release Notes
 
-## 15.0.1 — 2026-10-27
+## 15.0.1 — 2026-10-28
 
 ### Added
 
@@ -36,6 +36,14 @@
 - Listed the API `--method` option in generated command references and shell completions.
 - Rejected OAuth callbacks without an authorization code and retained profiles after keychain deletion errors.
 - Allowed health, list, and list item deletion previews without `--force`.
+- Enabled local OAuth profile listing and selection when credential storage is unavailable.
+- Removed duplicate current DNS records during desired-state updates and bounded DNS summary requests to five zones at a time.
+- Followed Cloudflare pagination metadata when pages contain fewer than the requested records.
+- Required at least one supported criterion before sending a cache removal request.
+- Rejected extension installs when the filesystem cannot verify that the source contains no symbolic links.
+- Accepted Ctrl-H as a backspace key during hidden API token entry.
+- Documented the OAuth routes and public image assets in the README.
+- Made extension path tests pass on Windows and other platforms.
 
 ## 12.0.1 — 2026-10-14
 
