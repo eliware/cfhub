@@ -1,7 +1,7 @@
 export function managesCredentials(resource, action) {
   return (
     (resource === "auth" && ["login", "logout", "list", "switch"].includes(action)) ||
-    (resource === "oauth" && (action === "login" || action === "logout"))
+    (resource === "oauth" && ["login", "logout", "list", "switch"].includes(action))
   );
 }
 

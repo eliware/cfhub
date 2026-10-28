@@ -25,6 +25,8 @@ test("credential commands skip profiles and API clients", async () => {
     ["auth", "switch"],
     ["oauth", "login"],
     ["oauth", "logout"],
+    ["oauth", "list"],
+    ["oauth", "switch"],
   ]) {
     const input = options({ resource, action, env: {} });
     await expect(authorizeCommand(input)).resolves.toEqual({ allowed: true, cf: null });

@@ -6,6 +6,9 @@ import {
 
 test("classifies credential actions", () => {
   expect(managesCredentials("auth", "login")).toBe(true);
+  expect(managesCredentials("oauth", "list")).toBe(true);
+  expect(managesCredentials("oauth", "switch")).toBe(true);
+  expect(managesCredentials("oauth", "logout")).toBe(true);
   expect(managesCredentials("oauth", "status")).toBe(false);
   expect(managesCredentials("zones", "list")).toBe(false);
 });
