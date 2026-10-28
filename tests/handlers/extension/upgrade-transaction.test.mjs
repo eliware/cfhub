@@ -1,4 +1,5 @@
 import { jest } from "@jest/globals";
+import path from "node:path";
 import { replaceExtension } from "../../../src/handlers/extension/upgrade-transaction.mjs";
 
 test("replaces an installed extension and cleans temporary directories", () => {
@@ -184,7 +185,7 @@ function failedBackupMove(overrides = {}) {
 
 test("keeps a backup after a failed move when the backup exists", () => {
   const { fsImpl, run } = failedBackupMove({ existsSync: jest.fn(() => true) });
-  expect(run).toThrow("Inspect the backup at temp-2\\demo");
+  expect(run).toThrow(`Inspect the backup at ${path.join("temp-2", "demo")}`);
   expect(fsImpl.rmSync).toHaveBeenCalledTimes(1);
   expect(fsImpl.rmSync).toHaveBeenCalledWith("temp-1", { recursive: true, force: true });
   expect(fsImpl.rmSync).not.toHaveBeenCalledWith("temp-2", { recursive: true, force: true });
@@ -203,14 +204,14 @@ test("keeps the backup when its existence check fails", () => {
       throw new Error("inspection failed");
     }),
   });
-  expect(run).toThrow("Inspect the backup at temp-2\\demo");
+  expect(run).toThrow(`Inspect the backup at ${path.join("temp-2", "demo")}`);
   expect(fsImpl.rmSync).toHaveBeenCalledTimes(1);
   expect(fsImpl.rmSync).not.toHaveBeenCalledWith("temp-2", { recursive: true, force: true });
 });
 
 test("keeps the backup when the file system cannot inspect it", () => {
   const { fsImpl, run } = failedBackupMove();
-  expect(run).toThrow("Inspect the backup at temp-2\\demo");
+  expect(run).toThrow(`Inspect the backup at ${path.join("temp-2", "demo")}`);
   expect(fsImpl.rmSync).toHaveBeenCalledTimes(1);
   expect(fsImpl.rmSync).not.toHaveBeenCalledWith("temp-2", { recursive: true, force: true });
 });
