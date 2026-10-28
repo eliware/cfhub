@@ -48,6 +48,7 @@ See [Command actions](command-actions.md) for the full action list.
 | `--output`     | Select json or text output.                      |
 | `--jq`         | Select fields from JSON output.                  |
 | `--template`   | Format JSON values with {{.field}} placeholders. |
+| `--method`     | Set the API method for cfhub api.                |
 | `--quiet`      | Suppress standard output.                        |
 | `--pager`      | Page readable output.                            |
 | `--no-pager`   | Disable paging.                                  |

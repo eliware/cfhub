@@ -23,6 +23,8 @@
 - Fixed command references and end-user documentation.
 - Allowed DNS deletion previews without `--force` and kept extension backup paths after failed backup moves.
 - Clarified that the OAuth success page confirms read access for the selected scopes.
+- Validated action names before showing action help and rejected API paths with nested traversal encoding.
+- Listed the API `--method` option in generated command references and shell completions.
 
 ## 12.0.1 — 2026-10-14
 

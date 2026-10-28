@@ -39,6 +39,27 @@ test("resolver returns help for resources and commands", async () => {
   expect((await resolveCommand({ ...ctx, args: ["zones"], opts: {} })).done).toBe(true);
 });
 
+test("resolver validates action names before returning action help", async () => {
+  const ctx = setup();
+  const help = await resolveCommand({
+    ...ctx,
+    args: ["zones", "list"],
+    opts: { help: true },
+  });
+  expect(help.done).toBe(true);
+  expect(ctx.printer.log).toHaveBeenCalledWith(expect.stringContaining("cfhub zones list [flags]"));
+
+  const invalid = await resolveCommand({
+    ...ctx,
+    args: ["zones", "unknown"],
+    opts: { help: true },
+  });
+  expect(invalid).toMatchObject({ done: true, value: 1 });
+  expect(ctx.printer.error).toHaveBeenCalledWith(
+    expect.stringContaining('unknown command "unknown"'),
+  );
+});
+
 test("resolver reports invalid actions and skips action checks for api", async () => {
   const ctx = setup();
   const invalid = await resolveCommand({ ...ctx, args: ["zones", "lis"], opts: {} });

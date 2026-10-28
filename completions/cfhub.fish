@@ -1,2 +1,2 @@
 complete -c cfhub -f -a 'auth oauth zones dns-records zone-settings rulesets lists list-items ssl cache api health audit inventory origin-ca load-balancer tunnel workers pages r2 d1 queues stream images ai access extension alias config'
-complete -c cfhub -l help -l version -l json -l output -l jq -l template -l quiet -l pager -l no-pager -l color -l width -l verbose -l paginate -l web -l force -l dry-run -l account-id -l zone-id -l file -l data
+complete -c cfhub -l help -l version -l json -l output -l jq -l template -l method -l quiet -l pager -l no-pager -l color -l width -l verbose -l paginate -l web -l force -l dry-run -l account-id -l zone-id -l file -l data

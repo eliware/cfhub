@@ -27,6 +27,8 @@ export async function resolveCommand({
     exit,
   });
   if (resourceValidation) return resourceValidation;
+  const validation = validateCommandAction({ resource, action, printer, exit });
+  if (validation) return validation;
   const help = resolveCommandHelp({ args, opts, resource, action, extensionManifest, printer });
   if (help) return help;
   if (extensionManifest) {
@@ -42,7 +44,5 @@ export async function resolveCommand({
       loadCommand,
     });
   }
-  const validation = validateCommandAction({ resource, action, printer, exit });
-  if (validation) return validation;
   return { done: false, args, opts, resource, action };
 }

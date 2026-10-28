@@ -16,10 +16,18 @@ export function validateApiRequest({ action, opts, body, fail }) {
     fail("cfhub api path contains invalid percent encoding");
     return null;
   }
-  const segments = decodedAction.split(/[\\/]/);
-  if (segments.includes("..")) {
-    fail("cfhub api path cannot traverse parent directories");
-    return null;
+  while (true) {
+    if (decodedAction.split(/[\\/]/).includes("..")) {
+      fail("cfhub api path cannot traverse parent directories");
+      return null;
+    }
+    if (!/%[a-f\d]{2}/i.test(decodedAction)) break;
+    try {
+      decodedAction = decodeURIComponent(decodedAction);
+    } catch {
+      fail("cfhub api path contains invalid percent encoding");
+      return null;
+    }
   }
   const path = action.startsWith("/") ? action : `/${action}`;
   const method = String(opts.method || "GET").toUpperCase();
