@@ -37,9 +37,9 @@ export async function handleHealth({
       fail("Missing --id");
       return;
     }
-    requireValue(opts.force, "Refusing to delete without --force", fail);
-    if (opts["dry-run"])
+    if (opts["dry-run"] === true)
       return printer.log(JSON.stringify({ action, zoneId, id, dryRun: true }, null, 2));
+    requireValue(opts.force, "Refusing to delete without --force", fail);
     const result = await cf.delete(`${base}/${id}`);
     return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
   }

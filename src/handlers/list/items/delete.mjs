@@ -17,14 +17,14 @@ export async function deleteListItems({
     fail("Expected at least one item ID");
     return;
   }
-  if (!opts.force) {
-    fail("Refusing to delete without --force");
-    return;
-  }
   if (opts["dry-run"] === true)
     return printer.log(
       JSON.stringify({ listId: id, action: "delete", body, dryRun: true }, null, 2),
     );
+  if (!opts.force) {
+    fail("Refusing to delete without --force");
+    return;
+  }
   const items = body.ids.map((itemId) => ({ id: itemId }));
   const result =
     typeof cf.delete === "function"

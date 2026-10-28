@@ -26,6 +26,7 @@
 - Validated action names before showing action help and rejected API paths with nested traversal encoding.
 - Listed the API `--method` option in generated command references and shell completions.
 - Rejected OAuth callbacks without an authorization code and retained profiles after keychain deletion errors.
+- Allowed health, list, and list item deletion previews without `--force`.
 
 ## 12.0.1 — 2026-10-14
 

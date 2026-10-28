@@ -32,7 +32,7 @@ test("requires ID and force, then prints text output", async () => {
 });
 
 test("previews deletion without calling Cloudflare in dry-run mode", async () => {
-  const input = base({ opts: { force: true, "dry-run": true } });
+  const input = base({ opts: { "dry-run": true } });
   await handleListsDelete(input);
   expect(input.cf.delete).not.toHaveBeenCalled();
   expect(input.printer.log).toHaveBeenCalledWith(

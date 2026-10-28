@@ -34,7 +34,7 @@ test("deletes items with SDK and generic clients", async () => {
 });
 
 test("supports delete dry runs without a network request", async () => {
-  const dryRun = base({ opts: { force: true, "dry-run": true } });
+  const dryRun = base({ opts: { "dry-run": true } });
   await deleteListItems(dryRun);
   expect(dryRun.cf.delete).not.toHaveBeenCalled();
   expect(dryRun.printer.log).toHaveBeenCalledWith(expect.stringContaining('"dryRun": true'));
