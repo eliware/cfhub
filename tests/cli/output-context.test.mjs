@@ -41,3 +41,40 @@ test("quiet output context suppresses command log output", () => {
   context.commandPrinter.log("hidden");
   expect(printer.log).not.toHaveBeenCalled();
 });
+
+test("sends update notices through the configured pager", async () => {
+  const terminalFactory = jest.fn(() => ({ log: jest.fn(), error: jest.fn(), flush: jest.fn() }));
+  const updateCheck = jest.fn().mockResolvedValue("99.0.0");
+  const context = createOutputContext({
+    opts: { pager: "less" },
+    printer: { log: jest.fn(), error: jest.fn() },
+    homeDir: "/tmp/cfhub-output-context",
+    env: {},
+    fsImpl: {
+      existsSync: () => true,
+      readFileSync: () => JSON.stringify({ pager: "less" }),
+    },
+    updateCheck,
+    terminalFactory,
+  });
+  await Promise.resolve();
+  await Promise.resolve();
+  expect(terminalFactory.mock.calls[0][0].pager).toBe("less");
+  expect(terminalFactory.mock.results[0].value.log).toHaveBeenCalledWith(
+    expect.stringContaining("99.0.0"),
+  );
+  expect(context.terminal).toBe(terminalFactory.mock.results[0].value);
+});
+
+test("returns a terminal flush function when terminal output is disabled", async () => {
+  const context = createOutputContext({
+    opts: { web: true, "no-pager": true },
+    printer: { log: jest.fn(), error: jest.fn() },
+    homeDir: "/tmp/cfhub-output-context",
+    env: {},
+    fsImpl: { existsSync: () => false },
+    updateCheck: jest.fn(),
+  });
+  expect(context.handled).toBe(true);
+  await expect(context.terminal.flush()).resolves.toBeUndefined();
+});

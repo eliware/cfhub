@@ -5,19 +5,19 @@ import { dashboardUrl } from "./dashboard-url.mjs";
 import { checkForUpdate } from "../update/check.mjs";
 import { showUpdateNotice } from "./update-notice.mjs";
 
-export function createOutputContext({ opts, printer, homeDir, env, fsImpl, updateCheck }) {
+export function createOutputContext({
+  opts,
+  printer,
+  homeDir,
+  env,
+  fsImpl,
+  updateCheck,
+  terminalFactory = createTerminalOutput,
+}) {
   const settings = readSettings(homeDir, fsImpl);
   const { outputJson, color, width, pager, useTerminal } = terminalOptions({ opts, settings });
-  if (
-    !outputJson &&
-    !opts.quiet &&
-    settings["update-check"] !== false &&
-    settings["update-check"] !== "false"
-  ) {
-    void showUpdateNotice({ updateCheck, currentVersion: VERSION, homeDir, env, fsImpl, printer });
-  }
   const terminal = useTerminal
-    ? createTerminalOutput({
+    ? terminalFactory({
         printer,
         json: outputJson,
         color,
@@ -25,6 +25,22 @@ export function createOutputContext({ opts, printer, homeDir, env, fsImpl, updat
         pager,
       })
     : { ...printer, flush: async () => {} };
+  if (
+    !outputJson &&
+    !opts.quiet &&
+    settings["update-check"] !== false &&
+    settings["update-check"] !== "false"
+  ) {
+    const noticePrinter = pager ? { error: (message) => terminal.log(message) } : printer;
+    void showUpdateNotice({
+      updateCheck,
+      currentVersion: VERSION,
+      homeDir,
+      env,
+      fsImpl,
+      printer: noticePrinter,
+    });
+  }
   const commandPrinter = opts.quiet ? { ...terminal, log: () => {} } : terminal;
   if (opts.web) {
     commandPrinter.log(dashboardUrl(opts));

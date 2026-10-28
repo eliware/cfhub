@@ -6,6 +6,9 @@ test("upgrade replaces an existing extension", () => {
   let tempNumber = 0;
   const fsImpl = {
     readFileSync: () => JSON.stringify({ name: "demo", version: "2", commands: {} }),
+    lstatSync: () => {
+      throw Object.assign(new Error("not found"), { code: "ENOENT" });
+    },
     mkdirSync: jest.fn(),
     existsSync: jest.fn(() => true),
     rmSync: jest.fn(),
@@ -42,6 +45,7 @@ test("reports upgrade success when backup cleanup fails", () => {
   const cleanupError = new Error("backup cleanup failed");
   const fsImpl = {
     readFileSync: () => JSON.stringify({ name: "demo", version: "2", commands: {} }),
+    lstatSync: () => ({ isSymbolicLink: () => false }),
     mkdirSync: jest.fn(),
     existsSync: jest.fn(() => true),
     mkdtempSync: jest.fn(() => `cfhub-temp-${++tempNumber}`),
@@ -172,6 +176,47 @@ test("refuses an extension name that is unsafe on Windows", () => {
   });
   expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
   expect(rmSync).not.toHaveBeenCalled();
+});
+
+test("refuses to upgrade an installed symbolic link", () => {
+  const fail = jest.fn();
+  const renameSync = jest.fn();
+  const fsImpl = {
+    readFileSync: () => JSON.stringify({ name: "demo", version: "2", commands: {} }),
+    lstatSync: () => ({ isSymbolicLink: () => true }),
+    mkdirSync: jest.fn(),
+    existsSync: jest.fn(() => true),
+    mkdtempSync: jest.fn(),
+    renameSync,
+  };
+  upgradeExtension({
+    opts: { path: "/source" },
+    printer: { log: jest.fn() },
+    fail,
+    fsImpl,
+    homeDir: "/home",
+  });
+  expect(fail).toHaveBeenCalledWith("Refusing to upgrade a symbolic link");
+  expect(fsImpl.mkdirSync).not.toHaveBeenCalled();
+  expect(renameSync).not.toHaveBeenCalled();
+});
+
+test("propagates unexpected installed path inspection errors", () => {
+  const inspectionError = Object.assign(new Error("permission denied"), { code: "EACCES" });
+  expect(() =>
+    upgradeExtension({
+      opts: { path: "/source" },
+      printer: { log: jest.fn() },
+      fail: jest.fn(),
+      fsImpl: {
+        readFileSync: () => JSON.stringify({ name: "demo", version: "2", commands: {} }),
+        lstatSync: () => {
+          throw inspectionError;
+        },
+      },
+      homeDir: "/home",
+    }),
+  ).toThrow(inspectionError);
 });
 
 test("refuses an upgrade source inside its installation destination", () => {

@@ -15,6 +15,11 @@ export function serveOAuthPickerSubmitRoute({
   onError = () => {},
 }) {
   if (!scopePicker || url.pathname !== "/oauth/start" || request.method !== "POST") return false;
+  if (request.headers?.origin !== url.origin) {
+    response.writeHead(403, { "content-type": plainTextContentType });
+    response.end("Cross-origin OAuth request rejected");
+    return true;
+  }
   try {
     const form = parseOAuthForm(request.body ?? "");
     const nextScopes = selectOAuthPickerScopes({

@@ -41,7 +41,7 @@ test("updates preview scopes and redirects to the OAuth authorization page", asy
     {
       method: "POST",
       url: "/oauth/start",
-      headers: {},
+      headers: { origin: "http://127.0.0.1:1120" },
       body: "scope=dns.read",
     },
     response,

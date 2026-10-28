@@ -36,3 +36,13 @@ test("cache handles unknown action and text output", async () => {
   await handleCache({ ...text, action: "purge", opts: { "zone-id": "z1", force: true } });
   expect(text.printer.log).toHaveBeenCalledWith(JSON.stringify({ ok: true }, null, 2));
 });
+
+test("treats false dry-run values as a live purge when force is set", async () => {
+  const ctx = base();
+  await handleCache({
+    ...ctx,
+    action: "purge",
+    opts: { "zone-id": "z1", force: true, "dry-run": false },
+  });
+  expect(ctx.cf.post).toHaveBeenCalledWith("/zones/z1/purge_cache", { body: { value: "full" } });
+});

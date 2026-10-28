@@ -61,6 +61,31 @@ test("validates the desired record body", async () => {
   );
 });
 
+test("stops when a validation callback returns", async () => {
+  const listRecords = jest.fn();
+  const fail = jest.fn();
+  await handleDnsDiff(context({ body: {}, fail, listRecords }));
+  expect(fail).toHaveBeenCalledWith("Expected an array of target records");
+  expect(listRecords).not.toHaveBeenCalled();
+
+  const apply = jest.fn();
+  await handleDnsDiff(
+    context({
+      action: "apply",
+      body: [],
+      fail,
+      listRecords: jest.fn().mockResolvedValue({}),
+      cf: { post: apply },
+    }),
+  );
+  expect(fail).toHaveBeenCalledWith("Refusing DNS apply without --force");
+  expect(apply).not.toHaveBeenCalled();
+
+  await handleDnsDiff(context({ body: null, fail, listRecords }));
+  expect(fail).toHaveBeenCalledWith("Missing target records in --data or --file");
+  expect(listRecords).not.toHaveBeenCalled();
+});
+
 test("applies an empty desired state", async () => {
   const remove = jest.fn();
   const toJsonOutput = jest.fn();

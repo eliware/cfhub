@@ -32,3 +32,16 @@ test("returns an empty value and resets terminal mode on interrupt", async () =>
   expect(input.setRawMode.mock.calls).toEqual([[true], [false]]);
   expect(input.pause).toHaveBeenCalledTimes(1);
 });
+
+test("removes the data listener after each prompt", async () => {
+  const input = terminalInput();
+  const output = { write: jest.fn() };
+  const first = readHiddenTerminalInput(input, output);
+  input.emit("data", "first\r");
+  await expect(first).resolves.toBe("first");
+  expect(input.listenerCount("data")).toBe(0);
+  const second = readHiddenTerminalInput(input, output);
+  input.emit("data", "second\r");
+  await expect(second).resolves.toBe("second");
+  expect(input.listenerCount("data")).toBe(0);
+});

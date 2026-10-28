@@ -11,3 +11,18 @@ test("compresses the payload when the request accepts gzip", () => {
   expect(encoded.contentEncoding).toBe("gzip");
   expect(gunzipSync(encoded.payload).toString()).toBe("body");
 });
+
+test.each(["gzip;q=0", "gzip;q=0.0", "gzip;q=0, *;q=1"])(
+  "does not compress when gzip quality is zero: %s",
+  (acceptEncoding) => {
+    expect(
+      encodeAsset({ headers: { "accept-encoding": acceptEncoding } }, "body").contentEncoding,
+    ).toBeUndefined();
+  },
+);
+
+test("compresses when gzip has a positive quality", () => {
+  expect(
+    encodeAsset({ headers: { "accept-encoding": "gzip;q=0.5" } }, "body").contentEncoding,
+  ).toBe("gzip");
+});

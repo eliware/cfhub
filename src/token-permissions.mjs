@@ -4,6 +4,8 @@ export { summarizePermissions } from "./permission-summary.mjs";
 
 export async function inspectApiToken({ token, accountId, fetchImpl = fetch } = {}) {
   const accountToken = token?.startsWith("cfat_");
+  if (accountToken && accountId && !/^[A-Za-z0-9_-]+$/.test(accountId))
+    throw new Error("Account ID contains invalid path characters");
   const verifyPath =
     accountToken && accountId ? `/accounts/${accountId}/tokens/verify` : "/user/tokens/verify";
   const verifyResponse = await fetchImpl(`${API_ROOT}${verifyPath}`, {

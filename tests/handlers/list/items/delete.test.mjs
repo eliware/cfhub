@@ -47,3 +47,17 @@ test("requires item IDs and force", async () => {
   );
   await expect(deleteListItems(base({ opts: {} }))).rejects.toThrow("without --force");
 });
+
+test("stops when item validation fails without throwing", async () => {
+  const cf = { delete: jest.fn() };
+  const fail = jest.fn();
+  await deleteListItems(base({ cf, body: {}, fail }));
+  expect(fail).toHaveBeenCalledWith('Missing --data or --file with {"ids":[...]}');
+  expect(cf.delete).not.toHaveBeenCalled();
+
+  await deleteListItems(base({ cf, body: { ids: [] }, fail }));
+  await deleteListItems(base({ cf, opts: {}, fail }));
+  expect(fail).toHaveBeenCalledWith("Expected at least one item ID");
+  expect(fail).toHaveBeenCalledWith("Refusing to delete without --force");
+  expect(cf.delete).not.toHaveBeenCalled();
+});

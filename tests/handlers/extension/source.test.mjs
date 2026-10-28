@@ -56,3 +56,17 @@ test("rejects a source when a command file is missing", () => {
   ).toBeNull();
   expect(fail).toHaveBeenCalledWith("Invalid cfhub extension manifest");
 });
+
+test("rejects symbolic links anywhere in the extension source", () => {
+  const fail = jest.fn();
+  const fsImpl = {
+    readFileSync: () => JSON.stringify(validManifest),
+    lstatSync: (entryPath) => ({
+      isSymbolicLink: () => entryPath.endsWith("linked-file"),
+      isDirectory: () => entryPath.endsWith("source"),
+    }),
+    readdirSync: () => ["linked-file"],
+  };
+  expect(loadExtensionSource({ sourcePath: "/source", fsImpl, fail })).toBeNull();
+  expect(fail).toHaveBeenCalledWith("Extension source cannot contain symbolic links");
+});

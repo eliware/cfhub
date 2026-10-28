@@ -1,5 +1,3 @@
-import { requireValue } from "../../argument-validation.mjs";
-
 export async function deleteListItems({
   cf,
   accountId,
@@ -11,10 +9,19 @@ export async function deleteListItems({
   toJsonOutput,
   fail,
 }) {
-  if (!body || !Array.isArray(body.ids)) fail('Missing --data or --file with {"ids":[...]}');
-  requireValue(body.ids.length, "Expected at least one item ID", fail);
-  requireValue(opts.force, "Refusing to delete without --force", fail);
-  if (opts["dry-run"])
+  if (!body || !Array.isArray(body.ids)) {
+    fail('Missing --data or --file with {"ids":[...]}');
+    return;
+  }
+  if (!body.ids.length) {
+    fail("Expected at least one item ID");
+    return;
+  }
+  if (!opts.force) {
+    fail("Refusing to delete without --force");
+    return;
+  }
+  if (opts["dry-run"] === true)
     return printer.log(
       JSON.stringify({ listId: id, action: "delete", body, dryRun: true }, null, 2),
     );

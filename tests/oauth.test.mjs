@@ -48,7 +48,10 @@ test("OAuth login opens the scope picker before authorization", async () => {
   const pickerPage = new URL(printed[0].split(": ").at(-1));
   const startResponse = await requestOAuthResponse(new URL("/oauth/start", pickerPage), {
     method: "POST",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
+    headers: {
+      "content-type": "application/x-www-form-urlencoded",
+      origin: pickerPage.origin,
+    },
     body: "scope=zone.read",
   });
   const authorization = new URL(startResponse.headers.location);

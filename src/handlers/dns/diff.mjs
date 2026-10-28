@@ -1,4 +1,3 @@
-import { requireValue } from "../argument-validation.mjs";
 import { buildDnsPlan } from "./plan.mjs";
 import { applyDnsPlan } from "./apply-plan.mjs";
 
@@ -14,15 +13,24 @@ export async function handleDnsDiff({
   cf,
   listRecords,
 }) {
-  requireValue(body, "Missing target records in --data or --file", fail);
+  if (!body) {
+    fail("Missing target records in --data or --file");
+    return;
+  }
   const targetRecords = Array.isArray(body) ? body : body.records;
-  if (!Array.isArray(targetRecords)) fail("Expected an array of target records");
+  if (!Array.isArray(targetRecords)) {
+    fail("Expected an array of target records");
+    return;
+  }
   const currentResponse = await listRecords();
   const current = Array.isArray(currentResponse?.result) ? currentResponse.result : [];
   const plan = buildDnsPlan(zoneId, targetRecords, current);
   if (action === "diff" || opts["dry-run"])
     return outputJson ? toJsonOutput(plan) : printer.log(JSON.stringify(plan, null, 2));
-  requireValue(opts.force, "Refusing DNS apply without --force", fail);
+  if (!opts.force) {
+    fail("Refusing DNS apply without --force");
+    return;
+  }
   await applyDnsPlan(cf, plan);
   return outputJson
     ? toJsonOutput({ ...plan, applied: true })

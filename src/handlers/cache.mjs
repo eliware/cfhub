@@ -19,9 +19,12 @@ export async function handleCache({
     return;
   }
   requireValue(body, "Missing --data or --file", fail);
-  requireValue(opts.force || opts["dry-run"], "Refusing cache removal without --force", fail);
-  if (opts["dry-run"])
-    return printer.log(JSON.stringify({ zoneId, action, body, dryRun: true }, null, 2));
+  const dryRun = opts["dry-run"] === true;
+  if (!opts.force && !dryRun) {
+    fail("Refusing cache removal without --force");
+    return;
+  }
+  if (dryRun) return printer.log(JSON.stringify({ zoneId, action, body, dryRun: true }, null, 2));
   const result = await cf.post(`/zones/${zoneId}/purge_cache`, { body });
   return outputJson ? toJsonOutput(result) : printer.log(JSON.stringify(result, null, 2));
 }

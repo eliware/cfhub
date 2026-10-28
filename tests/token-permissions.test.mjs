@@ -46,6 +46,14 @@ test("verifies account tokens without falsely claiming permissions", async () =>
   );
 });
 
+test("rejects unsafe account IDs before requesting token verification", async () => {
+  const fetchImpl = jest.fn();
+  await expect(
+    inspectApiToken({ token: "cfat_token", accountId: "../user", fetchImpl }),
+  ).rejects.toThrow("Account ID contains invalid path characters");
+  expect(fetchImpl).not.toHaveBeenCalled();
+});
+
 test("rejects inactive tokens and tolerates unavailable token details", async () => {
   const inactive = jest
     .fn()

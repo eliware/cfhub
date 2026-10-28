@@ -8,6 +8,7 @@ test("serves the project version and rejects unknown projects", () => {
       request: { method: "GET" },
       response,
       url: new URL("http://localhost/api/version?project=cfhub"),
+      scopePicker: true,
     }),
   ).toBe(true);
   expect(response.writeHead).toHaveBeenLastCalledWith(200, {
@@ -19,6 +20,7 @@ test("serves the project version and rejects unknown projects", () => {
       request: { method: "GET" },
       response,
       url: new URL("http://localhost/api/version?project=other"),
+      scopePicker: true,
     }),
   ).toBe(true);
   expect(response.writeHead).toHaveBeenLastCalledWith(404, expect.any(Object));
@@ -26,6 +28,7 @@ test("serves the project version and rejects unknown projects", () => {
     request: { method: "GET" },
     response,
     url: new URL("http://localhost/api/version"),
+    scopePicker: true,
   });
   expect(response.end.mock.calls.at(-1)[0]).toContain("Project not found: ");
   expect(
@@ -33,6 +36,15 @@ test("serves the project version and rejects unknown projects", () => {
       request: { method: "POST" },
       response,
       url: new URL("http://localhost/api/version"),
+      scopePicker: true,
+    }),
+  ).toBe(false);
+  expect(
+    serveOAuthPickerVersionRoute({
+      request: { method: "GET" },
+      response,
+      url: new URL("http://localhost/api/version?project=cfhub"),
+      scopePicker: false,
     }),
   ).toBe(false);
 });

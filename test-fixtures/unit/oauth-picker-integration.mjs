@@ -62,6 +62,7 @@ export async function verifyOAuthPickerIntegration() {
   browser.emit("error", { code: "ENOENT" });
   const startResponse = await fetch(new URL("/oauth/start", landing), {
     method: "POST",
+    headers: { origin: landing.origin },
     redirect: "manual",
   });
   const authorization = new URL(startResponse.headers.get("location"));

@@ -25,7 +25,12 @@ test("OAuth picker setup errors reject the callback promise", async () => {
       throw error;
     },
   });
-  const request = { method: "POST", url: "/oauth/start", headers: {}, body: "" };
+  const request = {
+    method: "POST",
+    url: "/oauth/start",
+    headers: { origin: "http://localhost" },
+    body: "",
+  };
   const response = { writeHead: jest.fn(), end: jest.fn() };
   const rejected = expect(callback).rejects.toBe(error);
   await handleRequest(request, response);
@@ -116,10 +121,20 @@ test("OAuth scope picker opens a local setup page and redirects with selected sc
   let authorization;
   const startUrl = new URL(landing);
   startUrl.pathname = "/oauth/start";
-  expect((await requestOAuthResponse(startUrl, { method: "POST" })).statusCode).toBe(302);
+  expect(
+    (
+      await requestOAuthResponse(startUrl, {
+        method: "POST",
+        headers: { origin: startUrl.origin },
+      })
+    ).statusCode,
+  ).toBe(302);
   const selected = await requestOAuthResponse(startUrl, {
     method: "POST",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
+    headers: {
+      "content-type": "application/x-www-form-urlencoded",
+      origin: startUrl.origin,
+    },
     body: "scope=zone.read&scope=dns.write&keep-signed-in=on",
   });
   expect(selected.statusCode).toBe(302);

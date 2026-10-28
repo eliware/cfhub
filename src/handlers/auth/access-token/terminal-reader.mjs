@@ -9,10 +9,14 @@ export function readHiddenTerminalInput(input, output) {
       output.write("\n");
       resolve(result);
     };
-    input.on("data", (chunk) => {
+    const onData = (chunk) => {
       const result = editor.write(chunk);
-      if (result.done) finish(result.value);
-    });
+      if (result.done) {
+        input.removeListener("data", onData);
+        finish(result.value);
+      }
+    };
+    input.on("data", onData);
     input.setRawMode(true);
     input.resume();
   });

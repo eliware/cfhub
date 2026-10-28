@@ -2,8 +2,8 @@ import { VERSION } from "../../version.mjs";
 
 const jsonContentType = `application/json${String.fromCharCode(59)} charset=utf-8`;
 
-export function serveOAuthPickerVersionRoute({ request, response, url }) {
-  if (url.pathname !== "/api/version" || request.method !== "GET") return false;
+export function serveOAuthPickerVersionRoute({ request, response, url, scopePicker }) {
+  if (!scopePicker || url.pathname !== "/api/version" || request.method !== "GET") return false;
   const project = url.searchParams.get("project");
   if (project !== "cfhub") {
     response.writeHead(404, { "content-type": jsonContentType });
