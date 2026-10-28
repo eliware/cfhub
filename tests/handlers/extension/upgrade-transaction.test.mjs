@@ -49,6 +49,7 @@ test("returns cleanup failures from the transaction result", () => {
     }),
   ).toEqual({
     backupDestination: expect.stringContaining("demo"),
+    backupRetained: false,
     cleanupErrors: [{ path: "temp-1", error: cleanupError }],
   });
 });

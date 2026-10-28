@@ -71,6 +71,34 @@ test("reports upgrade success when backup cleanup fails", () => {
   expect(printer.error).toHaveBeenCalledWith(
     expect.stringContaining("Upgrade completed, but cleanup failed"),
   );
+  expect(printer.error).toHaveBeenCalledWith(expect.stringContaining("cfhub-temp-2"));
+});
+
+test("reports staging cleanup errors without claiming that the backup remains", () => {
+  let tempNumber = 0;
+  const printer = { log: jest.fn(), error: jest.fn() };
+  upgradeExtension({
+    opts: { path: "/source" },
+    printer,
+    fail: jest.fn(),
+    fsImpl: {
+      readFileSync: () => JSON.stringify({ name: "demo", version: "2", commands: {} }),
+      mkdirSync: jest.fn(),
+      existsSync: jest.fn(() => true),
+      mkdtempSync: jest.fn(() => `cfhub-temp-${++tempNumber}`),
+      renameSync: jest.fn(),
+      cpSync: jest.fn(),
+      rmSync: jest
+        .fn()
+        .mockImplementationOnce(() => {
+          throw new Error("staging cleanup failed");
+        })
+        .mockImplementationOnce(() => {}),
+    },
+    homeDir: "/home",
+  });
+  expect(printer.error).toHaveBeenCalledWith(expect.stringContaining("staging cleanup failed"));
+  expect(printer.error.mock.calls.flat().join(" ")).not.toContain("previous extension remains");
 });
 
 test("keeps the installed extension when staging the new extension fails", () => {

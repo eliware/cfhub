@@ -26,7 +26,12 @@ export function upgradeExtension({ opts, printer, fail, fsImpl, homeDir }) {
   const result = replaceExtension({ source, destination, root, name: manifest.name, fsImpl });
   const message = printer.log(`Upgraded extension ${manifest.name}`);
   result?.cleanupErrors.forEach(({ path: cleanupPath, error }) => {
-    printer.error(`Upgrade completed, but cleanup failed for ${cleanupPath}: ${error.message}`);
+    const backupMessage = result.backupRetained
+      ? ` The previous extension remains at ${result.backupDestination}.`
+      : "";
+    printer.error(
+      `Upgrade completed, but cleanup failed for ${cleanupPath}: ${error.message}.${backupMessage}`,
+    );
   });
   return message;
 }

@@ -122,7 +122,9 @@ test("uses injected IDs when it saves a token profile", async () => {
 test("reports token inspection errors", async () => {
   const inspect = setup({ inspectApiTokenImpl: jest.fn().mockRejectedValue(Error("denied")) });
   await saveApiTokenLogin(inspect.args);
-  expect(inspect.fail).toHaveBeenCalledWith("Could not verify API token: denied");
+  expect(inspect.fail).toHaveBeenCalledWith(
+    "Could not verify API token. Check that the token is valid and try again.",
+  );
 });
 
 test("saves a verified token when optional permission details are unavailable", async () => {

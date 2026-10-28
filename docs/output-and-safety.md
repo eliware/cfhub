@@ -38,7 +38,7 @@ Add `--force` to confirm a destructive action. Commands refuse supported destruc
 
 `cfhub api` accepts relative Cloudflare API paths. It uses `GET` by default. Set `--method` to `GET`, `POST`, `PUT`, `PATCH`, or `DELETE`.
 
-Read requests do not accept a body. Pass a JSON body with `--data` or `--file`. `DELETE` requires `--force` or `--dry-run`. Pass `--paginate` to fetch all pages from supported GET requests.
+Read requests do not accept a body. Pass a JSON body with `--data` or `--file`. `DELETE` requires `--force` or a true `--dry-run` value. `--dry-run=false` does not authorize deletion. Pass `--paginate` to fetch all pages from supported GET requests.
 
 ## Keep access private
 

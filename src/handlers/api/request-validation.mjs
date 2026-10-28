@@ -23,10 +23,10 @@ export function validateApiRequest({ action, opts, body, fail }) {
   }
   const path = action.startsWith("/") ? action : `/${action}`;
   const method = String(opts.method || "GET").toUpperCase();
-  const dryRunSpecified = typeof opts["dry-run"] === "boolean";
+  const dryRun = opts["dry-run"] === true;
   if (!METHODS.has(method)) fail(`Unsupported API method: ${method}`);
   else if (method === "GET" && body !== null) fail("Read requests cannot include --data or --file");
-  else if (method === "DELETE" && !opts.force && !dryRunSpecified)
+  else if (method === "DELETE" && !opts.force && !dryRun)
     fail("Refusing DELETE without --force (or use --dry-run)");
   else return { method, path };
   return null;

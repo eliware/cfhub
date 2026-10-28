@@ -41,12 +41,23 @@ test("returns after an API dry run", async () => {
 test("performs an API DELETE when dry-run is explicitly false", async () => {
   const ctx = context({
     action: "/zones/z1",
-    opts: { method: "DELETE", "dry-run": false },
+    opts: { method: "DELETE", "dry-run": false, force: true },
   });
   ctx.cf.delete = jest.fn().mockResolvedValue({ result: "deleted" });
   await handleApi(ctx);
   expect(ctx.cf.delete).toHaveBeenCalledWith("/zones/z1", undefined);
   expect(ctx.printer.log).toHaveBeenCalledWith(expect.stringContaining("deleted"));
+});
+
+test("does not send an API DELETE when dry-run is false without force", async () => {
+  const ctx = context({
+    action: "/zones/z1",
+    opts: { method: "DELETE", "dry-run": false },
+  });
+  ctx.cf.delete = jest.fn();
+  await handleApi(ctx);
+  expect(ctx.cf.delete).not.toHaveBeenCalled();
+  expect(ctx.fail).toHaveBeenCalledWith("Refusing DELETE without --force (or use --dry-run)");
 });
 
 test.each([

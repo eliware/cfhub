@@ -36,5 +36,5 @@ export function replaceExtension({ source, destination, root, name, fsImpl }) {
       fsImpl,
     });
   }
-  return extensionCleanupReport(backupDestination, cleanupErrors);
+  return extensionCleanupReport(backupRoot, backupDestination, cleanupErrors);
 }

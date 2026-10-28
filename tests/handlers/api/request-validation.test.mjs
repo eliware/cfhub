@@ -40,13 +40,15 @@ test("accepts leading slashes and dry-run deletes", () => {
   ).toEqual({ path: "/zones/z1", method: "DELETE" });
 });
 
-test("accepts an explicit false dry-run value as authorization for a DELETE", () => {
+test("requires force when dry-run is explicitly false for a DELETE", () => {
+  const fail = jest.fn();
   expect(
     validateApiRequest({
       action: "zones/z1",
       opts: { method: "DELETE", "dry-run": false },
       body: null,
-      fail: jest.fn(),
+      fail,
     }),
-  ).toEqual({ path: "/zones/z1", method: "DELETE" });
+  ).toBeNull();
+  expect(fail).toHaveBeenCalledWith("Refusing DELETE without --force (or use --dry-run)");
 });

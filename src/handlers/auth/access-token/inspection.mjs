@@ -1,8 +1,8 @@
 export async function inspectLoginToken({ token, accountId, inspectApiTokenImpl, fail }) {
   try {
     return await inspectApiTokenImpl({ token, accountId });
-  } catch (error) {
-    fail(`Could not verify API token: ${error.message}`);
+  } catch {
+    fail("Could not verify API token. Check that the token is valid and try again.");
     return null;
   }
 }
