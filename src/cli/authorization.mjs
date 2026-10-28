@@ -43,7 +43,10 @@ export async function authorizeCommand({
       : null;
   const missingApi = managesCredentialAction
     ? []
-    : missingApiPermissions(resource, action, apiPermissions, permissionOptions);
+    : missingApiPermissions(resource, action, apiPermissions, {
+        ...permissionOptions,
+        method: opts.method,
+      });
   if (missingApi.length) {
     printer.error(missingApiPermissionMessage(missingApi));
     return { allowed: false, result: exit(1) };

@@ -76,6 +76,26 @@ test("removes a profile when the credential store has no entry", async () => {
   expect(input.data.profiles.old).toBeUndefined();
 });
 
+test("removes a profile when credential reading fails", async () => {
+  const input = options();
+  input.readCredentialImpl.mockRejectedValue(Error("keychain unavailable"));
+  await logoutAuthProfile(input);
+  expect(input.deleteCredentialImpl).toHaveBeenCalledWith("old");
+  expect(input.data.profiles.old).toBeUndefined();
+  expect(input.write).toHaveBeenCalledWith(input.data, "/home", {});
+  expect(input.printer.error).toHaveBeenCalledWith(
+    "Could not read saved credentials. The local profile will be removed.",
+  );
+});
+
+test("clears the active profile when no profiles remain", async () => {
+  const input = options();
+  input.data = { active: "old", profiles: { old: { authMethod: "api-token" } } };
+  input.readCredentialImpl.mockResolvedValue(null);
+  await logoutAuthProfile(input);
+  expect(input.data).toEqual({ active: null, profiles: {} });
+});
+
 test("revokes an OAuth access token and removes its credential", async () => {
   const input = options();
   input.readCredentialImpl.mockResolvedValue({ oauthAccessToken: "access-token" });

@@ -31,7 +31,7 @@ Use this table to set environment values:
 
 cfhub uses `CLOUDFLARE_API_TOKEN` when you do not save access in a profile. Use the account and zone values only when a command needs those IDs.
 
-The active profile supplies permission values when it records a complete permission list. cfhub checks known permissions before API calls. It rejects a command when the token lacks a required permission. Do not set `CFHUB_API_PERMISSIONS` values manually unless you know the full list.
+The active profile supplies permission values when it records a complete permission list. cfhub checks known permissions before API calls. It rejects a command when the token lacks a required permission. For `cfhub api`, it also rejects paths that do not map to a known permission. Do not set `CFHUB_API_PERMISSIONS` values manually unless you know the full list.
 
 cfhub reads `~/.cfhub` before the project `.env` file. It does not replace values in the process environment. It keeps values from `~/.cfhub` when the project file has the same key.
 

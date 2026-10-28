@@ -10,5 +10,7 @@ export function missingScopeMessage(missing) {
 }
 
 export function missingApiPermissionMessage(missing) {
+  if (missing.some((permission) => permission.startsWith("Cannot verify this API path and method")))
+    return "cfhub cannot verify this API request against known token permissions. Use a built-in command, or check the API path and token permissions.";
   return `Your active API token is missing permission${missing.length === 1 ? "" : "s"}: ${missing.join(", ")}\n\nRun cfhub auth login again with a token that grants the required permissions.`;
 }

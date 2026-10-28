@@ -15,4 +15,7 @@ test("formats missing scope and token permission messages", () => {
   expect(missingScopeMessage(["zone.read", "dns.read"])).toContain("missing scopes:");
   expect(missingApiPermissionMessage(["DNS Write"])).toContain("missing permission:");
   expect(missingApiPermissionMessage(["DNS Write", "Zone Read"])).toContain("missing permissions:");
+  expect(missingApiPermissionMessage(["Cannot verify this API path and method"])).toContain(
+    "cannot verify this API request",
+  );
 });

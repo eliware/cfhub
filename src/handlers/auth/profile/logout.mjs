@@ -14,7 +14,12 @@ export async function logoutAuthProfile({
     fail(`Unknown profile: ${name || "(none)"}`);
     return;
   }
-  const credential = await readCredentialImpl(name);
+  let credential;
+  try {
+    credential = await readCredentialImpl(name);
+  } catch {
+    printer.error("Could not read saved credentials. The local profile will be removed.");
+  }
   try {
     const isOAuthProfile = data.profiles[name].authMethod === "oauth";
     const token = isOAuthProfile

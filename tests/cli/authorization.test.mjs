@@ -81,6 +81,34 @@ test("authorization reports one or many missing API token permissions", async ()
   expect(many.printer.error).toHaveBeenCalledWith(expect.stringContaining("missing permissions:"));
 });
 
+test("blocks API writes when the known token permissions only allow reads", async () => {
+  const input = options({
+    resource: "api",
+    action: "/zones/zone-1/dns_records",
+    opts: { method: "POST" },
+    env: {
+      CFHUB_OAUTH_SCOPES: "zone.read",
+      CFHUB_API_PERMISSIONS_KNOWN: "1",
+      CFHUB_API_PERMISSIONS: "DNS Read",
+    },
+  });
+  await expect(authorizeCommand(input)).resolves.toEqual({ allowed: false, result: 1 });
+  expect(input.printer.error).toHaveBeenCalledWith(expect.stringContaining("DNS Write"));
+  expect(input.cfFactory).not.toHaveBeenCalled();
+});
+
+test("blocks API paths without a known permission mapping", async () => {
+  const input = options({
+    resource: "api",
+    action: "/custom/unknown",
+    opts: { method: "GET" },
+    env: { CFHUB_API_PERMISSIONS_KNOWN: "1", CFHUB_API_PERMISSIONS: "" },
+  });
+  await expect(authorizeCommand(input)).resolves.toEqual({ allowed: false, result: 1 });
+  expect(input.printer.error).toHaveBeenCalledWith(expect.stringContaining("cannot verify"));
+  expect(input.cfFactory).not.toHaveBeenCalled();
+});
+
 test("allows list deletion previews with read-only grants", async () => {
   const input = options({
     resource: "lists",
