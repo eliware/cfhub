@@ -1,5 +1,8 @@
 import { jest } from "@jest/globals";
-import { createCloudflareClient } from "../src/cloudflare.mjs";
+
+const defaultCloudflare = jest.fn().mockImplementation((options) => ({ options }));
+jest.unstable_mockModule("cloudflare", () => ({ Cloudflare: defaultCloudflare }));
+const { createCloudflareClient } = await import("../src/cloudflare.mjs");
 
 test("createCloudflareClient supports API-token dependency injection", () => {
   const ctor = jest.fn().mockImplementation((cfg) => ({ cfg }));
@@ -9,6 +12,12 @@ test("createCloudflareClient supports API-token dependency injection", () => {
   });
   expect(ctor).toHaveBeenCalledWith({ apiToken: "token" });
   expect(client.cfg.apiToken).toBe("token");
+});
+
+test("createCloudflareClient uses the default class when a token exists", () => {
+  const client = createCloudflareClient({ env: { CLOUDFLARE_API_TOKEN: " token " } });
+  expect(defaultCloudflare).toHaveBeenCalledWith({ apiToken: " token " });
+  expect(client.options.apiToken).toBe(" token ");
 });
 
 test("createCloudflareClient throws without credentials", () => {
