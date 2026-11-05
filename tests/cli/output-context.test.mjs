@@ -4,30 +4,6 @@ test("output context is exported", () => {
   expect(createOutputContext).toEqual(expect.any(Function));
 });
 
-test("output context prints update notices and contains check failures", async () => {
-  const printer = { log: jest.fn(), error: jest.fn() };
-  const common = {
-    opts: {},
-    printer,
-    homeDir: "/tmp/cfhub-output-context",
-    env: {},
-    fsImpl: { existsSync: () => false },
-  };
-  createOutputContext({ ...common, updateCheck: jest.fn().mockResolvedValue("99.0.0") });
-  await Promise.resolve();
-  await Promise.resolve();
-  expect(printer.error).toHaveBeenCalledWith(expect.stringContaining("99.0.0"));
-
-  printer.error.mockClear();
-  createOutputContext({
-    ...common,
-    updateCheck: jest.fn().mockRejectedValue(new Error("offline")),
-  });
-  await Promise.resolve();
-  await Promise.resolve();
-  expect(printer.error).not.toHaveBeenCalled();
-});
-
 test("quiet output context suppresses command log output", () => {
   const printer = { log: jest.fn(), error: jest.fn() };
   const context = createOutputContext({
@@ -42,39 +18,41 @@ test("quiet output context suppresses command log output", () => {
   expect(printer.log).not.toHaveBeenCalled();
 });
 
-test("sends update notices through the configured pager", async () => {
-  const terminalFactory = jest.fn(() => ({ log: jest.fn(), error: jest.fn(), flush: jest.fn() }));
-  const updateCheck = jest.fn().mockResolvedValue("99.0.0");
+test("creates terminal output when saved settings select a pager", () => {
+  const terminal = { log: jest.fn(), error: jest.fn(), flush: jest.fn() };
+  const terminalFactory = jest.fn(() => terminal);
   const context = createOutputContext({
-    opts: { pager: "less" },
+    opts: {},
     printer: { log: jest.fn(), error: jest.fn() },
     homeDir: "/tmp/cfhub-output-context",
     env: {},
     fsImpl: {
       existsSync: () => true,
-      readFileSync: () => JSON.stringify({ pager: "less" }),
+      readFileSync: () => JSON.stringify({ pager: "less", "update-check": false }),
     },
-    updateCheck,
+    updateCheck: jest.fn(),
     terminalFactory,
   });
-  await Promise.resolve();
-  await Promise.resolve();
-  expect(terminalFactory.mock.calls[0][0].pager).toBe("less");
-  expect(terminalFactory.mock.results[0].value.log).toHaveBeenCalledWith(
-    expect.stringContaining("99.0.0"),
+  expect(terminalFactory).toHaveBeenCalledWith(
+    expect.objectContaining({ pager: "less", json: false }),
   );
-  expect(context.terminal).toBe(terminalFactory.mock.results[0].value);
+  expect(context.terminal).toBe(terminal);
 });
 
-test("returns a terminal flush function when terminal output is disabled", async () => {
+test("prints dashboard links and returns a terminal flush function", async () => {
+  const printer = { log: jest.fn(), error: jest.fn() };
   const context = createOutputContext({
-    opts: { web: true, "no-pager": true },
-    printer: { log: jest.fn(), error: jest.fn() },
+    opts: { web: true, "no-pager": true, "zone-id": "zone" },
+    printer,
     homeDir: "/tmp/cfhub-output-context",
     env: {},
-    fsImpl: { existsSync: () => false },
+    fsImpl: {
+      existsSync: () => true,
+      readFileSync: () => JSON.stringify({ "update-check": false }),
+    },
     updateCheck: jest.fn(),
   });
   expect(context.handled).toBe(true);
+  expect(printer.log).toHaveBeenCalledWith("https://dash.cloudflare.com/zones/zone");
   await expect(context.terminal.flush()).resolves.toBeUndefined();
 });

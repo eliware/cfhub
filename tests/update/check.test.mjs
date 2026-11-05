@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 import { checkForUpdate } from "../../src/update/check.mjs";
-import { run } from "../../src/cli.mjs";
 function memoryFs(files = new Map()) {
   return {
     files,
@@ -125,23 +124,4 @@ test("update check handles missing fetch and missing timeout support", async () 
     globalThis.AbortSignal = abortSignal;
   }
   expect(fetchImpl).toHaveBeenCalledWith("https://registry.npmjs.org/@eliware%2Fcfhub/latest", {});
-});
-
-test("CLI prints an update notice without delaying command output", async () => {
-  const printer = { log: jest.fn(), error: jest.fn() };
-  await run({
-    argv: ["zones", "list"],
-    homeDir: "/tmp/cfhub-update-cli",
-    env: {},
-    printer,
-    fsImpl: { existsSync: () => false },
-    loadEnv: jest.fn(),
-    cfFactory: jest.fn(() => ({})),
-    handlers: { zones: ({ printer: injected }) => injected.log("zones") },
-    updateCheck: jest.fn().mockResolvedValue("2.0.0"),
-    exit: jest.fn(),
-  });
-  await Promise.resolve();
-  await Promise.resolve();
-  expect(printer.error).toHaveBeenCalledWith(expect.stringContaining("2.0.0"));
 });

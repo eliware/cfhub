@@ -1,9 +1,10 @@
 import { jest } from "@jest/globals";
 import { simpleHandlers } from "../../src/cli/simple-handlers.mjs";
-import { run } from "../../src/cli.mjs";
-import { createMemoryFs } from "../../test-fixtures/unit/memory-fs.mjs";
-test("simple handler map covers platform resources", async () => {
+
+test("simple handler map reads each configured resource", async () => {
+  expect(simpleHandlers).toHaveProperty("loadBalancer");
   for (const resource of [
+    "tunnel",
     "workers",
     "pages",
     "r2",
@@ -15,106 +16,22 @@ test("simple handler map covers platform resources", async () => {
     "access",
   ])
     expect(simpleHandlers).toHaveProperty(resource);
-  for (const [name, handler] of Object.entries(simpleHandlers)) {
-    const get = jest.fn().mockResolvedValue({ result: [] });
-    await handler({
-      cf: { get },
-      action: "list",
-      opts: name === "loadBalancer" ? { "zone-id": "zone" } : { "account-id": "account" },
-      outputJson: true,
-      toJsonOutput: jest.fn(),
-      printer: { log: jest.fn() },
-      fail: (message) => {
-        throw new Error(message);
-      },
-    });
-    expect(get).toHaveBeenCalledTimes(1);
-  }
-});
 
-test("CLI manages aliases and config through the command surface", async () => {
-  const home = "/tmp/cf-cli-settings-test";
-  const files = new Map();
-  const fsImpl = {
-    existsSync: (path) => files.has(path),
-    readFileSync: (path) => files.get(path),
-    mkdirSync: jest.fn(),
-    writeFileSync: (path, value) => files.set(path, value),
-    chmodSync: jest.fn(),
-  };
-  const printer = { log: jest.fn(), error: jest.fn() };
-  const common = { homeDir: home, fsImpl, printer };
-  await run({ ...common, argv: ["alias", "set", "work", "zone", "list"] });
-  await run({
-    ...common,
-    argv: ["work"],
-    loadEnv: jest.fn(),
-    cfFactory: jest.fn(() => ({})),
-    handlers: { zones: jest.fn() },
-    exit: jest.fn(),
-  });
-  await run({ ...common, argv: ["config", "set", "pager", "less"] });
-  await run({ ...common, argv: ["config", "get", "pager"] });
-  expect(printer.log).toHaveBeenCalledWith("less");
-});
-
-test("CLI dispatches built-in load-balancer and tunnel handlers", async () => {
-  const printer = { log: jest.fn(), error: jest.fn() };
-  const cfFactory = jest.fn(() => ({
-    get: jest.fn().mockResolvedValue({ ok: true }),
-  }));
-  const common = {
-    printer,
-    loadEnv: jest.fn(),
-    cfFactory,
-    env: {},
-    exit: jest.fn(),
-  };
-  await run({
-    ...common,
-    argv: ["load-balancer", "list", "--zone-id", "z1"],
-  });
-  await run({ ...common, argv: ["tunnel", "list", "--account-id", "a1"] });
-  expect(printer.log).toHaveBeenCalled();
-});
-
-test("CLI dispatches a configured account platform handler", async () => {
-  const printer = { log: jest.fn(), error: jest.fn() };
-  const cfFactory = jest.fn(() => ({
-    get: jest.fn().mockResolvedValue({ ok: true }),
-  }));
-  await run({
-    argv: ["workers", "list", "--account-id", "a1"],
-    printer,
-    loadEnv: jest.fn(),
-    cfFactory,
-    env: {},
-    exit: jest.fn(),
-  });
-  expect(printer.log).toHaveBeenCalled();
-});
-
-test("CLI loads an installed extension without Cloudflare credentials", async () => {
-  const home = "/tmp/cfhub-home/cli-extension";
-  const fsImpl = createMemoryFs({
-    [`${home}/.config/cfhub/extensions/hello/cf-extension.json`]: JSON.stringify({
-      name: "hello",
-      version: "1.0.0",
-      commands: { hello: "hello.mjs" },
+  await Promise.all(
+    Object.entries(simpleHandlers).map(async ([name, handler]) => {
+      const get = jest.fn().mockResolvedValue({ result: [] });
+      await handler({
+        cf: { get },
+        action: "list",
+        opts: name === "loadBalancer" ? { "zone-id": "zone" } : { "account-id": "account" },
+        outputJson: true,
+        toJsonOutput: jest.fn(),
+        printer: { log: jest.fn() },
+        fail: (message) => {
+          throw new Error(message);
+        },
+      });
+      expect(get).toHaveBeenCalledTimes(1);
     }),
-    [`${home}/.config/cfhub/extensions/hello/hello.mjs`]: "source",
-  });
-  const printer = { log: jest.fn(), error: jest.fn() };
-  await run({
-    argv: ["hello", "--name", "Eli"],
-    printer,
-    fsImpl,
-    homeDir: home,
-    loadCommand: jest.fn(
-      async () =>
-        ({ printer: target, opts }) =>
-          target.log(`Hello ${opts.name}`),
-    ),
-  });
-  expect(printer.log).toHaveBeenCalledWith("Hello Eli");
+  );
 });

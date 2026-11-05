@@ -1,4 +1,5 @@
-import { createOAuthServer, startOAuthServer } from "./oauth/server.mjs";
+import { createOAuthServer } from "./oauth/server.mjs";
+import { startOAuthServerLifecycle } from "./oauth/server/lifecycle.mjs";
 import { openBrowser } from "./oauth/browser.mjs";
 import { exchangeOAuthCode } from "./oauth/exchange.mjs";
 import { DEFAULT_OAUTH_SCOPES } from "./oauth/scopes.mjs";
@@ -20,7 +21,13 @@ export async function loginOAuth({
   setTimeoutImpl = setTimeout,
 }) {
   if (!clientId) throw new Error("Missing CFHUB_OAUTH_CLIENT_ID");
-  const { server, port } = await startOAuthServer({ ports, serverFactory, bindHost });
+  const lifecycle = await startOAuthServerLifecycle({
+    ports,
+    serverFactory,
+    bindHost,
+    setTimeoutImpl,
+  });
+  const { server, port } = lifecycle;
   const setup = prepareOAuthLogin({
     clientId,
     redirectHost,
@@ -44,8 +51,6 @@ export async function loginOAuth({
       fetchImpl,
     });
   } finally {
-    // Give the browser time to receive the inline result page before the
-    // one-shot callback server shuts down.
-    setTimeoutImpl(() => server.close(), 250);
+    lifecycle.closeAfterResponse();
   }
 }

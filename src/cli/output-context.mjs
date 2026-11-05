@@ -1,9 +1,8 @@
-import { VERSION } from "../version.mjs";
 import { createTerminalOutput } from "../terminal.mjs";
 import { terminalOptions } from "./terminal/options.mjs";
 import { dashboardUrl } from "./dashboard-url.mjs";
-import { checkForUpdate } from "../update/check.mjs";
-import { showUpdateNotice } from "./update-notice.mjs";
+import { scheduleUpdateNotice } from "./update-notice/context.mjs";
+import { readSettings } from "../settings.mjs";
 
 export function createOutputContext({
   opts,
@@ -25,22 +24,18 @@ export function createOutputContext({
         pager,
       })
     : { ...printer, flush: async () => {} };
-  if (
-    !outputJson &&
-    !opts.quiet &&
-    settings["update-check"] !== false &&
-    settings["update-check"] !== "false"
-  ) {
-    const noticePrinter = pager ? { error: (message) => terminal.log(message) } : printer;
-    void showUpdateNotice({
-      updateCheck,
-      currentVersion: VERSION,
-      homeDir,
-      env,
-      fsImpl,
-      printer: noticePrinter,
-    });
-  }
+  scheduleUpdateNotice({
+    outputJson,
+    opts,
+    settings,
+    pager,
+    terminal,
+    printer,
+    updateCheck,
+    homeDir,
+    env,
+    fsImpl,
+  });
   const commandPrinter = opts.quiet ? { ...terminal, log: () => {} } : terminal;
   if (opts.web) {
     commandPrinter.log(dashboardUrl(opts));
@@ -48,6 +43,3 @@ export function createOutputContext({
   }
   return { handled: false, outputJson, terminal, commandPrinter };
 }
-
-import { readSettings } from "../settings.mjs";
-export { checkForUpdate };

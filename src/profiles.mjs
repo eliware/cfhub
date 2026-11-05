@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import { deleteCredential, readCredential, writeCredential } from "./identity/store.mjs";
 import { refreshOAuth } from "./oauth/api.mjs";
 import { activeProfile } from "./profile/store.mjs";
-import { removeExpiredProfile } from "./profile/expiry.mjs";
+import { resolveCredentialLifecycle } from "./profile/credential-lifecycle.mjs";
 import { applyProfileEnvironment } from "./profile/environment.mjs";
 
 export { activeProfile, profilesPath, readProfiles, writeProfiles } from "./profile/store.mjs";
@@ -27,42 +27,18 @@ export async function applyActiveProfile(
   const profile = activeProfile(env, homeDir, fsImpl);
   if (!profile) return null;
   const credential = await credentialReader(profile.name);
-  if (
-    credential?.oauthAccessToken &&
-    credential.expiresAt &&
-    credential.expiresAt <= now() + 60_000 &&
-    !credential.oauthRefreshToken
-  ) {
-    await removeExpiredProfile(profile.name, homeDir, fsImpl, credentialDeleter);
-    return null;
-  }
-  let activeCredential = credential;
-  if (
-    credential?.oauthRefreshToken &&
-    credential.expiresAt &&
-    credential.expiresAt <= now() + 60_000
-  ) {
-    try {
-      const refreshed = await refresh({
-        refreshToken: credential.oauthRefreshToken,
-      });
-      activeCredential = {
-        ...refreshed,
-        oauthAccessToken: refreshed.accessToken,
-        oauthRefreshToken: refreshed.refreshToken,
-      };
-      await credentialWriter(profile.name, {
-        ...credential,
-        ...activeCredential,
-      });
-    } catch {
-      // A rejected refresh token cannot restore the previous access token.
-      // Remove the invalid local credential before a new login.
-      await removeExpiredProfile(profile.name, homeDir, fsImpl, credentialDeleter);
-      return null;
-    }
-  }
-  const values = { ...profile, ...activeCredential };
+  const credentials = await resolveCredentialLifecycle({
+    profileName: profile.name,
+    credential,
+    homeDir,
+    fsImpl,
+    writeCredential: credentialWriter,
+    deleteCredential: credentialDeleter,
+    refreshOAuth: refresh,
+    now,
+  });
+  if (!credentials) return null;
+  const values = { ...profile, ...credentials.activeCredential };
   applyProfileEnvironment(values, env);
-  return { ...profile, ...credential };
+  return { ...profile, ...credentials.credential };
 }

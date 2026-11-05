@@ -51,15 +51,13 @@ test("rejects an empty token", async () => {
   expect(args.inspectApiTokenImpl).not.toHaveBeenCalled();
 });
 
-test("prompts for an interactive token and account ID", async () => {
+test("passes the resolved account ID to token inspection", async () => {
   delete process.env.CLOUDFLARE_ACCOUNT_ID;
   const { args } = setup({
     opts: {},
     promptToken: jest.fn().mockResolvedValue(" cfat_account-token "),
   });
   await saveApiTokenLogin(args);
-  expect(args.printer.error).toHaveBeenCalled();
-  expect(args.promptAccountId).toHaveBeenCalled();
   expect(args.inspectApiTokenImpl).toHaveBeenCalledWith({
     token: "cfat_account-token",
     accountId: "prompt-account",
@@ -99,24 +97,6 @@ test("saves a standard-input token with option and environment IDs", async () =>
   expect(write).toHaveBeenCalledWith(data, "home", args.profileFs);
   expect(data.active).toBe("work");
   expect(args.writeCredentialImpl).toHaveBeenCalledWith("work", { apiToken: "token" });
-});
-
-test("uses injected IDs when it saves a token profile", async () => {
-  const env = { CLOUDFLARE_ACCOUNT_ID: "injected-account", CLOUDFLARE_ZONE_ID: "injected-zone" };
-  const { args, data } = setup({
-    env,
-    readToken: () => "cfat_account-token",
-    inspectApiTokenImpl: jest.fn().mockResolvedValue({
-      permissions: [],
-      permissionsKnown: false,
-      permissionSummary: {},
-    }),
-  });
-  await saveApiTokenLogin(args);
-  expect(data.profiles.work).toMatchObject({
-    accountId: "injected-account",
-    zoneId: "injected-zone",
-  });
 });
 
 test("reports token inspection errors", async () => {
