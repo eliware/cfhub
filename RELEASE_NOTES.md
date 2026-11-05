@@ -14,6 +14,10 @@
 - Simplified repository guidance and corrected the OAuth route list in the README.
 - Reduced repeated CLI tests and removed duplicate token account selection coverage.
 
+### Fixed
+
+- Added command-specific help with syntax, required arguments, options, defaults, and safety rules.
+
 ## 15.0.1 — 2026-10-28
 
 ### Added

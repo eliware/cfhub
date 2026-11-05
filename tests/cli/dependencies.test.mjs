@@ -20,6 +20,16 @@ test("selects default CLI dependencies", () => {
   expect(dependencies.updateCheck).toEqual(expect.any(Function));
 });
 
+test("default exit dependency calls the injected process exit", () => {
+  const exit = jest.spyOn(process, "exit").mockImplementation(() => undefined);
+  try {
+    createCliDependencies().exit(1);
+    expect(exit).toHaveBeenCalledWith(1);
+  } finally {
+    exit.mockRestore();
+  }
+});
+
 test("preserves injected CLI dependencies", () => {
   const options = {
     argv: [],

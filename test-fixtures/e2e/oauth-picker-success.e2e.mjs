@@ -30,8 +30,14 @@ try {
   }
   const start = await fetch(new URL("/oauth/start", previewUrl), {
     method: "POST",
+    headers: {
+      origin: new URL(previewUrl).origin,
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({ scope: "zone.read" }),
     redirect: "manual",
   });
+  assert.equal(start.status, 302, `OAuth picker returned ${start.status}: ${await start.text()}`);
   const authorization = new URL(start.headers.get("location"));
   const callback = new URL(previewUrl);
   callback.pathname = "/oauth/callback";

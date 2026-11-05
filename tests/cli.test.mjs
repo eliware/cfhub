@@ -1,89 +1,82 @@
 import { jest } from "@jest/globals";
-import { run } from "../src/cli.mjs";
-import { createCliDependencies } from "../src/cli/dependencies.mjs";
 
-function dependencies(argv, overrides = {}) {
-  return {
+const parseArgs = jest.fn();
+const loadBody = jest.fn();
+const resolveCommand = jest.fn();
+const createCommandContext = jest.fn();
+const runExtensionCommand = jest.fn();
+const handleLocalCommand = jest.fn();
+const authorizeCommand = jest.fn();
+const createOutputContext = jest.fn();
+const createCliDependencies = jest.fn();
+const dispatchCommand = jest.fn();
+
+jest.unstable_mockModule("../src/args.mjs", () => ({ parseArgs }));
+jest.unstable_mockModule("../src/cli/body-loader.mjs", () => ({ loadBody }));
+jest.unstable_mockModule("../src/cli/resolve/command.mjs", () => ({ resolveCommand }));
+jest.unstable_mockModule("../src/cli/command/context.mjs", () => ({ createCommandContext }));
+jest.unstable_mockModule("../src/cli/extension-command.mjs", () => ({ runExtensionCommand }));
+jest.unstable_mockModule("../src/cli/local-commands.mjs", () => ({ handleLocalCommand }));
+jest.unstable_mockModule("../src/cli/authorization.mjs", () => ({ authorizeCommand }));
+jest.unstable_mockModule("../src/cli/output-context.mjs", () => ({ createOutputContext }));
+jest.unstable_mockModule("../src/cli/dependencies.mjs", () => ({ createCliDependencies }));
+jest.unstable_mockModule("../src/cli/dispatch.mjs", () => ({ dispatchCommand }));
+
+const { run } = await import("../src/cli.mjs");
+
+function configure({ argv = ["zones", "list"], local = false, resolution, authorization, output }) {
+  const printer = { log: jest.fn(), error: jest.fn() };
+  const dependencies = {
     argv,
-    printer: { log: jest.fn(), error: jest.fn() },
-    fsImpl: { existsSync: () => false, readFileSync: jest.fn(() => "") },
+    env: {},
+    cfFactory: jest.fn(),
     loadEnv: jest.fn(),
-    cfFactory: jest.fn(() => ({})),
-    updateCheck: jest.fn(),
+    printer,
+    fsImpl: { readFileSync: jest.fn(), existsSync: jest.fn() },
+    handlers: {},
+    projectRoot: "/project",
+    homeDir: "/home",
     exit: jest.fn(),
-    ...overrides,
+    updateCheck: jest.fn(),
   };
+  createCliDependencies.mockReturnValue(dependencies);
+  parseArgs.mockReturnValue({ args: argv, opts: {} });
+  handleLocalCommand.mockReturnValue({ handled: local, result: "local" });
+  resolveCommand.mockResolvedValue(
+    resolution || { done: false, args: argv, opts: {}, resource: "zones", action: "list" },
+  );
+  authorizeCommand.mockResolvedValue(authorization || { allowed: true, cf: {} });
+  createOutputContext.mockReturnValue(
+    output || { handled: false, outputJson: false, terminal: {}, commandPrinter: printer },
+  );
+  createCommandContext.mockReturnValue({});
+  dispatchCommand.mockResolvedValue("dispatched");
+  return dependencies;
 }
 
-test("prints the version without loading project services", async () => {
-  const options = dependencies(["--version"]);
-  await run(options);
-  expect(options.printer.log).toHaveBeenCalled();
-});
+test("routes coordinator results with mocked services", async () => {
+  configure({ argv: ["--version"], local: true });
+  await expect(run()).resolves.toBe("local");
 
-test("uses default arguments when options are omitted", async () => {
-  const argv = process.argv;
-  const log = jest.spyOn(console, "log").mockImplementation(() => {});
-  process.argv = ["node", "cfhub", "--version"];
-  try {
-    await run();
-  } finally {
-    process.argv = argv;
-    log.mockRestore();
-  }
-});
+  configure({ resolution: { done: true, value: "help" } });
+  await expect(run({})).resolves.toBe("help");
 
-test("prints help for empty arguments", async () => {
-  const options = dependencies([]);
-  await run(options);
-  expect(options.printer.log).toHaveBeenCalled();
-});
-
-test("resolves resource help before authorization", async () => {
-  const options = dependencies(["zones", "--help"]);
-  await run(options);
-  expect(options.loadEnv).not.toHaveBeenCalled();
-});
-
-test("routes extension commands before authorization", async () => {
-  const options = dependencies(["extension", "list"]);
-  await run(options);
-  expect(options.cfFactory).not.toHaveBeenCalled();
-});
-
-test("stops when authorization rejects a command", async () => {
-  const options = dependencies(["zones", "list"], {
-    env: { CFHUB_OAUTH_SCOPES: "dns.read" },
+  configure({
+    argv: ["extension", "list"],
+    resolution: { done: false, resource: "extension", action: "list", opts: {} },
   });
-  await run(options);
-  expect(options.cfFactory).not.toHaveBeenCalled();
-});
+  runExtensionCommand.mockResolvedValue("extension");
+  await expect(run({})).resolves.toBe("extension");
 
-test("returns after printing dashboard links", async () => {
-  const options = dependencies(["zones", "get", "--zone-id", "z1", "--web"], {
-    env: {},
-  });
-  await run(options);
-  expect(options.printer.log).toHaveBeenCalledWith("https://dash.cloudflare.com/zones/z1");
-});
+  configure({ authorization: { allowed: false, result: "denied" } });
+  await expect(run({})).resolves.toBe("denied");
 
-test("dispatches an authorized command to its injected handler", async () => {
-  const zones = jest.fn();
-  const options = dependencies(["zones", "list"], {
-    env: {},
-    cfFactory: jest.fn(() => ({ zones: { list: jest.fn().mockResolvedValue({ result: [] }) } })),
-    handlers: { zones },
-  });
-  await run(options);
-  expect(zones).toHaveBeenCalled();
-});
+  configure({ output: { handled: true } });
+  await expect(run({})).resolves.toBeUndefined();
 
-test("uses the default exit callback for an unknown command", async () => {
-  const exit = jest.spyOn(process, "exit").mockImplementation(() => undefined);
-  try {
-    createCliDependencies().exit(1);
-    expect(exit).toHaveBeenCalledWith(1);
-  } finally {
-    exit.mockRestore();
-  }
+  configure({});
+  await expect(run({})).resolves.toBe("dispatched");
+  expect(loadBody).toHaveBeenCalled();
+  expect(createCommandContext).toHaveBeenCalled();
+  expect(dispatchCommand).toHaveBeenCalled();
 });

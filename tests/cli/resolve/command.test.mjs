@@ -47,7 +47,9 @@ test("resolver validates action names before returning action help", async () =>
     opts: { help: true },
   });
   expect(help.done).toBe(true);
-  expect(ctx.printer.log).toHaveBeenCalledWith(expect.stringContaining("cfhub zones list [flags]"));
+  expect(ctx.printer.log).toHaveBeenCalledWith(
+    expect.stringContaining("cfhub zones list [--account-id <account_id>] [flags]"),
+  );
 
   const invalid = await resolveCommand({
     ...ctx,

@@ -7,6 +7,11 @@ try {
   const cancellationFailure = login.catch((error) => error);
   const start = await fetch(new URL("/oauth/start", previewUrl), {
     method: "POST",
+    headers: {
+      origin: new URL(previewUrl).origin,
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({ scope: "zone.read" }),
     redirect: "manual",
   });
   const authorization = new URL(start.headers.get("location"));
@@ -67,7 +72,7 @@ try {
     }
     assert.match(
       (await invalidFailure).message,
-      /OAuth login expired or was opened in another browser/,
+      /OAuth login expired or is open in a different browser/,
     );
   } finally {
     await invalid.browser.close();

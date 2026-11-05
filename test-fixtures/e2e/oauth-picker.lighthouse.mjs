@@ -53,6 +53,8 @@ try {
   chrome.kill();
   const start = await fetch(new URL("/oauth/start", url), {
     method: "POST",
+    headers: { origin: new URL(url).origin, "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ scope: "zone.read" }),
     redirect: "manual",
   });
   const authorization = new URL(start.headers.get("location"));
