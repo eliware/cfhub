@@ -164,7 +164,6 @@ test("routes extension commands before Cloudflare setup", async () => {
 });
 
 test("supports a bare pager flag with and without saved pager settings", async () => {
-  const mod = await import("../src/cli.mjs?ts=17");
   const home = "/tmp/cf-cli-pager-test";
   const printer = { log: jest.fn(), error: jest.fn() };
   const fsImpl = {
@@ -178,7 +177,7 @@ test("supports a bare pager flag with and without saved pager settings", async (
   const oldPager = process.env.PAGER;
   process.env.PAGER = "true";
   try {
-    await mod.run({
+    await run({
       argv: ["zones", "list", "--pager"],
       env: {},
       homeDir: home,
@@ -196,7 +195,7 @@ test("supports a bare pager flag with and without saved pager settings", async (
   const savedPager = process.env.PAGER;
   delete process.env.PAGER;
   try {
-    await mod.run({
+    await run({
       argv: ["zones", "list", "--pager", "--no-pager"],
       env: {},
       homeDir: `${home}-fallback`,
@@ -215,7 +214,6 @@ test("supports a bare pager flag with and without saved pager settings", async (
 });
 
 test("prints dashboard links before dispatch", async () => {
-  const mod = await import("../src/cli.mjs?ts=13");
   const printer = { log: jest.fn(), error: jest.fn() };
   const common = {
     printer,
@@ -224,22 +222,21 @@ test("prints dashboard links before dispatch", async () => {
     cfFactory: jest.fn(() => ({})),
     exit: jest.fn(),
   };
-  await mod.run({
+  await run({
     ...common,
     argv: ["zones", "get", "--zone-id", "z1", "--web"],
   });
   expect(printer.log).toHaveBeenCalledWith("https://dash.cloudflare.com/zones/z1");
-  await mod.run({
+  await run({
     ...common,
     argv: ["zones", "get", "--account-id", "a1", "--web"],
   });
-  await mod.run({ ...common, argv: ["zones", "get", "--web"] });
+  await run({ ...common, argv: ["zones", "get", "--web"] });
 });
 
 test("renders templates through injected handlers", async () => {
-  const mod = await import("../src/cli.mjs?ts=14");
   const printer = { log: jest.fn(), error: jest.fn() };
-  await mod.run({
+  await run({
     argv: ["zones", "list", "--template", "{{.name}}"],
     printer,
     loadEnv: jest.fn(),

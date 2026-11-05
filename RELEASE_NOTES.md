@@ -1,5 +1,14 @@
 # Release Notes
 
+## 15.1.0 — 2026-11-04
+
+### Changed
+
+- Bumped the package version to 15.1.0.
+- Updated `@eliware/test`, Fastify, and webpack-cli to their latest releases.
+- Refreshed the lockfile with `npm update` and `npm install`.
+- Reused the imported CLI module in tests and removed redundant module reloads.
+
 ## 15.0.1 — 2026-10-28
 
 ### Added
