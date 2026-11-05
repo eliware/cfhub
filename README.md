@@ -64,7 +64,7 @@ Preview a DNS write:
 cfhub dns-records create --zone-id <zone_id> --data '{"type":"A","name":"www","content":"192.0.2.1"}' --dry-run
 ```
 
-Read [docs/README.md](docs/README.md) for user guides. Read [specs/README.md](specs/README.md) for project rules. Read [RELEASE_NOTES.md](RELEASE_NOTES.md) for version history.
+Read [docs/README.md](docs/README.md) for user guides. Read [specs/README.md](specs/README.md) for project specifications. Read [RELEASE_NOTES.md](RELEASE_NOTES.md) for version history.
 
 ## Development
 
@@ -73,8 +73,6 @@ Install dependencies before you run repository checks:
 ```sh
 npm ci
 ```
-
-Read [AGENTS.md](AGENTS.md) and the [specifications index](specs/README.md) before you change files.
 
 ## Testing
 
@@ -113,13 +111,14 @@ After SIGINT, cfhub exits with code 130. After SIGTERM, it exits with code 143.
 
 ## Routes
 
-The local OAuth server provides these routes when the scope picker is enabled:
+The local OAuth server owns these routes when the scope picker is enabled:
 
 - `GET /` returns the scope picker.
 - `POST /oauth/start` accepts the selected scopes and redirects to Cloudflare.
 - `GET /api/version?project=cfhub` returns the package version.
-- `GET /oauth-picker.css`, `/oauth-picker-app.mjs`, and `/picker/*.mjs` return picker files.
-- `GET /oauth-web/*` returns the picker logos and images.
+- `GET /oauth-picker.css`, `/oauth-result.css`, `/oauth-picker.mjs`, and `/oauth-picker-app.mjs` return picker files.
+- `GET /picker/*.mjs`, `/escape-picker-markup.mjs`, and `/collect-picker-scope-boxes.mjs` return picker modules.
+- `GET /oauth-web/cf-logo.svg`, `/oauth-web/cloudflare-115x53.png`, and `/oauth-web/eliware-58x58.png` return picker images.
 - `GET /oauth/callback` receives the OAuth callback.
 
 ## Assets

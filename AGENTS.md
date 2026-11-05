@@ -2,11 +2,12 @@
 
 ## Project
 
-See README.md for repository purpose, ownership, and scope.
+Eliware owns this repository. cfhub is the Cloudflare administration CLI and OAuth picker.
 
 ## Scope and boundaries
 
-Keep requirements in their authoritative specifications.
+Maintain the CLI, OAuth picker, packaged examples, and their validation workflows here.
+Keep company-wide requirements in their authoritative specifications.
 
 ## Layout
 
@@ -14,11 +15,11 @@ Use README.md and specs/README.md to find maintained files.
 
 ## Development
 
-Give each source and test module one cohesive purpose.
+Run `npm ci` to install dependencies before checks.
 
 ## Validation
 
-Use Node.js 26 or later and native ESM for maintained JavaScript modules.
+Use Node.js 26 and native ESM for maintained JavaScript modules.
 Run npm test for aggregate validation.
 Run npm run lint for lint checks.
 Run npm run audit for dependency checks.
