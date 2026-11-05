@@ -1,17 +1,18 @@
 # Release Notes
 
-## 15.1.0 — 2026-11-04
+## 15.1.0 — 2026-11-05
+
+### Added
+
+- Added cursor pagination and a `--per-page` option for list items.
 
 ### Changed
 
-- Bumped the package version to 15.1.0.
-- Updated `@eliware/test`, Fastify, and webpack-cli to their latest releases.
-- Refreshed the lockfile with `npm update` and `npm install`.
-- Reused the imported CLI module in tests and removed redundant module reloads.
-
-### Fixed
-
-- Added cursor pagination and page-size selection for account list items.
+- Set the package version to 15.1.0 and updated `@eliware/test`, Fastify, and webpack-cli.
+- Updated command documentation, generated references, and shell completions for list-item pagination.
+- Refactored update notices, OAuth server shutdown, and credential refresh into focused modules.
+- Simplified repository guidance and corrected the OAuth route list in the README.
+- Reduced repeated CLI tests and removed duplicate token account selection coverage.
 
 ## 15.0.1 — 2026-10-28
 
