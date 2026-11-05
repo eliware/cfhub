@@ -22,4 +22,5 @@ test("command reference renders every global flag and API usage", () => {
   expect(reference).toContain("[Command actions](command-actions.md)");
   expect(reference).toContain("The method defaults to GET.");
   expect(reference).toContain("A cursor is a token that identifies a later page.");
+  expect(reference).toContain("to show purpose, syntax, required values, options, and defaults.");
 });

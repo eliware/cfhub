@@ -26,7 +26,7 @@ export function renderCommandReference() {
     "# Command reference",
     "",
     "Run `cfhub --help` to list commands. Run `cfhub <command> --help` to list actions.",
-    "Use action help to list flags.",
+    "Run `cfhub <command> <action> --help` to show purpose, syntax, required values, options, and defaults.",
     "See [Command actions](command-actions.md) for the full action list.",
     "",
     "## Commands",
