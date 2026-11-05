@@ -56,6 +56,7 @@ See [Command actions](command-actions.md) for the full action list.
 | `--width`      | Set terminal width.                              |
 | `--verbose`    | Include diagnostic details.                      |
 | `--paginate`   | Fetch all supported pages.                       |
+| `--per-page`   | Set the item count for each page from 1 to 500.  |
 | `--web`        | Print a Cloudflare dashboard link.               |
 | `--force`      | Confirm destructive actions.                     |
 | `--dry-run`    | Show changes without writing.                    |
@@ -79,5 +80,16 @@ The method defaults to GET. Set `--method` to GET, POST, PUT, PATCH, or DELETE.
 Pass a JSON request body with `--data` or `--file`.
 GET requests reject bodies, and DELETE requires `--force` or `--dry-run`.
 Pass `--paginate` to fetch all pages from supported GET requests.
+
+## List items
+
+Use `--per-page` to set the item count for each page from 1 to 500 for `list-items list`.
+The default page contains 100 items when you pass `--paginate`.
+Pass `--paginate` to read every list item. The command follows each cursor that Cloudflare returns.
+A cursor is a token that identifies a later page.
+
+```sh
+cfhub list-items list --account-id <account_id> --id <list_id> --per-page 500 --paginate --json
+```
 
 Shell completions use the command and flag names in this reference.

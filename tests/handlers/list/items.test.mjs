@@ -44,6 +44,23 @@ test("lists generic and SDK responses", async () => {
   expect(log.mock.calls[0][0]).toContain('{"id":"c"}');
 });
 
+test("passes cursor pagination options to list-item reads", async () => {
+  const get = jest.fn().mockResolvedValue({
+    result: [{ id: "one" }],
+    result_info: { cursors: {} },
+  });
+  const toJsonOutput = jest.fn();
+  await handleListItems(
+    context("list", {
+      cf: { get },
+      opts: { "account-id": "acct", id: "list", paginate: true, "per-page": "50" },
+      toJsonOutput,
+    }),
+  );
+  expect(get).toHaveBeenCalledWith("/accounts/acct/rules/lists/list/items?per_page=50", undefined);
+  expect(toJsonOutput).toHaveBeenCalledWith([{ id: "one" }]);
+});
+
 test("dispatches create and delete actions to their handlers", async () => {
   const post = jest.fn().mockResolvedValue({});
   await handleListItems(context("create", { cf: { post }, body: { ip: "192.0.2.1" } }));

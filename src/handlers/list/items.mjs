@@ -3,6 +3,7 @@ import { requireValue } from "../argument-validation.mjs";
 import { printTable } from "../../output/table.mjs";
 import { createListItems } from "./items/write.mjs";
 import { deleteListItems } from "./items/delete.mjs";
+import { readListItems } from "./items/read.mjs";
 
 export async function handleListItems({
   cf,
@@ -20,16 +21,7 @@ export async function handleListItems({
   requireValue(id, "Missing --id", fail);
 
   if (action === "list") {
-    const response =
-      typeof cf.get === "function"
-        ? await cf.get(`/accounts/${accountId}/rules/lists/${id}/items`, undefined)
-        : null;
-
-    const items = response ? (Array.isArray(response.result) ? response.result : response) : [];
-
-    if (!response)
-      for await (const item of cf.rules.lists.items.list(id, { account_id: accountId }))
-        items.push(item);
+    const items = await readListItems({ cf, accountId, listId: id, opts, fail });
     return outputJson
       ? toJsonOutput(items)
       : printTable(

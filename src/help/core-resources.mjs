@@ -46,6 +46,8 @@ export function coreResourceHelp(resource) {
     "list-items": helpText([
       "list-items",
       "  list                 List items in a list.",
+      "  --paginate           Fetch all cursor pages.",
+      "  --per-page <count>   Set the item count from 1 to 500.",
       "  create               Add an item to a list.\n  delete               Delete an item from a list.",
     ]),
     api: helpText([

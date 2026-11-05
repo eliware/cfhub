@@ -60,6 +60,7 @@ export const GLOBAL_FLAGS = [
   ["--width", "Set terminal width."],
   ["--verbose", "Include diagnostic details."],
   ["--paginate", "Fetch all supported pages."],
+  ["--per-page", "Set the item count for each page from 1 to 500."],
   ["--web", "Print a Cloudflare dashboard link."],
   ["--force", "Confirm destructive actions."],
   ["--dry-run", "Show changes without writing."],
