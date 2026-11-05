@@ -2,7 +2,13 @@ import { jest } from "@jest/globals";
 import os from "node:os";
 
 const fsMock = { readFileSync: jest.fn() };
+const createCloudflareClient = jest.fn();
+const loadProjectEnv = jest.fn();
+const checkForUpdate = jest.fn();
 jest.unstable_mockModule("node:fs", () => fsMock);
+jest.unstable_mockModule("../../src/cloudflare.mjs", () => ({ createCloudflareClient }));
+jest.unstable_mockModule("../../src/env.mjs", () => ({ loadProjectEnv }));
+jest.unstable_mockModule("../../src/update/check.mjs", () => ({ checkForUpdate }));
 const { createCliDependencies } = await import("../../src/cli/dependencies.mjs");
 
 test("selects default CLI dependencies", () => {
